@@ -1,0 +1,70 @@
+[
+  {
+    "id": "farmer_001",
+    "name": "Juan Dela Cruz",
+    "email": "juan@example.com",
+    "phone": "+639171234567",
+    "farm_name": "San Isidro Farm",
+    "location": {
+      "lat": 14.5995,
+      "lng": 120.9842,
+      "address": "Brgy. San Isidro, Rizal"
+    },
+    "crops": ["sitao", "pechay"],
+    "photo": "https://picsum.photos/seed/farmer_001/600/400",
+    "rating": 4.6,
+    "created_at": "2024-11-01T08:00:00Z"
+  },
+  {
+    "id": "farmer_002",
+    "name": "Maria Santos",
+    "email": "maria@example.com",
+    "phone": "+639189876543",
+    "farm_name": "Greenfield Farm",
+    "location": {
+      "lat": 10.3157,
+      "lng": 123.8854,
+      "address": "Iloilo Province"
+    },
+    "crops": ["mango", "coconut"],
+    "photo": "https://picsum.photos/seed/farmer_002/600/400",
+    "rating": 4.8,
+    "created_at": "2025-02-15T09:30:00Z"
+  },
+  {
+    "id": "farmer_003",
+    "name": "Pedro Lopez",
+    "email": "pedro@example.com",
+    "phone": "+639171112223",
+    "farm_name": "Lopez Organic",
+    "location": { "lat": 7.1907, "lng": 125.4553, "address": "Davao City" },
+    "crops": ["banana", "pineapple"],
+    "photo": "https://picsum.photos/seed/farmer_003/600/400",
+    "rating": 4.5,
+    "created_at": "2024-08-20T07:45:00Z"
+  },
+  {
+    "id": "farmer_004",
+    "name": "Ana Reyes",
+    "email": "ana@example.com",
+    "phone": "+639199998888",
+    "farm_name": "Reyes Agro",
+    "location": { "lat": 14.676, "lng": 121.0437, "address": "Bulacan" },
+    "crops": ["onion", "garlic"],
+    "photo": "https://picsum.photos/seed/farmer_004/600/400",
+    "rating": 4.3,
+    "created_at": "2025-01-05T10:15:00Z"
+  },
+  {
+    "id": "farmer_005",
+    "name": "Lito Ramos",
+    "email": "lito@example.com",
+    "phone": "+639188776655",
+    "farm_name": "Ramos Farm",
+    "location": { "lat": 6.4381, "lng": 124.8481, "address": "Tawi-Tawi" },
+    "crops": ["fish", "seaweed"],
+    "photo": "https://picsum.photos/seed/farmer_005/600/400",
+    "rating": 4.2,
+    "created_at": "2024-12-12T06:00:00Z"
+  }
+]

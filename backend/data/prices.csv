@@ -1,0 +1,5201 @@
+crop,region,month,price_php_per_kg
+Tomato,Luzon-North,2022-01,55.82
+Tomato,Luzon-Central,2022-01,52.08
+Tomato,Luzon-South,2022-01,55.18
+Tomato,Visayas,2022-01,58.05
+Tomato,Mindanao,2022-01,48.61
+Tomato,Luzon-North,2022-02,55.35
+Tomato,Luzon-Central,2022-02,56.53
+Tomato,Luzon-South,2022-02,56.52
+Tomato,Visayas,2022-02,57.75
+Tomato,Mindanao,2022-02,52.58
+Tomato,Luzon-North,2022-03,54.65
+Tomato,Luzon-Central,2022-03,51.81
+Tomato,Luzon-South,2022-03,53.75
+Tomato,Visayas,2022-03,57.9
+Tomato,Mindanao,2022-03,51.67
+Tomato,Luzon-North,2022-04,49.73
+Tomato,Luzon-Central,2022-04,50.01
+Tomato,Luzon-South,2022-04,50.66
+Tomato,Visayas,2022-04,53.87
+Tomato,Mindanao,2022-04,45.02
+Tomato,Luzon-North,2022-05,53.96
+Tomato,Luzon-Central,2022-05,49.09
+Tomato,Luzon-South,2022-05,58.11
+Tomato,Visayas,2022-05,59.43
+Tomato,Mindanao,2022-05,50.3
+Tomato,Luzon-North,2022-06,49.84
+Tomato,Luzon-Central,2022-06,53.26
+Tomato,Luzon-South,2022-06,59.72
+Tomato,Visayas,2022-06,61.93
+Tomato,Mindanao,2022-06,48.97
+Tomato,Luzon-North,2022-07,57.48
+Tomato,Luzon-Central,2022-07,53.76
+Tomato,Luzon-South,2022-07,59.33
+Tomato,Visayas,2022-07,66.97
+Tomato,Mindanao,2022-07,52.55
+Tomato,Luzon-North,2022-08,61.8
+Tomato,Luzon-Central,2022-08,62.05
+Tomato,Luzon-South,2022-08,63.09
+Tomato,Visayas,2022-08,66.47
+Tomato,Mindanao,2022-08,57.88
+Tomato,Luzon-North,2022-09,63.43
+Tomato,Luzon-Central,2022-09,56.98
+Tomato,Luzon-South,2022-09,66.65
+Tomato,Visayas,2022-09,72.93
+Tomato,Mindanao,2022-09,54.26
+Tomato,Luzon-North,2022-10,63.8
+Tomato,Luzon-Central,2022-10,59.07
+Tomato,Luzon-South,2022-10,62.17
+Tomato,Visayas,2022-10,72.67
+Tomato,Mindanao,2022-10,59.06
+Tomato,Luzon-North,2022-11,54.49
+Tomato,Luzon-Central,2022-11,55.85
+Tomato,Luzon-South,2022-11,62.62
+Tomato,Visayas,2022-11,62.01
+Tomato,Mindanao,2022-11,55.75
+Tomato,Luzon-North,2022-12,56.82
+Tomato,Luzon-Central,2022-12,56.56
+Tomato,Luzon-South,2022-12,64.17
+Tomato,Visayas,2022-12,59.49
+Tomato,Mindanao,2022-12,53.56
+Tomato,Luzon-North,2023-01,55.88
+Tomato,Luzon-Central,2023-01,55.26
+Tomato,Luzon-South,2023-01,56.5
+Tomato,Visayas,2023-01,59.99
+Tomato,Mindanao,2023-01,52.68
+Tomato,Luzon-North,2023-02,59.97
+Tomato,Luzon-Central,2023-02,58.25
+Tomato,Luzon-South,2023-02,56.28
+Tomato,Visayas,2023-02,59.52
+Tomato,Mindanao,2023-02,55.1
+Tomato,Luzon-North,2023-03,50.28
+Tomato,Luzon-Central,2023-03,52.36
+Tomato,Luzon-South,2023-03,58.35
+Tomato,Visayas,2023-03,64.1
+Tomato,Mindanao,2023-03,53.72
+Tomato,Luzon-North,2023-04,54.54
+Tomato,Luzon-Central,2023-04,52.25
+Tomato,Luzon-South,2023-04,57.49
+Tomato,Visayas,2023-04,64.45
+Tomato,Mindanao,2023-04,50.46
+Tomato,Luzon-North,2023-05,55.92
+Tomato,Luzon-Central,2023-05,55.48
+Tomato,Luzon-South,2023-05,59.27
+Tomato,Visayas,2023-05,60.73
+Tomato,Mindanao,2023-05,49.87
+Tomato,Luzon-North,2023-06,59.27
+Tomato,Luzon-Central,2023-06,55.67
+Tomato,Luzon-South,2023-06,65.9
+Tomato,Visayas,2023-06,66.14
+Tomato,Mindanao,2023-06,55.08
+Tomato,Luzon-North,2023-07,63.29
+Tomato,Luzon-Central,2023-07,57.8
+Tomato,Luzon-South,2023-07,67.69
+Tomato,Visayas,2023-07,66.13
+Tomato,Mindanao,2023-07,58.62
+Tomato,Luzon-North,2023-08,60.22
+Tomato,Luzon-Central,2023-08,62.87
+Tomato,Luzon-South,2023-08,61.89
+Tomato,Visayas,2023-08,62.45
+Tomato,Mindanao,2023-08,58.96
+Tomato,Luzon-North,2023-09,62.8
+Tomato,Luzon-Central,2023-09,63.65
+Tomato,Luzon-South,2023-09,76.8
+Tomato,Visayas,2023-09,68.07
+Tomato,Mindanao,2023-09,59.25
+Tomato,Luzon-North,2023-10,64.27
+Tomato,Luzon-Central,2023-10,62.58
+Tomato,Luzon-South,2023-10,66.21
+Tomato,Visayas,2023-10,68.0
+Tomato,Mindanao,2023-10,61.25
+Tomato,Luzon-North,2023-11,61.85
+Tomato,Luzon-Central,2023-11,54.88
+Tomato,Luzon-South,2023-11,63.05
+Tomato,Visayas,2023-11,65.22
+Tomato,Mindanao,2023-11,53.11
+Tomato,Luzon-North,2023-12,60.07
+Tomato,Luzon-Central,2023-12,54.48
+Tomato,Luzon-South,2023-12,65.29
+Tomato,Visayas,2023-12,64.66
+Tomato,Mindanao,2023-12,55.39
+Tomato,Luzon-North,2024-01,57.74
+Tomato,Luzon-Central,2024-01,56.78
+Tomato,Luzon-South,2024-01,56.23
+Tomato,Visayas,2024-01,60.62
+Tomato,Mindanao,2024-01,56.33
+Tomato,Luzon-North,2024-02,53.34
+Tomato,Luzon-Central,2024-02,59.73
+Tomato,Luzon-South,2024-02,57.2
+Tomato,Visayas,2024-02,66.91
+Tomato,Mindanao,2024-02,53.17
+Tomato,Luzon-North,2024-03,60.34
+Tomato,Luzon-Central,2024-03,56.12
+Tomato,Luzon-South,2024-03,56.3
+Tomato,Visayas,2024-03,66.65
+Tomato,Mindanao,2024-03,57.91
+Tomato,Luzon-North,2024-04,57.49
+Tomato,Luzon-Central,2024-04,54.61
+Tomato,Luzon-South,2024-04,60.08
+Tomato,Visayas,2024-04,59.25
+Tomato,Mindanao,2024-04,56.58
+Tomato,Luzon-North,2024-05,57.46
+Tomato,Luzon-Central,2024-05,56.56
+Tomato,Luzon-South,2024-05,59.56
+Tomato,Visayas,2024-05,61.8
+Tomato,Mindanao,2024-05,51.42
+Tomato,Luzon-North,2024-06,65.56
+Tomato,Luzon-Central,2024-06,58.76
+Tomato,Luzon-South,2024-06,67.9
+Tomato,Visayas,2024-06,66.66
+Tomato,Mindanao,2024-06,55.37
+Tomato,Luzon-North,2024-07,62.66
+Tomato,Luzon-Central,2024-07,59.44
+Tomato,Luzon-South,2024-07,66.92
+Tomato,Visayas,2024-07,67.51
+Tomato,Mindanao,2024-07,58.36
+Tomato,Luzon-North,2024-08,62.34
+Tomato,Luzon-Central,2024-08,61.69
+Tomato,Luzon-South,2024-08,76.12
+Tomato,Visayas,2024-08,69.89
+Tomato,Mindanao,2024-08,58.99
+Tomato,Luzon-North,2024-09,69.56
+Tomato,Luzon-Central,2024-09,70.29
+Tomato,Luzon-South,2024-09,66.6
+Tomato,Visayas,2024-09,73.11
+Tomato,Mindanao,2024-09,61.61
+Tomato,Luzon-North,2024-10,60.35
+Tomato,Luzon-Central,2024-10,65.86
+Tomato,Luzon-South,2024-10,69.4
+Tomato,Visayas,2024-10,71.72
+Tomato,Mindanao,2024-10,59.23
+Tomato,Luzon-North,2024-11,64.13
+Tomato,Luzon-Central,2024-11,58.58
+Tomato,Luzon-South,2024-11,65.37
+Tomato,Visayas,2024-11,63.97
+Tomato,Mindanao,2024-11,54.77
+Tomato,Luzon-North,2024-12,65.8
+Tomato,Luzon-Central,2024-12,57.71
+Tomato,Luzon-South,2024-12,65.71
+Tomato,Visayas,2024-12,66.5
+Tomato,Mindanao,2024-12,56.09
+Tomato,Luzon-North,2025-01,60.31
+Tomato,Luzon-Central,2025-01,61.28
+Tomato,Luzon-South,2025-01,64.0
+Tomato,Visayas,2025-01,66.33
+Tomato,Mindanao,2025-01,57.62
+Tomato,Luzon-North,2025-02,65.74
+Tomato,Luzon-Central,2025-02,61.63
+Tomato,Luzon-South,2025-02,66.44
+Tomato,Visayas,2025-02,65.17
+Tomato,Mindanao,2025-02,53.75
+Tomato,Luzon-North,2025-03,63.28
+Tomato,Luzon-Central,2025-03,60.79
+Tomato,Luzon-South,2025-03,62.98
+Tomato,Visayas,2025-03,67.01
+Tomato,Mindanao,2025-03,58.38
+Tomato,Luzon-North,2025-04,62.48
+Tomato,Luzon-Central,2025-04,60.24
+Tomato,Luzon-South,2025-04,61.55
+Tomato,Visayas,2025-04,69.69
+Tomato,Mindanao,2025-04,52.31
+Tomato,Luzon-North,2025-05,64.08
+Tomato,Luzon-Central,2025-05,60.43
+Tomato,Luzon-South,2025-05,67.32
+Tomato,Visayas,2025-05,72.58
+Tomato,Mindanao,2025-05,61.37
+Tomato,Luzon-North,2025-06,60.48
+Tomato,Luzon-Central,2025-06,56.39
+Tomato,Luzon-South,2025-06,70.11
+Tomato,Visayas,2025-06,65.77
+Tomato,Mindanao,2025-06,59.63
+Tomato,Luzon-North,2025-07,69.04
+Tomato,Luzon-Central,2025-07,58.38
+Tomato,Luzon-South,2025-07,62.23
+Tomato,Visayas,2025-07,72.48
+Tomato,Mindanao,2025-07,61.75
+Tomato,Luzon-North,2025-08,68.79
+Tomato,Luzon-Central,2025-08,66.98
+Tomato,Luzon-South,2025-08,69.98
+Tomato,Visayas,2025-08,69.52
+Tomato,Mindanao,2025-08,64.23
+Tomato,Luzon-North,2025-09,67.69
+Tomato,Luzon-Central,2025-09,62.69
+Tomato,Luzon-South,2025-09,76.59
+Tomato,Visayas,2025-09,76.6
+Tomato,Mindanao,2025-09,67.51
+Tomato,Luzon-North,2025-10,65.42
+Tomato,Luzon-Central,2025-10,63.9
+Tomato,Luzon-South,2025-10,68.66
+Tomato,Visayas,2025-10,71.04
+Tomato,Mindanao,2025-10,64.63
+Tomato,Luzon-North,2025-11,62.67
+Tomato,Luzon-Central,2025-11,63.73
+Tomato,Luzon-South,2025-11,69.64
+Tomato,Visayas,2025-11,77.57
+Tomato,Mindanao,2025-11,56.43
+Tomato,Luzon-North,2025-12,66.99
+Tomato,Luzon-Central,2025-12,61.31
+Tomato,Luzon-South,2025-12,67.31
+Tomato,Visayas,2025-12,64.26
+Tomato,Mindanao,2025-12,58.28
+Tomato,Luzon-North,2026-01,66.75
+Tomato,Luzon-Central,2026-01,61.53
+Tomato,Luzon-South,2026-01,67.85
+Tomato,Visayas,2026-01,68.5
+Tomato,Mindanao,2026-01,63.31
+Tomato,Luzon-North,2026-02,64.51
+Tomato,Luzon-Central,2026-02,55.17
+Tomato,Luzon-South,2026-02,65.46
+Tomato,Visayas,2026-02,62.88
+Tomato,Mindanao,2026-02,50.29
+Tomato,Luzon-North,2026-03,61.16
+Tomato,Luzon-Central,2026-03,64.34
+Tomato,Luzon-South,2026-03,66.12
+Tomato,Visayas,2026-03,63.88
+Tomato,Mindanao,2026-03,55.68
+Tomato,Luzon-North,2026-04,65.91
+Tomato,Luzon-Central,2026-04,60.36
+Tomato,Luzon-South,2026-04,65.66
+Tomato,Visayas,2026-04,67.2
+Tomato,Mindanao,2026-04,58.13
+Eggplant,Luzon-North,2022-01,43.16
+Eggplant,Luzon-Central,2022-01,40.75
+Eggplant,Luzon-South,2022-01,41.8
+Eggplant,Visayas,2022-01,46.52
+Eggplant,Mindanao,2022-01,37.72
+Eggplant,Luzon-North,2022-02,44.56
+Eggplant,Luzon-Central,2022-02,37.98
+Eggplant,Luzon-South,2022-02,44.06
+Eggplant,Visayas,2022-02,45.61
+Eggplant,Mindanao,2022-02,36.69
+Eggplant,Luzon-North,2022-03,44.75
+Eggplant,Luzon-Central,2022-03,42.44
+Eggplant,Luzon-South,2022-03,42.26
+Eggplant,Visayas,2022-03,46.21
+Eggplant,Mindanao,2022-03,39.04
+Eggplant,Luzon-North,2022-04,35.66
+Eggplant,Luzon-Central,2022-04,39.87
+Eggplant,Luzon-South,2022-04,42.94
+Eggplant,Visayas,2022-04,44.49
+Eggplant,Mindanao,2022-04,36.09
+Eggplant,Luzon-North,2022-05,41.55
+Eggplant,Luzon-Central,2022-05,40.07
+Eggplant,Luzon-South,2022-05,46.85
+Eggplant,Visayas,2022-05,46.24
+Eggplant,Mindanao,2022-05,39.16
+Eggplant,Luzon-North,2022-06,47.46
+Eggplant,Luzon-Central,2022-06,41.15
+Eggplant,Luzon-South,2022-06,45.4
+Eggplant,Visayas,2022-06,43.3
+Eggplant,Mindanao,2022-06,44.22
+Eggplant,Luzon-North,2022-07,47.85
+Eggplant,Luzon-Central,2022-07,45.83
+Eggplant,Luzon-South,2022-07,49.54
+Eggplant,Visayas,2022-07,49.58
+Eggplant,Mindanao,2022-07,42.91
+Eggplant,Luzon-North,2022-08,47.5
+Eggplant,Luzon-Central,2022-08,45.71
+Eggplant,Luzon-South,2022-08,50.65
+Eggplant,Visayas,2022-08,55.89
+Eggplant,Mindanao,2022-08,45.98
+Eggplant,Luzon-North,2022-09,49.13
+Eggplant,Luzon-Central,2022-09,45.93
+Eggplant,Luzon-South,2022-09,50.1
+Eggplant,Visayas,2022-09,57.48
+Eggplant,Mindanao,2022-09,46.99
+Eggplant,Luzon-North,2022-10,47.95
+Eggplant,Luzon-Central,2022-10,45.08
+Eggplant,Luzon-South,2022-10,47.4
+Eggplant,Visayas,2022-10,51.44
+Eggplant,Mindanao,2022-10,46.38
+Eggplant,Luzon-North,2022-11,44.51
+Eggplant,Luzon-Central,2022-11,43.09
+Eggplant,Luzon-South,2022-11,47.14
+Eggplant,Visayas,2022-11,49.3
+Eggplant,Mindanao,2022-11,38.86
+Eggplant,Luzon-North,2022-12,44.24
+Eggplant,Luzon-Central,2022-12,41.14
+Eggplant,Luzon-South,2022-12,49.08
+Eggplant,Visayas,2022-12,46.49
+Eggplant,Mindanao,2022-12,42.83
+Eggplant,Luzon-North,2023-01,48.47
+Eggplant,Luzon-Central,2023-01,42.55
+Eggplant,Luzon-South,2023-01,45.86
+Eggplant,Visayas,2023-01,49.1
+Eggplant,Mindanao,2023-01,41.88
+Eggplant,Luzon-North,2023-02,43.05
+Eggplant,Luzon-Central,2023-02,44.49
+Eggplant,Luzon-South,2023-02,52.36
+Eggplant,Visayas,2023-02,48.29
+Eggplant,Mindanao,2023-02,41.7
+Eggplant,Luzon-North,2023-03,41.87
+Eggplant,Luzon-Central,2023-03,43.09
+Eggplant,Luzon-South,2023-03,43.49
+Eggplant,Visayas,2023-03,45.07
+Eggplant,Mindanao,2023-03,43.71
+Eggplant,Luzon-North,2023-04,41.99
+Eggplant,Luzon-Central,2023-04,44.51
+Eggplant,Luzon-South,2023-04,49.7
+Eggplant,Visayas,2023-04,48.12
+Eggplant,Mindanao,2023-04,42.03
+Eggplant,Luzon-North,2023-05,49.56
+Eggplant,Luzon-Central,2023-05,42.92
+Eggplant,Luzon-South,2023-05,46.01
+Eggplant,Visayas,2023-05,45.47
+Eggplant,Mindanao,2023-05,42.08
+Eggplant,Luzon-North,2023-06,50.77
+Eggplant,Luzon-Central,2023-06,47.56
+Eggplant,Luzon-South,2023-06,47.3
+Eggplant,Visayas,2023-06,48.88
+Eggplant,Mindanao,2023-06,42.86
+Eggplant,Luzon-North,2023-07,49.66
+Eggplant,Luzon-Central,2023-07,46.51
+Eggplant,Luzon-South,2023-07,51.95
+Eggplant,Visayas,2023-07,53.65
+Eggplant,Mindanao,2023-07,44.84
+Eggplant,Luzon-North,2023-08,51.48
+Eggplant,Luzon-Central,2023-08,50.03
+Eggplant,Luzon-South,2023-08,53.94
+Eggplant,Visayas,2023-08,57.11
+Eggplant,Mindanao,2023-08,52.46
+Eggplant,Luzon-North,2023-09,54.4
+Eggplant,Luzon-Central,2023-09,50.86
+Eggplant,Luzon-South,2023-09,50.8
+Eggplant,Visayas,2023-09,58.17
+Eggplant,Mindanao,2023-09,44.35
+Eggplant,Luzon-North,2023-10,47.63
+Eggplant,Luzon-Central,2023-10,51.29
+Eggplant,Luzon-South,2023-10,55.7
+Eggplant,Visayas,2023-10,54.92
+Eggplant,Mindanao,2023-10,43.58
+Eggplant,Luzon-North,2023-11,47.78
+Eggplant,Luzon-Central,2023-11,45.15
+Eggplant,Luzon-South,2023-11,52.74
+Eggplant,Visayas,2023-11,58.51
+Eggplant,Mindanao,2023-11,45.76
+Eggplant,Luzon-North,2023-12,46.13
+Eggplant,Luzon-Central,2023-12,43.38
+Eggplant,Luzon-South,2023-12,50.26
+Eggplant,Visayas,2023-12,51.38
+Eggplant,Mindanao,2023-12,42.07
+Eggplant,Luzon-North,2024-01,48.57
+Eggplant,Luzon-Central,2024-01,43.69
+Eggplant,Luzon-South,2024-01,53.52
+Eggplant,Visayas,2024-01,54.92
+Eggplant,Mindanao,2024-01,47.34
+Eggplant,Luzon-North,2024-02,47.42
+Eggplant,Luzon-Central,2024-02,47.83
+Eggplant,Luzon-South,2024-02,50.66
+Eggplant,Visayas,2024-02,51.44
+Eggplant,Mindanao,2024-02,44.41
+Eggplant,Luzon-North,2024-03,44.3
+Eggplant,Luzon-Central,2024-03,42.2
+Eggplant,Luzon-South,2024-03,51.72
+Eggplant,Visayas,2024-03,50.68
+Eggplant,Mindanao,2024-03,44.54
+Eggplant,Luzon-North,2024-04,49.53
+Eggplant,Luzon-Central,2024-04,41.36
+Eggplant,Luzon-South,2024-04,47.58
+Eggplant,Visayas,2024-04,51.39
+Eggplant,Mindanao,2024-04,44.72
+Eggplant,Luzon-North,2024-05,47.51
+Eggplant,Luzon-Central,2024-05,48.88
+Eggplant,Luzon-South,2024-05,51.38
+Eggplant,Visayas,2024-05,49.13
+Eggplant,Mindanao,2024-05,42.94
+Eggplant,Luzon-North,2024-06,52.74
+Eggplant,Luzon-Central,2024-06,49.8
+Eggplant,Luzon-South,2024-06,48.18
+Eggplant,Visayas,2024-06,58.45
+Eggplant,Mindanao,2024-06,48.56
+Eggplant,Luzon-North,2024-07,56.02
+Eggplant,Luzon-Central,2024-07,49.43
+Eggplant,Luzon-South,2024-07,54.3
+Eggplant,Visayas,2024-07,53.5
+Eggplant,Mindanao,2024-07,55.01
+Eggplant,Luzon-North,2024-08,54.83
+Eggplant,Luzon-Central,2024-08,57.32
+Eggplant,Luzon-South,2024-08,56.21
+Eggplant,Visayas,2024-08,60.23
+Eggplant,Mindanao,2024-08,47.15
+Eggplant,Luzon-North,2024-09,55.58
+Eggplant,Luzon-Central,2024-09,57.07
+Eggplant,Luzon-South,2024-09,55.77
+Eggplant,Visayas,2024-09,64.47
+Eggplant,Mindanao,2024-09,53.58
+Eggplant,Luzon-North,2024-10,52.08
+Eggplant,Luzon-Central,2024-10,51.43
+Eggplant,Luzon-South,2024-10,56.37
+Eggplant,Visayas,2024-10,59.2
+Eggplant,Mindanao,2024-10,49.73
+Eggplant,Luzon-North,2024-11,50.05
+Eggplant,Luzon-Central,2024-11,49.35
+Eggplant,Luzon-South,2024-11,52.0
+Eggplant,Visayas,2024-11,52.75
+Eggplant,Mindanao,2024-11,48.43
+Eggplant,Luzon-North,2024-12,53.75
+Eggplant,Luzon-Central,2024-12,45.64
+Eggplant,Luzon-South,2024-12,54.06
+Eggplant,Visayas,2024-12,53.79
+Eggplant,Mindanao,2024-12,45.53
+Eggplant,Luzon-North,2025-01,53.99
+Eggplant,Luzon-Central,2025-01,48.42
+Eggplant,Luzon-South,2025-01,58.44
+Eggplant,Visayas,2025-01,53.74
+Eggplant,Mindanao,2025-01,49.09
+Eggplant,Luzon-North,2025-02,51.5
+Eggplant,Luzon-Central,2025-02,48.12
+Eggplant,Luzon-South,2025-02,56.3
+Eggplant,Visayas,2025-02,55.82
+Eggplant,Mindanao,2025-02,49.9
+Eggplant,Luzon-North,2025-03,50.68
+Eggplant,Luzon-Central,2025-03,46.12
+Eggplant,Luzon-South,2025-03,53.07
+Eggplant,Visayas,2025-03,55.0
+Eggplant,Mindanao,2025-03,49.51
+Eggplant,Luzon-North,2025-04,48.28
+Eggplant,Luzon-Central,2025-04,48.45
+Eggplant,Luzon-South,2025-04,48.53
+Eggplant,Visayas,2025-04,56.4
+Eggplant,Mindanao,2025-04,44.49
+Eggplant,Luzon-North,2025-05,47.23
+Eggplant,Luzon-Central,2025-05,49.7
+Eggplant,Luzon-South,2025-05,57.53
+Eggplant,Visayas,2025-05,51.8
+Eggplant,Mindanao,2025-05,45.66
+Eggplant,Luzon-North,2025-06,52.34
+Eggplant,Luzon-Central,2025-06,49.24
+Eggplant,Luzon-South,2025-06,58.16
+Eggplant,Visayas,2025-06,56.34
+Eggplant,Mindanao,2025-06,48.73
+Eggplant,Luzon-North,2025-07,57.93
+Eggplant,Luzon-Central,2025-07,51.99
+Eggplant,Luzon-South,2025-07,60.38
+Eggplant,Visayas,2025-07,57.83
+Eggplant,Mindanao,2025-07,49.17
+Eggplant,Luzon-North,2025-08,53.87
+Eggplant,Luzon-Central,2025-08,62.24
+Eggplant,Luzon-South,2025-08,61.28
+Eggplant,Visayas,2025-08,64.84
+Eggplant,Mindanao,2025-08,55.08
+Eggplant,Luzon-North,2025-09,61.24
+Eggplant,Luzon-Central,2025-09,58.47
+Eggplant,Luzon-South,2025-09,69.88
+Eggplant,Visayas,2025-09,62.2
+Eggplant,Mindanao,2025-09,52.1
+Eggplant,Luzon-North,2025-10,55.94
+Eggplant,Luzon-Central,2025-10,52.79
+Eggplant,Luzon-South,2025-10,64.18
+Eggplant,Visayas,2025-10,66.24
+Eggplant,Mindanao,2025-10,52.16
+Eggplant,Luzon-North,2025-11,52.08
+Eggplant,Luzon-Central,2025-11,52.78
+Eggplant,Luzon-South,2025-11,62.86
+Eggplant,Visayas,2025-11,51.93
+Eggplant,Mindanao,2025-11,53.43
+Eggplant,Luzon-North,2025-12,52.22
+Eggplant,Luzon-Central,2025-12,55.74
+Eggplant,Luzon-South,2025-12,54.83
+Eggplant,Visayas,2025-12,58.76
+Eggplant,Mindanao,2025-12,47.46
+Eggplant,Luzon-North,2026-01,52.81
+Eggplant,Luzon-Central,2026-01,56.99
+Eggplant,Luzon-South,2026-01,60.69
+Eggplant,Visayas,2026-01,58.76
+Eggplant,Mindanao,2026-01,49.39
+Eggplant,Luzon-North,2026-02,50.56
+Eggplant,Luzon-Central,2026-02,52.56
+Eggplant,Luzon-South,2026-02,58.55
+Eggplant,Visayas,2026-02,60.07
+Eggplant,Mindanao,2026-02,51.7
+Eggplant,Luzon-North,2026-03,51.41
+Eggplant,Luzon-Central,2026-03,52.11
+Eggplant,Luzon-South,2026-03,57.08
+Eggplant,Visayas,2026-03,62.62
+Eggplant,Mindanao,2026-03,55.38
+Eggplant,Luzon-North,2026-04,53.85
+Eggplant,Luzon-Central,2026-04,50.06
+Eggplant,Luzon-South,2026-04,56.75
+Eggplant,Visayas,2026-04,56.78
+Eggplant,Mindanao,2026-04,48.56
+Lettuce,Luzon-North,2022-01,71.09
+Lettuce,Luzon-Central,2022-01,74.18
+Lettuce,Luzon-South,2022-01,78.34
+Lettuce,Visayas,2022-01,82.01
+Lettuce,Mindanao,2022-01,69.11
+Lettuce,Luzon-North,2022-02,72.5
+Lettuce,Luzon-Central,2022-02,68.8
+Lettuce,Luzon-South,2022-02,78.06
+Lettuce,Visayas,2022-02,79.03
+Lettuce,Mindanao,2022-02,70.79
+Lettuce,Luzon-North,2022-03,73.17
+Lettuce,Luzon-Central,2022-03,65.47
+Lettuce,Luzon-South,2022-03,77.1
+Lettuce,Visayas,2022-03,73.73
+Lettuce,Mindanao,2022-03,65.96
+Lettuce,Luzon-North,2022-04,71.59
+Lettuce,Luzon-Central,2022-04,62.52
+Lettuce,Luzon-South,2022-04,76.64
+Lettuce,Visayas,2022-04,79.06
+Lettuce,Mindanao,2022-04,67.04
+Lettuce,Luzon-North,2022-05,72.82
+Lettuce,Luzon-Central,2022-05,70.09
+Lettuce,Luzon-South,2022-05,74.3
+Lettuce,Visayas,2022-05,79.27
+Lettuce,Mindanao,2022-05,67.28
+Lettuce,Luzon-North,2022-06,78.03
+Lettuce,Luzon-Central,2022-06,70.08
+Lettuce,Luzon-South,2022-06,82.52
+Lettuce,Visayas,2022-06,84.49
+Lettuce,Mindanao,2022-06,71.73
+Lettuce,Luzon-North,2022-07,78.45
+Lettuce,Luzon-Central,2022-07,79.12
+Lettuce,Luzon-South,2022-07,77.21
+Lettuce,Visayas,2022-07,88.62
+Lettuce,Mindanao,2022-07,75.5
+Lettuce,Luzon-North,2022-08,85.48
+Lettuce,Luzon-Central,2022-08,82.47
+Lettuce,Luzon-South,2022-08,85.61
+Lettuce,Visayas,2022-08,89.85
+Lettuce,Mindanao,2022-08,80.89
+Lettuce,Luzon-North,2022-09,87.95
+Lettuce,Luzon-Central,2022-09,83.5
+Lettuce,Luzon-South,2022-09,83.55
+Lettuce,Visayas,2022-09,95.48
+Lettuce,Mindanao,2022-09,84.75
+Lettuce,Luzon-North,2022-10,87.47
+Lettuce,Luzon-Central,2022-10,80.87
+Lettuce,Luzon-South,2022-10,80.62
+Lettuce,Visayas,2022-10,94.17
+Lettuce,Mindanao,2022-10,76.87
+Lettuce,Luzon-North,2022-11,68.9
+Lettuce,Luzon-Central,2022-11,77.16
+Lettuce,Luzon-South,2022-11,76.66
+Lettuce,Visayas,2022-11,79.68
+Lettuce,Mindanao,2022-11,71.04
+Lettuce,Luzon-North,2022-12,82.52
+Lettuce,Luzon-Central,2022-12,73.1
+Lettuce,Luzon-South,2022-12,82.56
+Lettuce,Visayas,2022-12,91.11
+Lettuce,Mindanao,2022-12,77.9
+Lettuce,Luzon-North,2023-01,77.42
+Lettuce,Luzon-Central,2023-01,73.81
+Lettuce,Luzon-South,2023-01,76.56
+Lettuce,Visayas,2023-01,81.13
+Lettuce,Mindanao,2023-01,73.92
+Lettuce,Luzon-North,2023-02,79.61
+Lettuce,Luzon-Central,2023-02,75.36
+Lettuce,Luzon-South,2023-02,86.05
+Lettuce,Visayas,2023-02,81.06
+Lettuce,Mindanao,2023-02,72.4
+Lettuce,Luzon-North,2023-03,78.72
+Lettuce,Luzon-Central,2023-03,75.03
+Lettuce,Luzon-South,2023-03,84.01
+Lettuce,Visayas,2023-03,83.65
+Lettuce,Mindanao,2023-03,69.53
+Lettuce,Luzon-North,2023-04,76.76
+Lettuce,Luzon-Central,2023-04,68.75
+Lettuce,Luzon-South,2023-04,72.68
+Lettuce,Visayas,2023-04,83.79
+Lettuce,Mindanao,2023-04,69.92
+Lettuce,Luzon-North,2023-05,78.39
+Lettuce,Luzon-Central,2023-05,67.82
+Lettuce,Luzon-South,2023-05,79.58
+Lettuce,Visayas,2023-05,80.88
+Lettuce,Mindanao,2023-05,68.69
+Lettuce,Luzon-North,2023-06,71.52
+Lettuce,Luzon-Central,2023-06,76.08
+Lettuce,Luzon-South,2023-06,88.43
+Lettuce,Visayas,2023-06,88.71
+Lettuce,Mindanao,2023-06,72.71
+Lettuce,Luzon-North,2023-07,83.16
+Lettuce,Luzon-Central,2023-07,82.92
+Lettuce,Luzon-South,2023-07,75.33
+Lettuce,Visayas,2023-07,89.33
+Lettuce,Mindanao,2023-07,79.5
+Lettuce,Luzon-North,2023-08,90.45
+Lettuce,Luzon-Central,2023-08,91.11
+Lettuce,Luzon-South,2023-08,97.05
+Lettuce,Visayas,2023-08,95.94
+Lettuce,Mindanao,2023-08,82.57
+Lettuce,Luzon-North,2023-09,92.85
+Lettuce,Luzon-Central,2023-09,83.45
+Lettuce,Luzon-South,2023-09,93.61
+Lettuce,Visayas,2023-09,100.85
+Lettuce,Mindanao,2023-09,91.21
+Lettuce,Luzon-North,2023-10,85.72
+Lettuce,Luzon-Central,2023-10,82.75
+Lettuce,Luzon-South,2023-10,91.63
+Lettuce,Visayas,2023-10,99.59
+Lettuce,Mindanao,2023-10,80.24
+Lettuce,Luzon-North,2023-11,87.88
+Lettuce,Luzon-Central,2023-11,74.79
+Lettuce,Luzon-South,2023-11,85.16
+Lettuce,Visayas,2023-11,87.54
+Lettuce,Mindanao,2023-11,79.13
+Lettuce,Luzon-North,2023-12,84.71
+Lettuce,Luzon-Central,2023-12,71.45
+Lettuce,Luzon-South,2023-12,80.66
+Lettuce,Visayas,2023-12,88.41
+Lettuce,Mindanao,2023-12,72.4
+Lettuce,Luzon-North,2024-01,74.61
+Lettuce,Luzon-Central,2024-01,81.55
+Lettuce,Luzon-South,2024-01,86.89
+Lettuce,Visayas,2024-01,89.37
+Lettuce,Mindanao,2024-01,73.32
+Lettuce,Luzon-North,2024-02,85.18
+Lettuce,Luzon-Central,2024-02,76.83
+Lettuce,Luzon-South,2024-02,89.72
+Lettuce,Visayas,2024-02,83.5
+Lettuce,Mindanao,2024-02,72.12
+Lettuce,Luzon-North,2024-03,79.62
+Lettuce,Luzon-Central,2024-03,73.0
+Lettuce,Luzon-South,2024-03,85.54
+Lettuce,Visayas,2024-03,86.22
+Lettuce,Mindanao,2024-03,69.91
+Lettuce,Luzon-North,2024-04,78.53
+Lettuce,Luzon-Central,2024-04,73.79
+Lettuce,Luzon-South,2024-04,85.92
+Lettuce,Visayas,2024-04,81.83
+Lettuce,Mindanao,2024-04,71.17
+Lettuce,Luzon-North,2024-05,84.97
+Lettuce,Luzon-Central,2024-05,85.52
+Lettuce,Luzon-South,2024-05,92.53
+Lettuce,Visayas,2024-05,86.8
+Lettuce,Mindanao,2024-05,75.32
+Lettuce,Luzon-North,2024-06,90.06
+Lettuce,Luzon-Central,2024-06,79.8
+Lettuce,Luzon-South,2024-06,83.54
+Lettuce,Visayas,2024-06,90.87
+Lettuce,Mindanao,2024-06,79.55
+Lettuce,Luzon-North,2024-07,82.79
+Lettuce,Luzon-Central,2024-07,76.09
+Lettuce,Luzon-South,2024-07,84.17
+Lettuce,Visayas,2024-07,96.38
+Lettuce,Mindanao,2024-07,77.28
+Lettuce,Luzon-North,2024-08,90.13
+Lettuce,Luzon-Central,2024-08,88.06
+Lettuce,Luzon-South,2024-08,98.26
+Lettuce,Visayas,2024-08,96.39
+Lettuce,Mindanao,2024-08,86.52
+Lettuce,Luzon-North,2024-09,88.58
+Lettuce,Luzon-Central,2024-09,87.39
+Lettuce,Luzon-South,2024-09,92.36
+Lettuce,Visayas,2024-09,105.79
+Lettuce,Mindanao,2024-09,86.1
+Lettuce,Luzon-North,2024-10,86.35
+Lettuce,Luzon-Central,2024-10,84.57
+Lettuce,Luzon-South,2024-10,93.11
+Lettuce,Visayas,2024-10,100.23
+Lettuce,Mindanao,2024-10,76.74
+Lettuce,Luzon-North,2024-11,80.55
+Lettuce,Luzon-Central,2024-11,80.01
+Lettuce,Luzon-South,2024-11,100.5
+Lettuce,Visayas,2024-11,96.13
+Lettuce,Mindanao,2024-11,78.57
+Lettuce,Luzon-North,2024-12,86.52
+Lettuce,Luzon-Central,2024-12,88.45
+Lettuce,Luzon-South,2024-12,86.69
+Lettuce,Visayas,2024-12,88.57
+Lettuce,Mindanao,2024-12,82.4
+Lettuce,Luzon-North,2025-01,85.87
+Lettuce,Luzon-Central,2025-01,83.15
+Lettuce,Luzon-South,2025-01,85.76
+Lettuce,Visayas,2025-01,99.22
+Lettuce,Mindanao,2025-01,84.6
+Lettuce,Luzon-North,2025-02,86.45
+Lettuce,Luzon-Central,2025-02,83.47
+Lettuce,Luzon-South,2025-02,79.32
+Lettuce,Visayas,2025-02,93.69
+Lettuce,Mindanao,2025-02,77.42
+Lettuce,Luzon-North,2025-03,83.55
+Lettuce,Luzon-Central,2025-03,81.18
+Lettuce,Luzon-South,2025-03,84.4
+Lettuce,Visayas,2025-03,80.85
+Lettuce,Mindanao,2025-03,77.45
+Lettuce,Luzon-North,2025-04,78.18
+Lettuce,Luzon-Central,2025-04,76.65
+Lettuce,Luzon-South,2025-04,82.67
+Lettuce,Visayas,2025-04,86.19
+Lettuce,Mindanao,2025-04,66.79
+Lettuce,Luzon-North,2025-05,88.19
+Lettuce,Luzon-Central,2025-05,80.82
+Lettuce,Luzon-South,2025-05,92.14
+Lettuce,Visayas,2025-05,98.67
+Lettuce,Mindanao,2025-05,77.4
+Lettuce,Luzon-North,2025-06,78.97
+Lettuce,Luzon-Central,2025-06,79.6
+Lettuce,Luzon-South,2025-06,85.64
+Lettuce,Visayas,2025-06,91.39
+Lettuce,Mindanao,2025-06,81.04
+Lettuce,Luzon-North,2025-07,80.65
+Lettuce,Luzon-Central,2025-07,87.51
+Lettuce,Luzon-South,2025-07,87.0
+Lettuce,Visayas,2025-07,98.23
+Lettuce,Mindanao,2025-07,82.89
+Lettuce,Luzon-North,2025-08,92.71
+Lettuce,Luzon-Central,2025-08,90.09
+Lettuce,Luzon-South,2025-08,96.22
+Lettuce,Visayas,2025-08,98.6
+Lettuce,Mindanao,2025-08,80.22
+Lettuce,Luzon-North,2025-09,96.06
+Lettuce,Luzon-Central,2025-09,100.87
+Lettuce,Luzon-South,2025-09,111.01
+Lettuce,Visayas,2025-09,110.76
+Lettuce,Mindanao,2025-09,92.62
+Lettuce,Luzon-North,2025-10,89.9
+Lettuce,Luzon-Central,2025-10,95.77
+Lettuce,Luzon-South,2025-10,97.42
+Lettuce,Visayas,2025-10,100.14
+Lettuce,Mindanao,2025-10,85.27
+Lettuce,Luzon-North,2025-11,88.56
+Lettuce,Luzon-Central,2025-11,82.78
+Lettuce,Luzon-South,2025-11,92.17
+Lettuce,Visayas,2025-11,90.04
+Lettuce,Mindanao,2025-11,80.45
+Lettuce,Luzon-North,2025-12,96.57
+Lettuce,Luzon-Central,2025-12,82.93
+Lettuce,Luzon-South,2025-12,89.93
+Lettuce,Visayas,2025-12,96.11
+Lettuce,Mindanao,2025-12,83.47
+Lettuce,Luzon-North,2026-01,82.12
+Lettuce,Luzon-Central,2026-01,82.62
+Lettuce,Luzon-South,2026-01,95.5
+Lettuce,Visayas,2026-01,95.18
+Lettuce,Mindanao,2026-01,81.37
+Lettuce,Luzon-North,2026-02,94.01
+Lettuce,Luzon-Central,2026-02,80.91
+Lettuce,Luzon-South,2026-02,91.97
+Lettuce,Visayas,2026-02,91.76
+Lettuce,Mindanao,2026-02,87.17
+Lettuce,Luzon-North,2026-03,76.57
+Lettuce,Luzon-Central,2026-03,78.73
+Lettuce,Luzon-South,2026-03,86.74
+Lettuce,Visayas,2026-03,94.68
+Lettuce,Mindanao,2026-03,81.31
+Lettuce,Luzon-North,2026-04,90.12
+Lettuce,Luzon-Central,2026-04,74.51
+Lettuce,Luzon-South,2026-04,91.78
+Lettuce,Visayas,2026-04,89.65
+Lettuce,Mindanao,2026-04,75.74
+Bell Pepper,Luzon-North,2022-01,90.63
+Bell Pepper,Luzon-Central,2022-01,81.73
+Bell Pepper,Luzon-South,2022-01,97.9
+Bell Pepper,Visayas,2022-01,94.92
+Bell Pepper,Mindanao,2022-01,85.48
+Bell Pepper,Luzon-North,2022-02,97.26
+Bell Pepper,Luzon-Central,2022-02,93.09
+Bell Pepper,Luzon-South,2022-02,108.21
+Bell Pepper,Visayas,2022-02,102.09
+Bell Pepper,Mindanao,2022-02,81.99
+Bell Pepper,Luzon-North,2022-03,89.53
+Bell Pepper,Luzon-Central,2022-03,85.22
+Bell Pepper,Luzon-South,2022-03,91.75
+Bell Pepper,Visayas,2022-03,102.68
+Bell Pepper,Mindanao,2022-03,83.74
+Bell Pepper,Luzon-North,2022-04,83.4
+Bell Pepper,Luzon-Central,2022-04,91.95
+Bell Pepper,Luzon-South,2022-04,96.64
+Bell Pepper,Visayas,2022-04,101.74
+Bell Pepper,Mindanao,2022-04,86.53
+Bell Pepper,Luzon-North,2022-05,97.95
+Bell Pepper,Luzon-Central,2022-05,91.32
+Bell Pepper,Luzon-South,2022-05,105.86
+Bell Pepper,Visayas,2022-05,104.72
+Bell Pepper,Mindanao,2022-05,90.03
+Bell Pepper,Luzon-North,2022-06,101.36
+Bell Pepper,Luzon-Central,2022-06,88.41
+Bell Pepper,Luzon-South,2022-06,103.43
+Bell Pepper,Visayas,2022-06,105.88
+Bell Pepper,Mindanao,2022-06,93.33
+Bell Pepper,Luzon-North,2022-07,95.77
+Bell Pepper,Luzon-Central,2022-07,106.7
+Bell Pepper,Luzon-South,2022-07,108.45
+Bell Pepper,Visayas,2022-07,104.25
+Bell Pepper,Mindanao,2022-07,87.39
+Bell Pepper,Luzon-North,2022-08,106.67
+Bell Pepper,Luzon-Central,2022-08,103.4
+Bell Pepper,Luzon-South,2022-08,109.52
+Bell Pepper,Visayas,2022-08,117.38
+Bell Pepper,Mindanao,2022-08,97.39
+Bell Pepper,Luzon-North,2022-09,113.77
+Bell Pepper,Luzon-Central,2022-09,102.44
+Bell Pepper,Luzon-South,2022-09,116.03
+Bell Pepper,Visayas,2022-09,125.43
+Bell Pepper,Mindanao,2022-09,116.21
+Bell Pepper,Luzon-North,2022-10,101.88
+Bell Pepper,Luzon-Central,2022-10,100.61
+Bell Pepper,Luzon-South,2022-10,107.92
+Bell Pepper,Visayas,2022-10,120.42
+Bell Pepper,Mindanao,2022-10,94.05
+Bell Pepper,Luzon-North,2022-11,99.38
+Bell Pepper,Luzon-Central,2022-11,97.63
+Bell Pepper,Luzon-South,2022-11,101.7
+Bell Pepper,Visayas,2022-11,104.73
+Bell Pepper,Mindanao,2022-11,92.46
+Bell Pepper,Luzon-North,2022-12,89.8
+Bell Pepper,Luzon-Central,2022-12,89.36
+Bell Pepper,Luzon-South,2022-12,103.18
+Bell Pepper,Visayas,2022-12,109.17
+Bell Pepper,Mindanao,2022-12,92.45
+Bell Pepper,Luzon-North,2023-01,91.91
+Bell Pepper,Luzon-Central,2023-01,94.57
+Bell Pepper,Luzon-South,2023-01,110.12
+Bell Pepper,Visayas,2023-01,111.95
+Bell Pepper,Mindanao,2023-01,93.42
+Bell Pepper,Luzon-North,2023-02,96.87
+Bell Pepper,Luzon-Central,2023-02,100.38
+Bell Pepper,Luzon-South,2023-02,103.35
+Bell Pepper,Visayas,2023-02,103.07
+Bell Pepper,Mindanao,2023-02,90.49
+Bell Pepper,Luzon-North,2023-03,105.93
+Bell Pepper,Luzon-Central,2023-03,95.87
+Bell Pepper,Luzon-South,2023-03,109.72
+Bell Pepper,Visayas,2023-03,104.12
+Bell Pepper,Mindanao,2023-03,96.17
+Bell Pepper,Luzon-North,2023-04,95.3
+Bell Pepper,Luzon-Central,2023-04,93.58
+Bell Pepper,Luzon-South,2023-04,115.99
+Bell Pepper,Visayas,2023-04,110.18
+Bell Pepper,Mindanao,2023-04,89.09
+Bell Pepper,Luzon-North,2023-05,100.37
+Bell Pepper,Luzon-Central,2023-05,98.34
+Bell Pepper,Luzon-South,2023-05,112.24
+Bell Pepper,Visayas,2023-05,106.2
+Bell Pepper,Mindanao,2023-05,85.58
+Bell Pepper,Luzon-North,2023-06,103.97
+Bell Pepper,Luzon-Central,2023-06,101.3
+Bell Pepper,Luzon-South,2023-06,111.32
+Bell Pepper,Visayas,2023-06,121.37
+Bell Pepper,Mindanao,2023-06,99.61
+Bell Pepper,Luzon-North,2023-07,113.51
+Bell Pepper,Luzon-Central,2023-07,98.95
+Bell Pepper,Luzon-South,2023-07,119.5
+Bell Pepper,Visayas,2023-07,130.15
+Bell Pepper,Mindanao,2023-07,105.36
+Bell Pepper,Luzon-North,2023-08,116.31
+Bell Pepper,Luzon-Central,2023-08,111.11
+Bell Pepper,Luzon-South,2023-08,131.37
+Bell Pepper,Visayas,2023-08,118.29
+Bell Pepper,Mindanao,2023-08,106.22
+Bell Pepper,Luzon-North,2023-09,120.24
+Bell Pepper,Luzon-Central,2023-09,117.03
+Bell Pepper,Luzon-South,2023-09,120.72
+Bell Pepper,Visayas,2023-09,128.89
+Bell Pepper,Mindanao,2023-09,107.79
+Bell Pepper,Luzon-North,2023-10,114.58
+Bell Pepper,Luzon-Central,2023-10,108.62
+Bell Pepper,Luzon-South,2023-10,112.77
+Bell Pepper,Visayas,2023-10,122.88
+Bell Pepper,Mindanao,2023-10,110.57
+Bell Pepper,Luzon-North,2023-11,102.89
+Bell Pepper,Luzon-Central,2023-11,102.54
+Bell Pepper,Luzon-South,2023-11,117.3
+Bell Pepper,Visayas,2023-11,110.52
+Bell Pepper,Mindanao,2023-11,101.47
+Bell Pepper,Luzon-North,2023-12,100.87
+Bell Pepper,Luzon-Central,2023-12,108.06
+Bell Pepper,Luzon-South,2023-12,124.78
+Bell Pepper,Visayas,2023-12,126.67
+Bell Pepper,Mindanao,2023-12,97.98
+Bell Pepper,Luzon-North,2024-01,111.02
+Bell Pepper,Luzon-Central,2024-01,103.4
+Bell Pepper,Luzon-South,2024-01,112.99
+Bell Pepper,Visayas,2024-01,124.57
+Bell Pepper,Mindanao,2024-01,93.0
+Bell Pepper,Luzon-North,2024-02,113.28
+Bell Pepper,Luzon-Central,2024-02,103.05
+Bell Pepper,Luzon-South,2024-02,120.94
+Bell Pepper,Visayas,2024-02,117.3
+Bell Pepper,Mindanao,2024-02,96.71
+Bell Pepper,Luzon-North,2024-03,106.33
+Bell Pepper,Luzon-Central,2024-03,104.38
+Bell Pepper,Luzon-South,2024-03,110.32
+Bell Pepper,Visayas,2024-03,116.03
+Bell Pepper,Mindanao,2024-03,94.99
+Bell Pepper,Luzon-North,2024-04,93.19
+Bell Pepper,Luzon-Central,2024-04,104.66
+Bell Pepper,Luzon-South,2024-04,113.37
+Bell Pepper,Visayas,2024-04,113.5
+Bell Pepper,Mindanao,2024-04,97.35
+Bell Pepper,Luzon-North,2024-05,112.56
+Bell Pepper,Luzon-Central,2024-05,100.39
+Bell Pepper,Luzon-South,2024-05,108.4
+Bell Pepper,Visayas,2024-05,114.49
+Bell Pepper,Mindanao,2024-05,105.45
+Bell Pepper,Luzon-North,2024-06,104.19
+Bell Pepper,Luzon-Central,2024-06,113.88
+Bell Pepper,Luzon-South,2024-06,113.79
+Bell Pepper,Visayas,2024-06,114.26
+Bell Pepper,Mindanao,2024-06,110.68
+Bell Pepper,Luzon-North,2024-07,115.25
+Bell Pepper,Luzon-Central,2024-07,103.95
+Bell Pepper,Luzon-South,2024-07,119.42
+Bell Pepper,Visayas,2024-07,130.9
+Bell Pepper,Mindanao,2024-07,114.13
+Bell Pepper,Luzon-North,2024-08,119.34
+Bell Pepper,Luzon-Central,2024-08,119.45
+Bell Pepper,Luzon-South,2024-08,132.62
+Bell Pepper,Visayas,2024-08,127.46
+Bell Pepper,Mindanao,2024-08,115.42
+Bell Pepper,Luzon-North,2024-09,124.6
+Bell Pepper,Luzon-Central,2024-09,116.59
+Bell Pepper,Luzon-South,2024-09,127.81
+Bell Pepper,Visayas,2024-09,135.23
+Bell Pepper,Mindanao,2024-09,116.23
+Bell Pepper,Luzon-North,2024-10,117.51
+Bell Pepper,Luzon-Central,2024-10,113.62
+Bell Pepper,Luzon-South,2024-10,134.05
+Bell Pepper,Visayas,2024-10,132.0
+Bell Pepper,Mindanao,2024-10,117.44
+Bell Pepper,Luzon-North,2024-11,121.69
+Bell Pepper,Luzon-Central,2024-11,113.45
+Bell Pepper,Luzon-South,2024-11,134.22
+Bell Pepper,Visayas,2024-11,118.86
+Bell Pepper,Mindanao,2024-11,111.07
+Bell Pepper,Luzon-North,2024-12,111.3
+Bell Pepper,Luzon-Central,2024-12,118.65
+Bell Pepper,Luzon-South,2024-12,128.85
+Bell Pepper,Visayas,2024-12,110.21
+Bell Pepper,Mindanao,2024-12,100.09
+Bell Pepper,Luzon-North,2025-01,117.45
+Bell Pepper,Luzon-Central,2025-01,113.44
+Bell Pepper,Luzon-South,2025-01,123.75
+Bell Pepper,Visayas,2025-01,122.33
+Bell Pepper,Mindanao,2025-01,108.12
+Bell Pepper,Luzon-North,2025-02,117.98
+Bell Pepper,Luzon-Central,2025-02,109.25
+Bell Pepper,Luzon-South,2025-02,126.13
+Bell Pepper,Visayas,2025-02,109.45
+Bell Pepper,Mindanao,2025-02,109.62
+Bell Pepper,Luzon-North,2025-03,105.58
+Bell Pepper,Luzon-Central,2025-03,112.0
+Bell Pepper,Luzon-South,2025-03,115.56
+Bell Pepper,Visayas,2025-03,114.9
+Bell Pepper,Mindanao,2025-03,105.48
+Bell Pepper,Luzon-North,2025-04,105.7
+Bell Pepper,Luzon-Central,2025-04,101.46
+Bell Pepper,Luzon-South,2025-04,107.17
+Bell Pepper,Visayas,2025-04,119.45
+Bell Pepper,Mindanao,2025-04,105.55
+Bell Pepper,Luzon-North,2025-05,119.42
+Bell Pepper,Luzon-Central,2025-05,108.29
+Bell Pepper,Luzon-South,2025-05,125.54
+Bell Pepper,Visayas,2025-05,122.81
+Bell Pepper,Mindanao,2025-05,105.16
+Bell Pepper,Luzon-North,2025-06,122.26
+Bell Pepper,Luzon-Central,2025-06,120.13
+Bell Pepper,Luzon-South,2025-06,122.66
+Bell Pepper,Visayas,2025-06,126.79
+Bell Pepper,Mindanao,2025-06,109.64
+Bell Pepper,Luzon-North,2025-07,123.46
+Bell Pepper,Luzon-Central,2025-07,112.71
+Bell Pepper,Luzon-South,2025-07,135.73
+Bell Pepper,Visayas,2025-07,130.12
+Bell Pepper,Mindanao,2025-07,116.98
+Bell Pepper,Luzon-North,2025-08,124.11
+Bell Pepper,Luzon-Central,2025-08,126.51
+Bell Pepper,Luzon-South,2025-08,138.59
+Bell Pepper,Visayas,2025-08,136.87
+Bell Pepper,Mindanao,2025-08,132.56
+Bell Pepper,Luzon-North,2025-09,134.94
+Bell Pepper,Luzon-Central,2025-09,138.48
+Bell Pepper,Luzon-South,2025-09,145.78
+Bell Pepper,Visayas,2025-09,138.34
+Bell Pepper,Mindanao,2025-09,120.85
+Bell Pepper,Luzon-North,2025-10,131.18
+Bell Pepper,Luzon-Central,2025-10,123.62
+Bell Pepper,Luzon-South,2025-10,135.13
+Bell Pepper,Visayas,2025-10,136.66
+Bell Pepper,Mindanao,2025-10,108.6
+Bell Pepper,Luzon-North,2025-11,120.49
+Bell Pepper,Luzon-Central,2025-11,104.01
+Bell Pepper,Luzon-South,2025-11,130.34
+Bell Pepper,Visayas,2025-11,126.83
+Bell Pepper,Mindanao,2025-11,109.28
+Bell Pepper,Luzon-North,2025-12,118.75
+Bell Pepper,Luzon-Central,2025-12,116.83
+Bell Pepper,Luzon-South,2025-12,117.04
+Bell Pepper,Visayas,2025-12,118.33
+Bell Pepper,Mindanao,2025-12,105.71
+Bell Pepper,Luzon-North,2026-01,108.35
+Bell Pepper,Luzon-Central,2026-01,110.25
+Bell Pepper,Luzon-South,2026-01,136.79
+Bell Pepper,Visayas,2026-01,123.44
+Bell Pepper,Mindanao,2026-01,115.88
+Bell Pepper,Luzon-North,2026-02,112.97
+Bell Pepper,Luzon-Central,2026-02,118.18
+Bell Pepper,Luzon-South,2026-02,125.32
+Bell Pepper,Visayas,2026-02,130.6
+Bell Pepper,Mindanao,2026-02,116.0
+Bell Pepper,Luzon-North,2026-03,128.57
+Bell Pepper,Luzon-Central,2026-03,114.57
+Bell Pepper,Luzon-South,2026-03,124.87
+Bell Pepper,Visayas,2026-03,121.43
+Bell Pepper,Mindanao,2026-03,113.12
+Bell Pepper,Luzon-North,2026-04,116.12
+Bell Pepper,Luzon-Central,2026-04,117.56
+Bell Pepper,Luzon-South,2026-04,123.17
+Bell Pepper,Visayas,2026-04,138.02
+Bell Pepper,Mindanao,2026-04,98.5
+Cabbage,Luzon-North,2022-01,36.54
+Cabbage,Luzon-Central,2022-01,33.01
+Cabbage,Luzon-South,2022-01,35.29
+Cabbage,Visayas,2022-01,37.3
+Cabbage,Mindanao,2022-01,30.3
+Cabbage,Luzon-North,2022-02,35.29
+Cabbage,Luzon-Central,2022-02,37.79
+Cabbage,Luzon-South,2022-02,38.95
+Cabbage,Visayas,2022-02,35.79
+Cabbage,Mindanao,2022-02,31.2
+Cabbage,Luzon-North,2022-03,33.41
+Cabbage,Luzon-Central,2022-03,34.38
+Cabbage,Luzon-South,2022-03,34.34
+Cabbage,Visayas,2022-03,35.56
+Cabbage,Mindanao,2022-03,33.12
+Cabbage,Luzon-North,2022-04,35.29
+Cabbage,Luzon-Central,2022-04,31.87
+Cabbage,Luzon-South,2022-04,33.54
+Cabbage,Visayas,2022-04,33.71
+Cabbage,Mindanao,2022-04,30.36
+Cabbage,Luzon-North,2022-05,30.75
+Cabbage,Luzon-Central,2022-05,34.48
+Cabbage,Luzon-South,2022-05,35.2
+Cabbage,Visayas,2022-05,38.28
+Cabbage,Mindanao,2022-05,35.2
+Cabbage,Luzon-North,2022-06,38.23
+Cabbage,Luzon-Central,2022-06,32.67
+Cabbage,Luzon-South,2022-06,39.57
+Cabbage,Visayas,2022-06,41.26
+Cabbage,Mindanao,2022-06,32.33
+Cabbage,Luzon-North,2022-07,35.48
+Cabbage,Luzon-Central,2022-07,35.57
+Cabbage,Luzon-South,2022-07,35.99
+Cabbage,Visayas,2022-07,43.2
+Cabbage,Mindanao,2022-07,30.48
+Cabbage,Luzon-North,2022-08,36.96
+Cabbage,Luzon-Central,2022-08,37.05
+Cabbage,Luzon-South,2022-08,40.62
+Cabbage,Visayas,2022-08,42.61
+Cabbage,Mindanao,2022-08,36.88
+Cabbage,Luzon-North,2022-09,39.5
+Cabbage,Luzon-Central,2022-09,40.51
+Cabbage,Luzon-South,2022-09,37.44
+Cabbage,Visayas,2022-09,43.12
+Cabbage,Mindanao,2022-09,35.81
+Cabbage,Luzon-North,2022-10,38.85
+Cabbage,Luzon-Central,2022-10,37.46
+Cabbage,Luzon-South,2022-10,38.67
+Cabbage,Visayas,2022-10,40.34
+Cabbage,Mindanao,2022-10,37.31
+Cabbage,Luzon-North,2022-11,37.17
+Cabbage,Luzon-Central,2022-11,33.88
+Cabbage,Luzon-South,2022-11,42.27
+Cabbage,Visayas,2022-11,44.01
+Cabbage,Mindanao,2022-11,31.49
+Cabbage,Luzon-North,2022-12,36.44
+Cabbage,Luzon-Central,2022-12,38.79
+Cabbage,Luzon-South,2022-12,39.17
+Cabbage,Visayas,2022-12,39.2
+Cabbage,Mindanao,2022-12,33.04
+Cabbage,Luzon-North,2023-01,35.01
+Cabbage,Luzon-Central,2023-01,34.18
+Cabbage,Luzon-South,2023-01,36.74
+Cabbage,Visayas,2023-01,40.31
+Cabbage,Mindanao,2023-01,32.8
+Cabbage,Luzon-North,2023-02,35.27
+Cabbage,Luzon-Central,2023-02,32.55
+Cabbage,Luzon-South,2023-02,37.78
+Cabbage,Visayas,2023-02,37.21
+Cabbage,Mindanao,2023-02,33.24
+Cabbage,Luzon-North,2023-03,36.89
+Cabbage,Luzon-Central,2023-03,34.28
+Cabbage,Luzon-South,2023-03,37.74
+Cabbage,Visayas,2023-03,38.54
+Cabbage,Mindanao,2023-03,32.7
+Cabbage,Luzon-North,2023-04,34.56
+Cabbage,Luzon-Central,2023-04,32.88
+Cabbage,Luzon-South,2023-04,37.91
+Cabbage,Visayas,2023-04,35.53
+Cabbage,Mindanao,2023-04,34.52
+Cabbage,Luzon-North,2023-05,35.65
+Cabbage,Luzon-Central,2023-05,32.89
+Cabbage,Luzon-South,2023-05,36.45
+Cabbage,Visayas,2023-05,37.13
+Cabbage,Mindanao,2023-05,33.36
+Cabbage,Luzon-North,2023-06,35.8
+Cabbage,Luzon-Central,2023-06,37.68
+Cabbage,Luzon-South,2023-06,37.46
+Cabbage,Visayas,2023-06,35.54
+Cabbage,Mindanao,2023-06,33.27
+Cabbage,Luzon-North,2023-07,34.46
+Cabbage,Luzon-Central,2023-07,36.7
+Cabbage,Luzon-South,2023-07,42.35
+Cabbage,Visayas,2023-07,42.71
+Cabbage,Mindanao,2023-07,33.24
+Cabbage,Luzon-North,2023-08,38.69
+Cabbage,Luzon-Central,2023-08,42.05
+Cabbage,Luzon-South,2023-08,42.91
+Cabbage,Visayas,2023-08,43.45
+Cabbage,Mindanao,2023-08,39.39
+Cabbage,Luzon-North,2023-09,46.09
+Cabbage,Luzon-Central,2023-09,41.97
+Cabbage,Luzon-South,2023-09,43.41
+Cabbage,Visayas,2023-09,45.13
+Cabbage,Mindanao,2023-09,39.36
+Cabbage,Luzon-North,2023-10,38.46
+Cabbage,Luzon-Central,2023-10,36.07
+Cabbage,Luzon-South,2023-10,41.77
+Cabbage,Visayas,2023-10,40.82
+Cabbage,Mindanao,2023-10,36.79
+Cabbage,Luzon-North,2023-11,37.74
+Cabbage,Luzon-Central,2023-11,40.28
+Cabbage,Luzon-South,2023-11,37.76
+Cabbage,Visayas,2023-11,40.32
+Cabbage,Mindanao,2023-11,34.65
+Cabbage,Luzon-North,2023-12,37.72
+Cabbage,Luzon-Central,2023-12,37.29
+Cabbage,Luzon-South,2023-12,37.81
+Cabbage,Visayas,2023-12,38.23
+Cabbage,Mindanao,2023-12,31.51
+Cabbage,Luzon-North,2024-01,35.28
+Cabbage,Luzon-Central,2024-01,36.47
+Cabbage,Luzon-South,2024-01,38.94
+Cabbage,Visayas,2024-01,37.93
+Cabbage,Mindanao,2024-01,33.77
+Cabbage,Luzon-North,2024-02,37.14
+Cabbage,Luzon-Central,2024-02,36.5
+Cabbage,Luzon-South,2024-02,37.78
+Cabbage,Visayas,2024-02,39.55
+Cabbage,Mindanao,2024-02,31.35
+Cabbage,Luzon-North,2024-03,33.98
+Cabbage,Luzon-Central,2024-03,37.41
+Cabbage,Luzon-South,2024-03,33.71
+Cabbage,Visayas,2024-03,38.28
+Cabbage,Mindanao,2024-03,33.9
+Cabbage,Luzon-North,2024-04,35.09
+Cabbage,Luzon-Central,2024-04,32.95
+Cabbage,Luzon-South,2024-04,37.44
+Cabbage,Visayas,2024-04,38.62
+Cabbage,Mindanao,2024-04,33.12
+Cabbage,Luzon-North,2024-05,33.16
+Cabbage,Luzon-Central,2024-05,34.87
+Cabbage,Luzon-South,2024-05,36.78
+Cabbage,Visayas,2024-05,38.44
+Cabbage,Mindanao,2024-05,34.42
+Cabbage,Luzon-North,2024-06,39.4
+Cabbage,Luzon-Central,2024-06,38.29
+Cabbage,Luzon-South,2024-06,39.09
+Cabbage,Visayas,2024-06,43.13
+Cabbage,Mindanao,2024-06,37.59
+Cabbage,Luzon-North,2024-07,41.63
+Cabbage,Luzon-Central,2024-07,40.44
+Cabbage,Luzon-South,2024-07,41.06
+Cabbage,Visayas,2024-07,42.17
+Cabbage,Mindanao,2024-07,38.14
+Cabbage,Luzon-North,2024-08,38.54
+Cabbage,Luzon-Central,2024-08,40.12
+Cabbage,Luzon-South,2024-08,42.28
+Cabbage,Visayas,2024-08,43.85
+Cabbage,Mindanao,2024-08,35.12
+Cabbage,Luzon-North,2024-09,40.33
+Cabbage,Luzon-Central,2024-09,40.48
+Cabbage,Luzon-South,2024-09,46.29
+Cabbage,Visayas,2024-09,47.85
+Cabbage,Mindanao,2024-09,39.1
+Cabbage,Luzon-North,2024-10,40.41
+Cabbage,Luzon-Central,2024-10,37.54
+Cabbage,Luzon-South,2024-10,43.7
+Cabbage,Visayas,2024-10,43.52
+Cabbage,Mindanao,2024-10,39.09
+Cabbage,Luzon-North,2024-11,42.01
+Cabbage,Luzon-Central,2024-11,37.02
+Cabbage,Luzon-South,2024-11,37.52
+Cabbage,Visayas,2024-11,39.92
+Cabbage,Mindanao,2024-11,33.3
+Cabbage,Luzon-North,2024-12,35.68
+Cabbage,Luzon-Central,2024-12,38.81
+Cabbage,Luzon-South,2024-12,40.3
+Cabbage,Visayas,2024-12,37.87
+Cabbage,Mindanao,2024-12,36.45
+Cabbage,Luzon-North,2025-01,40.44
+Cabbage,Luzon-Central,2025-01,35.86
+Cabbage,Luzon-South,2025-01,38.59
+Cabbage,Visayas,2025-01,40.39
+Cabbage,Mindanao,2025-01,35.88
+Cabbage,Luzon-North,2025-02,39.35
+Cabbage,Luzon-Central,2025-02,38.77
+Cabbage,Luzon-South,2025-02,42.46
+Cabbage,Visayas,2025-02,43.62
+Cabbage,Mindanao,2025-02,37.88
+Cabbage,Luzon-North,2025-03,38.29
+Cabbage,Luzon-Central,2025-03,32.86
+Cabbage,Luzon-South,2025-03,38.66
+Cabbage,Visayas,2025-03,40.66
+Cabbage,Mindanao,2025-03,33.81
+Cabbage,Luzon-North,2025-04,38.45
+Cabbage,Luzon-Central,2025-04,34.66
+Cabbage,Luzon-South,2025-04,36.82
+Cabbage,Visayas,2025-04,42.58
+Cabbage,Mindanao,2025-04,35.33
+Cabbage,Luzon-North,2025-05,38.03
+Cabbage,Luzon-Central,2025-05,37.79
+Cabbage,Luzon-South,2025-05,41.6
+Cabbage,Visayas,2025-05,41.32
+Cabbage,Mindanao,2025-05,30.69
+Cabbage,Luzon-North,2025-06,37.92
+Cabbage,Luzon-Central,2025-06,36.82
+Cabbage,Luzon-South,2025-06,39.18
+Cabbage,Visayas,2025-06,42.81
+Cabbage,Mindanao,2025-06,38.68
+Cabbage,Luzon-North,2025-07,39.51
+Cabbage,Luzon-Central,2025-07,36.67
+Cabbage,Luzon-South,2025-07,46.83
+Cabbage,Visayas,2025-07,42.75
+Cabbage,Mindanao,2025-07,35.34
+Cabbage,Luzon-North,2025-08,43.03
+Cabbage,Luzon-Central,2025-08,41.69
+Cabbage,Luzon-South,2025-08,43.08
+Cabbage,Visayas,2025-08,47.74
+Cabbage,Mindanao,2025-08,38.58
+Cabbage,Luzon-North,2025-09,41.4
+Cabbage,Luzon-Central,2025-09,42.04
+Cabbage,Luzon-South,2025-09,47.33
+Cabbage,Visayas,2025-09,45.39
+Cabbage,Mindanao,2025-09,41.03
+Cabbage,Luzon-North,2025-10,41.75
+Cabbage,Luzon-Central,2025-10,45.95
+Cabbage,Luzon-South,2025-10,42.48
+Cabbage,Visayas,2025-10,48.44
+Cabbage,Mindanao,2025-10,38.91
+Cabbage,Luzon-North,2025-11,39.46
+Cabbage,Luzon-Central,2025-11,39.5
+Cabbage,Luzon-South,2025-11,43.56
+Cabbage,Visayas,2025-11,45.6
+Cabbage,Mindanao,2025-11,37.54
+Cabbage,Luzon-North,2025-12,37.85
+Cabbage,Luzon-Central,2025-12,36.45
+Cabbage,Luzon-South,2025-12,42.01
+Cabbage,Visayas,2025-12,43.36
+Cabbage,Mindanao,2025-12,38.82
+Cabbage,Luzon-North,2026-01,39.93
+Cabbage,Luzon-Central,2026-01,39.54
+Cabbage,Luzon-South,2026-01,44.18
+Cabbage,Visayas,2026-01,42.59
+Cabbage,Mindanao,2026-01,33.67
+Cabbage,Luzon-North,2026-02,36.89
+Cabbage,Luzon-Central,2026-02,34.93
+Cabbage,Luzon-South,2026-02,44.44
+Cabbage,Visayas,2026-02,40.55
+Cabbage,Mindanao,2026-02,38.71
+Cabbage,Luzon-North,2026-03,39.22
+Cabbage,Luzon-Central,2026-03,39.72
+Cabbage,Luzon-South,2026-03,42.02
+Cabbage,Visayas,2026-03,40.95
+Cabbage,Mindanao,2026-03,35.09
+Cabbage,Luzon-North,2026-04,37.97
+Cabbage,Luzon-Central,2026-04,36.61
+Cabbage,Luzon-South,2026-04,38.64
+Cabbage,Visayas,2026-04,40.76
+Cabbage,Mindanao,2026-04,37.99
+Carrot,Luzon-North,2022-01,81.03
+Carrot,Luzon-Central,2022-01,73.32
+Carrot,Luzon-South,2022-01,84.79
+Carrot,Visayas,2022-01,90.03
+Carrot,Mindanao,2022-01,74.19
+Carrot,Luzon-North,2022-02,82.89
+Carrot,Luzon-Central,2022-02,70.52
+Carrot,Luzon-South,2022-02,88.44
+Carrot,Visayas,2022-02,83.59
+Carrot,Mindanao,2022-02,76.53
+Carrot,Luzon-North,2022-03,77.95
+Carrot,Luzon-Central,2022-03,64.57
+Carrot,Luzon-South,2022-03,78.04
+Carrot,Visayas,2022-03,84.34
+Carrot,Mindanao,2022-03,77.42
+Carrot,Luzon-North,2022-04,77.36
+Carrot,Luzon-Central,2022-04,74.16
+Carrot,Luzon-South,2022-04,74.42
+Carrot,Visayas,2022-04,88.26
+Carrot,Mindanao,2022-04,77.33
+Carrot,Luzon-North,2022-05,77.78
+Carrot,Luzon-Central,2022-05,73.74
+Carrot,Luzon-South,2022-05,74.95
+Carrot,Visayas,2022-05,87.59
+Carrot,Mindanao,2022-05,81.99
+Carrot,Luzon-North,2022-06,83.54
+Carrot,Luzon-Central,2022-06,82.31
+Carrot,Luzon-South,2022-06,86.97
+Carrot,Visayas,2022-06,82.81
+Carrot,Mindanao,2022-06,80.01
+Carrot,Luzon-North,2022-07,77.71
+Carrot,Luzon-Central,2022-07,78.67
+Carrot,Luzon-South,2022-07,88.18
+Carrot,Visayas,2022-07,93.4
+Carrot,Mindanao,2022-07,78.63
+Carrot,Luzon-North,2022-08,88.23
+Carrot,Luzon-Central,2022-08,79.93
+Carrot,Luzon-South,2022-08,85.02
+Carrot,Visayas,2022-08,93.77
+Carrot,Mindanao,2022-08,77.64
+Carrot,Luzon-North,2022-09,82.17
+Carrot,Luzon-Central,2022-09,79.06
+Carrot,Luzon-South,2022-09,90.05
+Carrot,Visayas,2022-09,86.15
+Carrot,Mindanao,2022-09,76.25
+Carrot,Luzon-North,2022-10,77.66
+Carrot,Luzon-Central,2022-10,81.94
+Carrot,Luzon-South,2022-10,90.62
+Carrot,Visayas,2022-10,100.51
+Carrot,Mindanao,2022-10,72.77
+Carrot,Luzon-North,2022-11,76.98
+Carrot,Luzon-Central,2022-11,79.99
+Carrot,Luzon-South,2022-11,82.76
+Carrot,Visayas,2022-11,84.65
+Carrot,Mindanao,2022-11,80.44
+Carrot,Luzon-North,2022-12,76.62
+Carrot,Luzon-Central,2022-12,70.5
+Carrot,Luzon-South,2022-12,76.45
+Carrot,Visayas,2022-12,85.59
+Carrot,Mindanao,2022-12,73.59
+Carrot,Luzon-North,2023-01,72.42
+Carrot,Luzon-Central,2023-01,70.97
+Carrot,Luzon-South,2023-01,83.82
+Carrot,Visayas,2023-01,86.4
+Carrot,Mindanao,2023-01,69.98
+Carrot,Luzon-North,2023-02,79.98
+Carrot,Luzon-Central,2023-02,76.59
+Carrot,Luzon-South,2023-02,74.18
+Carrot,Visayas,2023-02,82.46
+Carrot,Mindanao,2023-02,73.63
+Carrot,Luzon-North,2023-03,72.92
+Carrot,Luzon-Central,2023-03,64.36
+Carrot,Luzon-South,2023-03,77.71
+Carrot,Visayas,2023-03,84.13
+Carrot,Mindanao,2023-03,75.34
+Carrot,Luzon-North,2023-04,66.0
+Carrot,Luzon-Central,2023-04,80.45
+Carrot,Luzon-South,2023-04,73.44
+Carrot,Visayas,2023-04,83.88
+Carrot,Mindanao,2023-04,73.19
+Carrot,Luzon-North,2023-05,79.2
+Carrot,Luzon-Central,2023-05,73.01
+Carrot,Luzon-South,2023-05,74.66
+Carrot,Visayas,2023-05,84.08
+Carrot,Mindanao,2023-05,67.69
+Carrot,Luzon-North,2023-06,68.49
+Carrot,Luzon-Central,2023-06,85.89
+Carrot,Luzon-South,2023-06,85.21
+Carrot,Visayas,2023-06,92.34
+Carrot,Mindanao,2023-06,69.57
+Carrot,Luzon-North,2023-07,86.4
+Carrot,Luzon-Central,2023-07,83.42
+Carrot,Luzon-South,2023-07,91.09
+Carrot,Visayas,2023-07,86.84
+Carrot,Mindanao,2023-07,70.36
+Carrot,Luzon-North,2023-08,83.38
+Carrot,Luzon-Central,2023-08,71.87
+Carrot,Luzon-South,2023-08,80.81
+Carrot,Visayas,2023-08,91.27
+Carrot,Mindanao,2023-08,74.36
+Carrot,Luzon-North,2023-09,84.74
+Carrot,Luzon-Central,2023-09,81.58
+Carrot,Luzon-South,2023-09,98.38
+Carrot,Visayas,2023-09,98.27
+Carrot,Mindanao,2023-09,79.29
+Carrot,Luzon-North,2023-10,87.17
+Carrot,Luzon-Central,2023-10,75.84
+Carrot,Luzon-South,2023-10,84.86
+Carrot,Visayas,2023-10,92.82
+Carrot,Mindanao,2023-10,71.7
+Carrot,Luzon-North,2023-11,76.37
+Carrot,Luzon-Central,2023-11,69.44
+Carrot,Luzon-South,2023-11,81.8
+Carrot,Visayas,2023-11,90.47
+Carrot,Mindanao,2023-11,69.32
+Carrot,Luzon-North,2023-12,76.61
+Carrot,Luzon-Central,2023-12,69.46
+Carrot,Luzon-South,2023-12,74.97
+Carrot,Visayas,2023-12,76.76
+Carrot,Mindanao,2023-12,75.57
+Carrot,Luzon-North,2024-01,84.5
+Carrot,Luzon-Central,2024-01,74.3
+Carrot,Luzon-South,2024-01,76.51
+Carrot,Visayas,2024-01,84.49
+Carrot,Mindanao,2024-01,69.1
+Carrot,Luzon-North,2024-02,78.41
+Carrot,Luzon-Central,2024-02,73.42
+Carrot,Luzon-South,2024-02,80.26
+Carrot,Visayas,2024-02,83.89
+Carrot,Mindanao,2024-02,68.08
+Carrot,Luzon-North,2024-03,71.48
+Carrot,Luzon-Central,2024-03,64.01
+Carrot,Luzon-South,2024-03,74.92
+Carrot,Visayas,2024-03,73.19
+Carrot,Mindanao,2024-03,67.36
+Carrot,Luzon-North,2024-04,68.58
+Carrot,Luzon-Central,2024-04,69.5
+Carrot,Luzon-South,2024-04,77.35
+Carrot,Visayas,2024-04,72.27
+Carrot,Mindanao,2024-04,64.27
+Carrot,Luzon-North,2024-05,69.9
+Carrot,Luzon-Central,2024-05,73.06
+Carrot,Luzon-South,2024-05,83.6
+Carrot,Visayas,2024-05,82.6
+Carrot,Mindanao,2024-05,67.03
+Carrot,Luzon-North,2024-06,81.75
+Carrot,Luzon-Central,2024-06,67.59
+Carrot,Luzon-South,2024-06,85.98
+Carrot,Visayas,2024-06,79.57
+Carrot,Mindanao,2024-06,60.99
+Carrot,Luzon-North,2024-07,88.6
+Carrot,Luzon-Central,2024-07,81.03
+Carrot,Luzon-South,2024-07,77.9
+Carrot,Visayas,2024-07,85.2
+Carrot,Mindanao,2024-07,71.97
+Carrot,Luzon-North,2024-08,82.17
+Carrot,Luzon-Central,2024-08,72.66
+Carrot,Luzon-South,2024-08,82.92
+Carrot,Visayas,2024-08,90.36
+Carrot,Mindanao,2024-08,76.88
+Carrot,Luzon-North,2024-09,88.02
+Carrot,Luzon-Central,2024-09,80.04
+Carrot,Luzon-South,2024-09,97.44
+Carrot,Visayas,2024-09,86.47
+Carrot,Mindanao,2024-09,78.23
+Carrot,Luzon-North,2024-10,72.23
+Carrot,Luzon-Central,2024-10,71.89
+Carrot,Luzon-South,2024-10,89.45
+Carrot,Visayas,2024-10,82.21
+Carrot,Mindanao,2024-10,76.27
+Carrot,Luzon-North,2024-11,75.04
+Carrot,Luzon-Central,2024-11,68.48
+Carrot,Luzon-South,2024-11,77.65
+Carrot,Visayas,2024-11,79.2
+Carrot,Mindanao,2024-11,68.29
+Carrot,Luzon-North,2024-12,76.39
+Carrot,Luzon-Central,2024-12,72.98
+Carrot,Luzon-South,2024-12,75.07
+Carrot,Visayas,2024-12,75.9
+Carrot,Mindanao,2024-12,69.43
+Carrot,Luzon-North,2025-01,73.07
+Carrot,Luzon-Central,2025-01,74.13
+Carrot,Luzon-South,2025-01,87.35
+Carrot,Visayas,2025-01,82.66
+Carrot,Mindanao,2025-01,68.18
+Carrot,Luzon-North,2025-02,72.63
+Carrot,Luzon-Central,2025-02,67.32
+Carrot,Luzon-South,2025-02,73.44
+Carrot,Visayas,2025-02,75.16
+Carrot,Mindanao,2025-02,66.79
+Carrot,Luzon-North,2025-03,69.4
+Carrot,Luzon-Central,2025-03,70.61
+Carrot,Luzon-South,2025-03,72.97
+Carrot,Visayas,2025-03,75.83
+Carrot,Mindanao,2025-03,61.93
+Carrot,Luzon-North,2025-04,75.77
+Carrot,Luzon-Central,2025-04,68.91
+Carrot,Luzon-South,2025-04,80.09
+Carrot,Visayas,2025-04,78.62
+Carrot,Mindanao,2025-04,69.96
+Carrot,Luzon-North,2025-05,70.42
+Carrot,Luzon-Central,2025-05,70.9
+Carrot,Luzon-South,2025-05,84.99
+Carrot,Visayas,2025-05,72.29
+Carrot,Mindanao,2025-05,70.21
+Carrot,Luzon-North,2025-06,80.32
+Carrot,Luzon-Central,2025-06,72.57
+Carrot,Luzon-South,2025-06,80.71
+Carrot,Visayas,2025-06,85.07
+Carrot,Mindanao,2025-06,66.54
+Carrot,Luzon-North,2025-07,77.62
+Carrot,Luzon-Central,2025-07,69.75
+Carrot,Luzon-South,2025-07,77.07
+Carrot,Visayas,2025-07,79.52
+Carrot,Mindanao,2025-07,70.19
+Carrot,Luzon-North,2025-08,80.05
+Carrot,Luzon-Central,2025-08,78.05
+Carrot,Luzon-South,2025-08,77.38
+Carrot,Visayas,2025-08,94.51
+Carrot,Mindanao,2025-08,78.27
+Carrot,Luzon-North,2025-09,83.71
+Carrot,Luzon-Central,2025-09,76.06
+Carrot,Luzon-South,2025-09,84.36
+Carrot,Visayas,2025-09,89.61
+Carrot,Mindanao,2025-09,76.64
+Carrot,Luzon-North,2025-10,70.96
+Carrot,Luzon-Central,2025-10,77.37
+Carrot,Luzon-South,2025-10,93.71
+Carrot,Visayas,2025-10,75.92
+Carrot,Mindanao,2025-10,75.89
+Carrot,Luzon-North,2025-11,74.54
+Carrot,Luzon-Central,2025-11,69.83
+Carrot,Luzon-South,2025-11,82.22
+Carrot,Visayas,2025-11,74.21
+Carrot,Mindanao,2025-11,68.6
+Carrot,Luzon-North,2025-12,76.92
+Carrot,Luzon-Central,2025-12,68.0
+Carrot,Luzon-South,2025-12,73.52
+Carrot,Visayas,2025-12,77.73
+Carrot,Mindanao,2025-12,65.02
+Carrot,Luzon-North,2026-01,77.05
+Carrot,Luzon-Central,2026-01,65.33
+Carrot,Luzon-South,2026-01,78.31
+Carrot,Visayas,2026-01,72.13
+Carrot,Mindanao,2026-01,68.66
+Carrot,Luzon-North,2026-02,70.82
+Carrot,Luzon-Central,2026-02,59.28
+Carrot,Luzon-South,2026-02,74.74
+Carrot,Visayas,2026-02,72.69
+Carrot,Mindanao,2026-02,64.71
+Carrot,Luzon-North,2026-03,74.37
+Carrot,Luzon-Central,2026-03,62.36
+Carrot,Luzon-South,2026-03,68.42
+Carrot,Visayas,2026-03,79.94
+Carrot,Mindanao,2026-03,64.48
+Carrot,Luzon-North,2026-04,73.44
+Carrot,Luzon-Central,2026-04,66.41
+Carrot,Luzon-South,2026-04,68.21
+Carrot,Visayas,2026-04,73.24
+Carrot,Mindanao,2026-04,67.28
+Cucumber,Luzon-North,2022-01,38.0
+Cucumber,Luzon-Central,2022-01,36.57
+Cucumber,Luzon-South,2022-01,39.67
+Cucumber,Visayas,2022-01,39.82
+Cucumber,Mindanao,2022-01,38.85
+Cucumber,Luzon-North,2022-02,38.26
+Cucumber,Luzon-Central,2022-02,34.58
+Cucumber,Luzon-South,2022-02,39.17
+Cucumber,Visayas,2022-02,42.85
+Cucumber,Mindanao,2022-02,36.74
+Cucumber,Luzon-North,2022-03,37.05
+Cucumber,Luzon-Central,2022-03,34.59
+Cucumber,Luzon-South,2022-03,39.23
+Cucumber,Visayas,2022-03,36.83
+Cucumber,Mindanao,2022-03,32.38
+Cucumber,Luzon-North,2022-04,38.69
+Cucumber,Luzon-Central,2022-04,34.8
+Cucumber,Luzon-South,2022-04,39.78
+Cucumber,Visayas,2022-04,42.66
+Cucumber,Mindanao,2022-04,35.72
+Cucumber,Luzon-North,2022-05,38.22
+Cucumber,Luzon-Central,2022-05,40.66
+Cucumber,Luzon-South,2022-05,41.46
+Cucumber,Visayas,2022-05,40.48
+Cucumber,Mindanao,2022-05,36.84
+Cucumber,Luzon-North,2022-06,40.83
+Cucumber,Luzon-Central,2022-06,36.7
+Cucumber,Luzon-South,2022-06,42.15
+Cucumber,Visayas,2022-06,42.83
+Cucumber,Mindanao,2022-06,33.43
+Cucumber,Luzon-North,2022-07,41.06
+Cucumber,Luzon-Central,2022-07,39.19
+Cucumber,Luzon-South,2022-07,42.52
+Cucumber,Visayas,2022-07,40.96
+Cucumber,Mindanao,2022-07,37.83
+Cucumber,Luzon-North,2022-08,43.59
+Cucumber,Luzon-Central,2022-08,42.15
+Cucumber,Luzon-South,2022-08,43.19
+Cucumber,Visayas,2022-08,48.71
+Cucumber,Mindanao,2022-08,38.08
+Cucumber,Luzon-North,2022-09,44.25
+Cucumber,Luzon-Central,2022-09,45.85
+Cucumber,Luzon-South,2022-09,45.33
+Cucumber,Visayas,2022-09,47.07
+Cucumber,Mindanao,2022-09,43.92
+Cucumber,Luzon-North,2022-10,42.58
+Cucumber,Luzon-Central,2022-10,41.06
+Cucumber,Luzon-South,2022-10,46.12
+Cucumber,Visayas,2022-10,49.44
+Cucumber,Mindanao,2022-10,35.82
+Cucumber,Luzon-North,2022-11,39.53
+Cucumber,Luzon-Central,2022-11,37.58
+Cucumber,Luzon-South,2022-11,40.93
+Cucumber,Visayas,2022-11,42.63
+Cucumber,Mindanao,2022-11,36.74
+Cucumber,Luzon-North,2022-12,41.36
+Cucumber,Luzon-Central,2022-12,37.32
+Cucumber,Luzon-South,2022-12,43.03
+Cucumber,Visayas,2022-12,44.89
+Cucumber,Mindanao,2022-12,36.46
+Cucumber,Luzon-North,2023-01,41.26
+Cucumber,Luzon-Central,2023-01,42.65
+Cucumber,Luzon-South,2023-01,43.75
+Cucumber,Visayas,2023-01,42.82
+Cucumber,Mindanao,2023-01,37.99
+Cucumber,Luzon-North,2023-02,39.32
+Cucumber,Luzon-Central,2023-02,40.15
+Cucumber,Luzon-South,2023-02,45.23
+Cucumber,Visayas,2023-02,42.69
+Cucumber,Mindanao,2023-02,37.96
+Cucumber,Luzon-North,2023-03,42.54
+Cucumber,Luzon-Central,2023-03,37.66
+Cucumber,Luzon-South,2023-03,42.67
+Cucumber,Visayas,2023-03,41.2
+Cucumber,Mindanao,2023-03,35.87
+Cucumber,Luzon-North,2023-04,39.04
+Cucumber,Luzon-Central,2023-04,42.68
+Cucumber,Luzon-South,2023-04,41.24
+Cucumber,Visayas,2023-04,42.15
+Cucumber,Mindanao,2023-04,36.24
+Cucumber,Luzon-North,2023-05,40.84
+Cucumber,Luzon-Central,2023-05,40.83
+Cucumber,Luzon-South,2023-05,43.65
+Cucumber,Visayas,2023-05,49.06
+Cucumber,Mindanao,2023-05,38.71
+Cucumber,Luzon-North,2023-06,46.26
+Cucumber,Luzon-Central,2023-06,41.99
+Cucumber,Luzon-South,2023-06,46.67
+Cucumber,Visayas,2023-06,43.23
+Cucumber,Mindanao,2023-06,39.87
+Cucumber,Luzon-North,2023-07,44.53
+Cucumber,Luzon-Central,2023-07,42.38
+Cucumber,Luzon-South,2023-07,41.87
+Cucumber,Visayas,2023-07,50.39
+Cucumber,Mindanao,2023-07,40.76
+Cucumber,Luzon-North,2023-08,46.09
+Cucumber,Luzon-Central,2023-08,44.66
+Cucumber,Luzon-South,2023-08,48.91
+Cucumber,Visayas,2023-08,51.92
+Cucumber,Mindanao,2023-08,41.03
+Cucumber,Luzon-North,2023-09,46.04
+Cucumber,Luzon-Central,2023-09,47.03
+Cucumber,Luzon-South,2023-09,51.07
+Cucumber,Visayas,2023-09,51.17
+Cucumber,Mindanao,2023-09,43.62
+Cucumber,Luzon-North,2023-10,44.9
+Cucumber,Luzon-Central,2023-10,44.85
+Cucumber,Luzon-South,2023-10,52.1
+Cucumber,Visayas,2023-10,47.92
+Cucumber,Mindanao,2023-10,46.89
+Cucumber,Luzon-North,2023-11,46.41
+Cucumber,Luzon-Central,2023-11,41.78
+Cucumber,Luzon-South,2023-11,48.59
+Cucumber,Visayas,2023-11,44.57
+Cucumber,Mindanao,2023-11,37.83
+Cucumber,Luzon-North,2023-12,41.1
+Cucumber,Luzon-Central,2023-12,41.31
+Cucumber,Luzon-South,2023-12,45.38
+Cucumber,Visayas,2023-12,46.23
+Cucumber,Mindanao,2023-12,41.06
+Cucumber,Luzon-North,2024-01,39.5
+Cucumber,Luzon-Central,2024-01,43.5
+Cucumber,Luzon-South,2024-01,43.13
+Cucumber,Visayas,2024-01,46.18
+Cucumber,Mindanao,2024-01,40.27
+Cucumber,Luzon-North,2024-02,41.93
+Cucumber,Luzon-Central,2024-02,39.79
+Cucumber,Luzon-South,2024-02,44.38
+Cucumber,Visayas,2024-02,48.03
+Cucumber,Mindanao,2024-02,42.61
+Cucumber,Luzon-North,2024-03,44.65
+Cucumber,Luzon-Central,2024-03,39.62
+Cucumber,Luzon-South,2024-03,43.79
+Cucumber,Visayas,2024-03,44.74
+Cucumber,Mindanao,2024-03,41.3
+Cucumber,Luzon-North,2024-04,38.85
+Cucumber,Luzon-Central,2024-04,44.1
+Cucumber,Luzon-South,2024-04,44.32
+Cucumber,Visayas,2024-04,44.89
+Cucumber,Mindanao,2024-04,40.91
+Cucumber,Luzon-North,2024-05,46.73
+Cucumber,Luzon-Central,2024-05,43.39
+Cucumber,Luzon-South,2024-05,49.11
+Cucumber,Visayas,2024-05,48.31
+Cucumber,Mindanao,2024-05,43.86
+Cucumber,Luzon-North,2024-06,49.44
+Cucumber,Luzon-Central,2024-06,44.46
+Cucumber,Luzon-South,2024-06,52.39
+Cucumber,Visayas,2024-06,50.68
+Cucumber,Mindanao,2024-06,43.48
+Cucumber,Luzon-North,2024-07,45.99
+Cucumber,Luzon-Central,2024-07,45.62
+Cucumber,Luzon-South,2024-07,52.59
+Cucumber,Visayas,2024-07,48.65
+Cucumber,Mindanao,2024-07,46.3
+Cucumber,Luzon-North,2024-08,51.72
+Cucumber,Luzon-Central,2024-08,49.48
+Cucumber,Luzon-South,2024-08,47.49
+Cucumber,Visayas,2024-08,54.62
+Cucumber,Mindanao,2024-08,48.81
+Cucumber,Luzon-North,2024-09,50.11
+Cucumber,Luzon-Central,2024-09,50.24
+Cucumber,Luzon-South,2024-09,48.2
+Cucumber,Visayas,2024-09,58.15
+Cucumber,Mindanao,2024-09,46.84
+Cucumber,Luzon-North,2024-10,52.75
+Cucumber,Luzon-Central,2024-10,44.06
+Cucumber,Luzon-South,2024-10,54.91
+Cucumber,Visayas,2024-10,53.95
+Cucumber,Mindanao,2024-10,48.91
+Cucumber,Luzon-North,2024-11,45.82
+Cucumber,Luzon-Central,2024-11,44.7
+Cucumber,Luzon-South,2024-11,56.11
+Cucumber,Visayas,2024-11,49.74
+Cucumber,Mindanao,2024-11,43.11
+Cucumber,Luzon-North,2024-12,46.74
+Cucumber,Luzon-Central,2024-12,43.18
+Cucumber,Luzon-South,2024-12,52.73
+Cucumber,Visayas,2024-12,55.61
+Cucumber,Mindanao,2024-12,42.53
+Cucumber,Luzon-North,2025-01,43.59
+Cucumber,Luzon-Central,2025-01,48.48
+Cucumber,Luzon-South,2025-01,52.87
+Cucumber,Visayas,2025-01,53.64
+Cucumber,Mindanao,2025-01,46.93
+Cucumber,Luzon-North,2025-02,45.93
+Cucumber,Luzon-Central,2025-02,45.71
+Cucumber,Luzon-South,2025-02,46.93
+Cucumber,Visayas,2025-02,48.18
+Cucumber,Mindanao,2025-02,46.84
+Cucumber,Luzon-North,2025-03,45.27
+Cucumber,Luzon-Central,2025-03,50.1
+Cucumber,Luzon-South,2025-03,49.37
+Cucumber,Visayas,2025-03,48.97
+Cucumber,Mindanao,2025-03,45.3
+Cucumber,Luzon-North,2025-04,50.86
+Cucumber,Luzon-Central,2025-04,45.88
+Cucumber,Luzon-South,2025-04,46.01
+Cucumber,Visayas,2025-04,51.33
+Cucumber,Mindanao,2025-04,46.38
+Cucumber,Luzon-North,2025-05,46.75
+Cucumber,Luzon-Central,2025-05,44.23
+Cucumber,Luzon-South,2025-05,52.89
+Cucumber,Visayas,2025-05,52.13
+Cucumber,Mindanao,2025-05,42.12
+Cucumber,Luzon-North,2025-06,49.26
+Cucumber,Luzon-Central,2025-06,46.38
+Cucumber,Luzon-South,2025-06,53.5
+Cucumber,Visayas,2025-06,54.52
+Cucumber,Mindanao,2025-06,49.38
+Cucumber,Luzon-North,2025-07,53.85
+Cucumber,Luzon-Central,2025-07,46.03
+Cucumber,Luzon-South,2025-07,55.72
+Cucumber,Visayas,2025-07,58.69
+Cucumber,Mindanao,2025-07,49.47
+Cucumber,Luzon-North,2025-08,57.66
+Cucumber,Luzon-Central,2025-08,51.2
+Cucumber,Luzon-South,2025-08,54.84
+Cucumber,Visayas,2025-08,61.98
+Cucumber,Mindanao,2025-08,48.28
+Cucumber,Luzon-North,2025-09,50.13
+Cucumber,Luzon-Central,2025-09,56.71
+Cucumber,Luzon-South,2025-09,56.87
+Cucumber,Visayas,2025-09,59.76
+Cucumber,Mindanao,2025-09,48.61
+Cucumber,Luzon-North,2025-10,50.91
+Cucumber,Luzon-Central,2025-10,49.32
+Cucumber,Luzon-South,2025-10,56.22
+Cucumber,Visayas,2025-10,59.98
+Cucumber,Mindanao,2025-10,44.88
+Cucumber,Luzon-North,2025-11,53.78
+Cucumber,Luzon-Central,2025-11,46.82
+Cucumber,Luzon-South,2025-11,51.52
+Cucumber,Visayas,2025-11,57.87
+Cucumber,Mindanao,2025-11,48.02
+Cucumber,Luzon-North,2025-12,47.2
+Cucumber,Luzon-Central,2025-12,53.61
+Cucumber,Luzon-South,2025-12,51.38
+Cucumber,Visayas,2025-12,55.9
+Cucumber,Mindanao,2025-12,48.03
+Cucumber,Luzon-North,2026-01,55.09
+Cucumber,Luzon-Central,2026-01,48.28
+Cucumber,Luzon-South,2026-01,56.76
+Cucumber,Visayas,2026-01,53.52
+Cucumber,Mindanao,2026-01,50.54
+Cucumber,Luzon-North,2026-02,49.82
+Cucumber,Luzon-Central,2026-02,48.82
+Cucumber,Luzon-South,2026-02,59.54
+Cucumber,Visayas,2026-02,56.82
+Cucumber,Mindanao,2026-02,48.43
+Cucumber,Luzon-North,2026-03,56.2
+Cucumber,Luzon-Central,2026-03,49.39
+Cucumber,Luzon-South,2026-03,50.89
+Cucumber,Visayas,2026-03,56.58
+Cucumber,Mindanao,2026-03,44.22
+Cucumber,Luzon-North,2026-04,53.17
+Cucumber,Luzon-Central,2026-04,51.23
+Cucumber,Luzon-South,2026-04,51.34
+Cucumber,Visayas,2026-04,52.65
+Cucumber,Mindanao,2026-04,47.22
+Onion,Luzon-North,2022-01,104.62
+Onion,Luzon-Central,2022-01,108.6
+Onion,Luzon-South,2022-01,103.71
+Onion,Visayas,2022-01,116.23
+Onion,Mindanao,2022-01,100.23
+Onion,Luzon-North,2022-02,108.86
+Onion,Luzon-Central,2022-02,107.58
+Onion,Luzon-South,2022-02,108.77
+Onion,Visayas,2022-02,122.71
+Onion,Mindanao,2022-02,101.72
+Onion,Luzon-North,2022-03,103.9
+Onion,Luzon-Central,2022-03,96.05
+Onion,Luzon-South,2022-03,106.09
+Onion,Visayas,2022-03,118.07
+Onion,Mindanao,2022-03,95.06
+Onion,Luzon-North,2022-04,106.98
+Onion,Luzon-Central,2022-04,107.81
+Onion,Luzon-South,2022-04,117.75
+Onion,Visayas,2022-04,124.16
+Onion,Mindanao,2022-04,97.71
+Onion,Luzon-North,2022-05,103.29
+Onion,Luzon-Central,2022-05,110.2
+Onion,Luzon-South,2022-05,116.45
+Onion,Visayas,2022-05,124.58
+Onion,Mindanao,2022-05,101.63
+Onion,Luzon-North,2022-06,120.88
+Onion,Luzon-Central,2022-06,114.13
+Onion,Luzon-South,2022-06,124.05
+Onion,Visayas,2022-06,126.29
+Onion,Mindanao,2022-06,108.19
+Onion,Luzon-North,2022-07,119.17
+Onion,Luzon-Central,2022-07,114.37
+Onion,Luzon-South,2022-07,129.81
+Onion,Visayas,2022-07,123.97
+Onion,Mindanao,2022-07,119.06
+Onion,Luzon-North,2022-08,123.17
+Onion,Luzon-Central,2022-08,124.73
+Onion,Luzon-South,2022-08,129.43
+Onion,Visayas,2022-08,132.08
+Onion,Mindanao,2022-08,126.86
+Onion,Luzon-North,2022-09,124.55
+Onion,Luzon-Central,2022-09,113.69
+Onion,Luzon-South,2022-09,128.09
+Onion,Visayas,2022-09,134.46
+Onion,Mindanao,2022-09,130.33
+Onion,Luzon-North,2022-10,123.65
+Onion,Luzon-Central,2022-10,122.98
+Onion,Luzon-South,2022-10,122.07
+Onion,Visayas,2022-10,134.51
+Onion,Mindanao,2022-10,117.64
+Onion,Luzon-North,2022-11,126.43
+Onion,Luzon-Central,2022-11,107.46
+Onion,Luzon-South,2022-11,125.45
+Onion,Visayas,2022-11,127.15
+Onion,Mindanao,2022-11,102.35
+Onion,Luzon-North,2022-12,113.97
+Onion,Luzon-Central,2022-12,108.07
+Onion,Luzon-South,2022-12,105.85
+Onion,Visayas,2022-12,126.89
+Onion,Mindanao,2022-12,108.96
+Onion,Luzon-North,2023-01,111.95
+Onion,Luzon-Central,2023-01,102.53
+Onion,Luzon-South,2023-01,129.08
+Onion,Visayas,2023-01,125.26
+Onion,Mindanao,2023-01,111.86
+Onion,Luzon-North,2023-02,122.95
+Onion,Luzon-Central,2023-02,107.38
+Onion,Luzon-South,2023-02,125.49
+Onion,Visayas,2023-02,122.54
+Onion,Mindanao,2023-02,106.48
+Onion,Luzon-North,2023-03,111.27
+Onion,Luzon-Central,2023-03,107.27
+Onion,Luzon-South,2023-03,123.87
+Onion,Visayas,2023-03,121.43
+Onion,Mindanao,2023-03,103.12
+Onion,Luzon-North,2023-04,109.43
+Onion,Luzon-Central,2023-04,108.35
+Onion,Luzon-South,2023-04,111.3
+Onion,Visayas,2023-04,116.83
+Onion,Mindanao,2023-04,102.93
+Onion,Luzon-North,2023-05,110.43
+Onion,Luzon-Central,2023-05,108.46
+Onion,Luzon-South,2023-05,115.69
+Onion,Visayas,2023-05,135.04
+Onion,Mindanao,2023-05,112.72
+Onion,Luzon-North,2023-06,121.36
+Onion,Luzon-Central,2023-06,113.64
+Onion,Luzon-South,2023-06,138.27
+Onion,Visayas,2023-06,130.25
+Onion,Mindanao,2023-06,109.9
+Onion,Luzon-North,2023-07,124.44
+Onion,Luzon-Central,2023-07,119.48
+Onion,Luzon-South,2023-07,137.78
+Onion,Visayas,2023-07,132.26
+Onion,Mindanao,2023-07,125.96
+Onion,Luzon-North,2023-08,123.17
+Onion,Luzon-Central,2023-08,127.99
+Onion,Luzon-South,2023-08,128.52
+Onion,Visayas,2023-08,151.8
+Onion,Mindanao,2023-08,117.85
+Onion,Luzon-North,2023-09,131.25
+Onion,Luzon-Central,2023-09,132.21
+Onion,Luzon-South,2023-09,146.89
+Onion,Visayas,2023-09,134.26
+Onion,Mindanao,2023-09,120.3
+Onion,Luzon-North,2023-10,118.47
+Onion,Luzon-Central,2023-10,123.1
+Onion,Luzon-South,2023-10,133.04
+Onion,Visayas,2023-10,135.14
+Onion,Mindanao,2023-10,114.38
+Onion,Luzon-North,2023-11,118.35
+Onion,Luzon-Central,2023-11,111.53
+Onion,Luzon-South,2023-11,130.07
+Onion,Visayas,2023-11,140.22
+Onion,Mindanao,2023-11,101.4
+Onion,Luzon-North,2023-12,118.02
+Onion,Luzon-Central,2023-12,111.57
+Onion,Luzon-South,2023-12,127.71
+Onion,Visayas,2023-12,122.1
+Onion,Mindanao,2023-12,109.59
+Onion,Luzon-North,2024-01,112.91
+Onion,Luzon-Central,2024-01,118.32
+Onion,Luzon-South,2024-01,125.68
+Onion,Visayas,2024-01,127.6
+Onion,Mindanao,2024-01,112.82
+Onion,Luzon-North,2024-02,118.04
+Onion,Luzon-Central,2024-02,105.81
+Onion,Luzon-South,2024-02,129.22
+Onion,Visayas,2024-02,130.93
+Onion,Mindanao,2024-02,110.29
+Onion,Luzon-North,2024-03,122.02
+Onion,Luzon-Central,2024-03,118.44
+Onion,Luzon-South,2024-03,115.44
+Onion,Visayas,2024-03,120.69
+Onion,Mindanao,2024-03,116.52
+Onion,Luzon-North,2024-04,123.67
+Onion,Luzon-Central,2024-04,106.77
+Onion,Luzon-South,2024-04,114.1
+Onion,Visayas,2024-04,120.74
+Onion,Mindanao,2024-04,104.72
+Onion,Luzon-North,2024-05,108.9
+Onion,Luzon-Central,2024-05,113.72
+Onion,Luzon-South,2024-05,116.24
+Onion,Visayas,2024-05,120.0
+Onion,Mindanao,2024-05,115.03
+Onion,Luzon-North,2024-06,119.3
+Onion,Luzon-Central,2024-06,118.15
+Onion,Luzon-South,2024-06,133.77
+Onion,Visayas,2024-06,138.82
+Onion,Mindanao,2024-06,112.93
+Onion,Luzon-North,2024-07,127.85
+Onion,Luzon-Central,2024-07,117.41
+Onion,Luzon-South,2024-07,145.65
+Onion,Visayas,2024-07,142.25
+Onion,Mindanao,2024-07,112.09
+Onion,Luzon-North,2024-08,134.12
+Onion,Luzon-Central,2024-08,133.32
+Onion,Luzon-South,2024-08,144.17
+Onion,Visayas,2024-08,158.06
+Onion,Mindanao,2024-08,133.26
+Onion,Luzon-North,2024-09,133.3
+Onion,Luzon-Central,2024-09,130.93
+Onion,Luzon-South,2024-09,134.62
+Onion,Visayas,2024-09,149.8
+Onion,Mindanao,2024-09,128.36
+Onion,Luzon-North,2024-10,150.45
+Onion,Luzon-Central,2024-10,127.85
+Onion,Luzon-South,2024-10,124.59
+Onion,Visayas,2024-10,138.32
+Onion,Mindanao,2024-10,123.95
+Onion,Luzon-North,2024-11,117.71
+Onion,Luzon-Central,2024-11,115.34
+Onion,Luzon-South,2024-11,129.46
+Onion,Visayas,2024-11,137.96
+Onion,Mindanao,2024-11,115.84
+Onion,Luzon-North,2024-12,118.04
+Onion,Luzon-Central,2024-12,123.26
+Onion,Luzon-South,2024-12,126.21
+Onion,Visayas,2024-12,130.08
+Onion,Mindanao,2024-12,106.96
+Onion,Luzon-North,2025-01,119.08
+Onion,Luzon-Central,2025-01,122.87
+Onion,Luzon-South,2025-01,119.62
+Onion,Visayas,2025-01,133.39
+Onion,Mindanao,2025-01,119.41
+Onion,Luzon-North,2025-02,122.03
+Onion,Luzon-Central,2025-02,120.83
+Onion,Luzon-South,2025-02,123.3
+Onion,Visayas,2025-02,143.12
+Onion,Mindanao,2025-02,122.03
+Onion,Luzon-North,2025-03,122.43
+Onion,Luzon-Central,2025-03,105.97
+Onion,Luzon-South,2025-03,120.41
+Onion,Visayas,2025-03,137.07
+Onion,Mindanao,2025-03,122.18
+Onion,Luzon-North,2025-04,121.95
+Onion,Luzon-Central,2025-04,122.55
+Onion,Luzon-South,2025-04,122.34
+Onion,Visayas,2025-04,128.55
+Onion,Mindanao,2025-04,111.76
+Onion,Luzon-North,2025-05,125.67
+Onion,Luzon-Central,2025-05,109.12
+Onion,Luzon-South,2025-05,135.3
+Onion,Visayas,2025-05,141.71
+Onion,Mindanao,2025-05,107.88
+Onion,Luzon-North,2025-06,119.82
+Onion,Luzon-Central,2025-06,125.55
+Onion,Luzon-South,2025-06,130.54
+Onion,Visayas,2025-06,122.35
+Onion,Mindanao,2025-06,124.36
+Onion,Luzon-North,2025-07,133.77
+Onion,Luzon-Central,2025-07,124.39
+Onion,Luzon-South,2025-07,154.11
+Onion,Visayas,2025-07,144.36
+Onion,Mindanao,2025-07,118.8
+Onion,Luzon-North,2025-08,140.24
+Onion,Luzon-Central,2025-08,126.98
+Onion,Luzon-South,2025-08,140.93
+Onion,Visayas,2025-08,153.61
+Onion,Mindanao,2025-08,126.17
+Onion,Luzon-North,2025-09,139.33
+Onion,Luzon-Central,2025-09,148.27
+Onion,Luzon-South,2025-09,156.11
+Onion,Visayas,2025-09,160.13
+Onion,Mindanao,2025-09,136.08
+Onion,Luzon-North,2025-10,141.25
+Onion,Luzon-Central,2025-10,142.03
+Onion,Luzon-South,2025-10,144.66
+Onion,Visayas,2025-10,162.76
+Onion,Mindanao,2025-10,122.15
+Onion,Luzon-North,2025-11,129.02
+Onion,Luzon-Central,2025-11,116.81
+Onion,Luzon-South,2025-11,134.86
+Onion,Visayas,2025-11,144.8
+Onion,Mindanao,2025-11,130.36
+Onion,Luzon-North,2025-12,124.28
+Onion,Luzon-Central,2025-12,123.44
+Onion,Luzon-South,2025-12,132.55
+Onion,Visayas,2025-12,133.7
+Onion,Mindanao,2025-12,112.44
+Onion,Luzon-North,2026-01,129.37
+Onion,Luzon-Central,2026-01,113.1
+Onion,Luzon-South,2026-01,136.18
+Onion,Visayas,2026-01,139.44
+Onion,Mindanao,2026-01,116.01
+Onion,Luzon-North,2026-02,122.87
+Onion,Luzon-Central,2026-02,115.64
+Onion,Luzon-South,2026-02,148.6
+Onion,Visayas,2026-02,130.39
+Onion,Mindanao,2026-02,129.73
+Onion,Luzon-North,2026-03,129.69
+Onion,Luzon-Central,2026-03,118.68
+Onion,Luzon-South,2026-03,124.56
+Onion,Visayas,2026-03,143.08
+Onion,Mindanao,2026-03,127.23
+Onion,Luzon-North,2026-04,119.2
+Onion,Luzon-Central,2026-04,118.25
+Onion,Luzon-South,2026-04,138.2
+Onion,Visayas,2026-04,137.31
+Onion,Mindanao,2026-04,127.92
+Garlic,Luzon-North,2022-01,225.97
+Garlic,Luzon-Central,2022-01,197.99
+Garlic,Luzon-South,2022-01,255.21
+Garlic,Visayas,2022-01,228.92
+Garlic,Mindanao,2022-01,182.01
+Garlic,Luzon-North,2022-02,218.93
+Garlic,Luzon-Central,2022-02,210.03
+Garlic,Luzon-South,2022-02,253.49
+Garlic,Visayas,2022-02,233.91
+Garlic,Mindanao,2022-02,204.77
+Garlic,Luzon-North,2022-03,220.34
+Garlic,Luzon-Central,2022-03,221.72
+Garlic,Luzon-South,2022-03,223.98
+Garlic,Visayas,2022-03,243.12
+Garlic,Mindanao,2022-03,204.16
+Garlic,Luzon-North,2022-04,208.95
+Garlic,Luzon-Central,2022-04,204.4
+Garlic,Luzon-South,2022-04,223.01
+Garlic,Visayas,2022-04,218.57
+Garlic,Mindanao,2022-04,209.21
+Garlic,Luzon-North,2022-05,201.79
+Garlic,Luzon-Central,2022-05,220.33
+Garlic,Luzon-South,2022-05,238.52
+Garlic,Visayas,2022-05,233.07
+Garlic,Mindanao,2022-05,193.92
+Garlic,Luzon-North,2022-06,223.43
+Garlic,Luzon-Central,2022-06,222.08
+Garlic,Luzon-South,2022-06,246.1
+Garlic,Visayas,2022-06,247.57
+Garlic,Mindanao,2022-06,220.59
+Garlic,Luzon-North,2022-07,226.47
+Garlic,Luzon-Central,2022-07,226.27
+Garlic,Luzon-South,2022-07,225.43
+Garlic,Visayas,2022-07,261.2
+Garlic,Mindanao,2022-07,218.31
+Garlic,Luzon-North,2022-08,239.33
+Garlic,Luzon-Central,2022-08,248.26
+Garlic,Luzon-South,2022-08,265.5
+Garlic,Visayas,2022-08,226.79
+Garlic,Mindanao,2022-08,227.75
+Garlic,Luzon-North,2022-09,231.08
+Garlic,Luzon-Central,2022-09,252.0
+Garlic,Luzon-South,2022-09,294.24
+Garlic,Visayas,2022-09,262.17
+Garlic,Mindanao,2022-09,232.63
+Garlic,Luzon-North,2022-10,237.63
+Garlic,Luzon-Central,2022-10,235.08
+Garlic,Luzon-South,2022-10,260.82
+Garlic,Visayas,2022-10,276.63
+Garlic,Mindanao,2022-10,212.75
+Garlic,Luzon-North,2022-11,245.49
+Garlic,Luzon-Central,2022-11,208.33
+Garlic,Luzon-South,2022-11,242.3
+Garlic,Visayas,2022-11,260.06
+Garlic,Mindanao,2022-11,219.22
+Garlic,Luzon-North,2022-12,212.97
+Garlic,Luzon-Central,2022-12,206.99
+Garlic,Luzon-South,2022-12,229.21
+Garlic,Visayas,2022-12,240.72
+Garlic,Mindanao,2022-12,219.73
+Garlic,Luzon-North,2023-01,209.33
+Garlic,Luzon-Central,2023-01,219.84
+Garlic,Luzon-South,2023-01,242.14
+Garlic,Visayas,2023-01,248.43
+Garlic,Mindanao,2023-01,212.97
+Garlic,Luzon-North,2023-02,241.12
+Garlic,Luzon-Central,2023-02,220.39
+Garlic,Luzon-South,2023-02,245.39
+Garlic,Visayas,2023-02,248.86
+Garlic,Mindanao,2023-02,227.11
+Garlic,Luzon-North,2023-03,196.99
+Garlic,Luzon-Central,2023-03,222.36
+Garlic,Luzon-South,2023-03,225.57
+Garlic,Visayas,2023-03,231.78
+Garlic,Mindanao,2023-03,192.62
+Garlic,Luzon-North,2023-04,195.58
+Garlic,Luzon-Central,2023-04,203.15
+Garlic,Luzon-South,2023-04,218.74
+Garlic,Visayas,2023-04,238.75
+Garlic,Mindanao,2023-04,185.87
+Garlic,Luzon-North,2023-05,236.33
+Garlic,Luzon-Central,2023-05,214.6
+Garlic,Luzon-South,2023-05,228.7
+Garlic,Visayas,2023-05,229.73
+Garlic,Mindanao,2023-05,197.03
+Garlic,Luzon-North,2023-06,216.89
+Garlic,Luzon-Central,2023-06,214.67
+Garlic,Luzon-South,2023-06,241.44
+Garlic,Visayas,2023-06,246.06
+Garlic,Mindanao,2023-06,198.66
+Garlic,Luzon-North,2023-07,233.82
+Garlic,Luzon-Central,2023-07,217.33
+Garlic,Luzon-South,2023-07,250.8
+Garlic,Visayas,2023-07,279.78
+Garlic,Mindanao,2023-07,227.27
+Garlic,Luzon-North,2023-08,244.72
+Garlic,Luzon-Central,2023-08,219.28
+Garlic,Luzon-South,2023-08,242.58
+Garlic,Visayas,2023-08,245.86
+Garlic,Mindanao,2023-08,239.6
+Garlic,Luzon-North,2023-09,243.8
+Garlic,Luzon-Central,2023-09,244.12
+Garlic,Luzon-South,2023-09,257.89
+Garlic,Visayas,2023-09,275.03
+Garlic,Mindanao,2023-09,252.28
+Garlic,Luzon-North,2023-10,236.4
+Garlic,Luzon-Central,2023-10,230.99
+Garlic,Luzon-South,2023-10,246.66
+Garlic,Visayas,2023-10,275.93
+Garlic,Mindanao,2023-10,215.98
+Garlic,Luzon-North,2023-11,218.41
+Garlic,Luzon-Central,2023-11,206.84
+Garlic,Luzon-South,2023-11,225.98
+Garlic,Visayas,2023-11,255.93
+Garlic,Mindanao,2023-11,242.97
+Garlic,Luzon-North,2023-12,215.99
+Garlic,Luzon-Central,2023-12,228.59
+Garlic,Luzon-South,2023-12,241.66
+Garlic,Visayas,2023-12,231.96
+Garlic,Mindanao,2023-12,208.47
+Garlic,Luzon-North,2024-01,224.98
+Garlic,Luzon-Central,2024-01,210.98
+Garlic,Luzon-South,2024-01,262.08
+Garlic,Visayas,2024-01,222.41
+Garlic,Mindanao,2024-01,215.73
+Garlic,Luzon-North,2024-02,231.74
+Garlic,Luzon-Central,2024-02,212.5
+Garlic,Luzon-South,2024-02,241.15
+Garlic,Visayas,2024-02,257.0
+Garlic,Mindanao,2024-02,213.62
+Garlic,Luzon-North,2024-03,226.04
+Garlic,Luzon-Central,2024-03,219.93
+Garlic,Luzon-South,2024-03,208.87
+Garlic,Visayas,2024-03,256.81
+Garlic,Mindanao,2024-03,229.38
+Garlic,Luzon-North,2024-04,230.22
+Garlic,Luzon-Central,2024-04,221.36
+Garlic,Luzon-South,2024-04,214.2
+Garlic,Visayas,2024-04,235.61
+Garlic,Mindanao,2024-04,195.81
+Garlic,Luzon-North,2024-05,217.76
+Garlic,Luzon-Central,2024-05,225.78
+Garlic,Luzon-South,2024-05,226.09
+Garlic,Visayas,2024-05,240.71
+Garlic,Mindanao,2024-05,188.73
+Garlic,Luzon-North,2024-06,231.98
+Garlic,Luzon-Central,2024-06,225.49
+Garlic,Luzon-South,2024-06,236.88
+Garlic,Visayas,2024-06,243.45
+Garlic,Mindanao,2024-06,237.98
+Garlic,Luzon-North,2024-07,226.47
+Garlic,Luzon-Central,2024-07,219.25
+Garlic,Luzon-South,2024-07,242.87
+Garlic,Visayas,2024-07,275.94
+Garlic,Mindanao,2024-07,247.73
+Garlic,Luzon-North,2024-08,257.1
+Garlic,Luzon-Central,2024-08,234.07
+Garlic,Luzon-South,2024-08,259.86
+Garlic,Visayas,2024-08,287.67
+Garlic,Mindanao,2024-08,224.48
+Garlic,Luzon-North,2024-09,276.6
+Garlic,Luzon-Central,2024-09,265.09
+Garlic,Luzon-South,2024-09,271.71
+Garlic,Visayas,2024-09,287.5
+Garlic,Mindanao,2024-09,248.81
+Garlic,Luzon-North,2024-10,268.36
+Garlic,Luzon-Central,2024-10,226.48
+Garlic,Luzon-South,2024-10,276.9
+Garlic,Visayas,2024-10,263.88
+Garlic,Mindanao,2024-10,222.69
+Garlic,Luzon-North,2024-11,236.72
+Garlic,Luzon-Central,2024-11,223.67
+Garlic,Luzon-South,2024-11,235.08
+Garlic,Visayas,2024-11,234.04
+Garlic,Mindanao,2024-11,208.71
+Garlic,Luzon-North,2024-12,248.01
+Garlic,Luzon-Central,2024-12,243.75
+Garlic,Luzon-South,2024-12,250.67
+Garlic,Visayas,2024-12,264.53
+Garlic,Mindanao,2024-12,209.48
+Garlic,Luzon-North,2025-01,230.66
+Garlic,Luzon-Central,2025-01,225.44
+Garlic,Luzon-South,2025-01,229.99
+Garlic,Visayas,2025-01,237.7
+Garlic,Mindanao,2025-01,216.39
+Garlic,Luzon-North,2025-02,228.18
+Garlic,Luzon-Central,2025-02,210.78
+Garlic,Luzon-South,2025-02,248.19
+Garlic,Visayas,2025-02,247.15
+Garlic,Mindanao,2025-02,226.67
+Garlic,Luzon-North,2025-03,225.17
+Garlic,Luzon-Central,2025-03,212.97
+Garlic,Luzon-South,2025-03,238.0
+Garlic,Visayas,2025-03,241.15
+Garlic,Mindanao,2025-03,202.47
+Garlic,Luzon-North,2025-04,218.74
+Garlic,Luzon-Central,2025-04,222.33
+Garlic,Luzon-South,2025-04,241.97
+Garlic,Visayas,2025-04,256.59
+Garlic,Mindanao,2025-04,190.03
+Garlic,Luzon-North,2025-05,223.71
+Garlic,Luzon-Central,2025-05,214.53
+Garlic,Luzon-South,2025-05,241.67
+Garlic,Visayas,2025-05,240.88
+Garlic,Mindanao,2025-05,206.78
+Garlic,Luzon-North,2025-06,247.17
+Garlic,Luzon-Central,2025-06,230.38
+Garlic,Luzon-South,2025-06,235.19
+Garlic,Visayas,2025-06,274.03
+Garlic,Mindanao,2025-06,232.23
+Garlic,Luzon-North,2025-07,238.16
+Garlic,Luzon-Central,2025-07,245.17
+Garlic,Luzon-South,2025-07,247.99
+Garlic,Visayas,2025-07,279.72
+Garlic,Mindanao,2025-07,225.55
+Garlic,Luzon-North,2025-08,246.92
+Garlic,Luzon-Central,2025-08,242.35
+Garlic,Luzon-South,2025-08,259.76
+Garlic,Visayas,2025-08,280.49
+Garlic,Mindanao,2025-08,241.33
+Garlic,Luzon-North,2025-09,262.77
+Garlic,Luzon-Central,2025-09,244.8
+Garlic,Luzon-South,2025-09,225.0
+Garlic,Visayas,2025-09,284.6
+Garlic,Mindanao,2025-09,220.81
+Garlic,Luzon-North,2025-10,256.38
+Garlic,Luzon-Central,2025-10,256.91
+Garlic,Luzon-South,2025-10,269.6
+Garlic,Visayas,2025-10,268.23
+Garlic,Mindanao,2025-10,233.44
+Garlic,Luzon-North,2025-11,237.97
+Garlic,Luzon-Central,2025-11,223.67
+Garlic,Luzon-South,2025-11,244.2
+Garlic,Visayas,2025-11,246.78
+Garlic,Mindanao,2025-11,236.03
+Garlic,Luzon-North,2025-12,235.01
+Garlic,Luzon-Central,2025-12,236.58
+Garlic,Luzon-South,2025-12,243.87
+Garlic,Visayas,2025-12,254.93
+Garlic,Mindanao,2025-12,216.87
+Garlic,Luzon-North,2026-01,240.99
+Garlic,Luzon-Central,2026-01,235.46
+Garlic,Luzon-South,2026-01,250.28
+Garlic,Visayas,2026-01,245.81
+Garlic,Mindanao,2026-01,210.51
+Garlic,Luzon-North,2026-02,255.45
+Garlic,Luzon-Central,2026-02,223.27
+Garlic,Luzon-South,2026-02,244.07
+Garlic,Visayas,2026-02,273.41
+Garlic,Mindanao,2026-02,231.3
+Garlic,Luzon-North,2026-03,235.22
+Garlic,Luzon-Central,2026-03,215.54
+Garlic,Luzon-South,2026-03,268.86
+Garlic,Visayas,2026-03,252.29
+Garlic,Mindanao,2026-03,218.89
+Garlic,Luzon-North,2026-04,225.13
+Garlic,Luzon-Central,2026-04,202.57
+Garlic,Luzon-South,2026-04,222.51
+Garlic,Visayas,2026-04,250.22
+Garlic,Mindanao,2026-04,215.31
+Corn,Luzon-North,2022-01,23.54
+Corn,Luzon-Central,2022-01,22.27
+Corn,Luzon-South,2022-01,25.82
+Corn,Visayas,2022-01,25.03
+Corn,Mindanao,2022-01,24.29
+Corn,Luzon-North,2022-02,26.51
+Corn,Luzon-Central,2022-02,27.46
+Corn,Luzon-South,2022-02,27.47
+Corn,Visayas,2022-02,26.27
+Corn,Mindanao,2022-02,22.29
+Corn,Luzon-North,2022-03,20.16
+Corn,Luzon-Central,2022-03,22.7
+Corn,Luzon-South,2022-03,25.36
+Corn,Visayas,2022-03,27.59
+Corn,Mindanao,2022-03,23.35
+Corn,Luzon-North,2022-04,24.89
+Corn,Luzon-Central,2022-04,23.46
+Corn,Luzon-South,2022-04,26.23
+Corn,Visayas,2022-04,28.0
+Corn,Mindanao,2022-04,21.29
+Corn,Luzon-North,2022-05,24.18
+Corn,Luzon-Central,2022-05,22.1
+Corn,Luzon-South,2022-05,28.08
+Corn,Visayas,2022-05,28.45
+Corn,Mindanao,2022-05,23.88
+Corn,Luzon-North,2022-06,24.27
+Corn,Luzon-Central,2022-06,25.0
+Corn,Luzon-South,2022-06,26.79
+Corn,Visayas,2022-06,28.0
+Corn,Mindanao,2022-06,23.78
+Corn,Luzon-North,2022-07,27.34
+Corn,Luzon-Central,2022-07,25.07
+Corn,Luzon-South,2022-07,29.17
+Corn,Visayas,2022-07,29.12
+Corn,Mindanao,2022-07,24.41
+Corn,Luzon-North,2022-08,27.83
+Corn,Luzon-Central,2022-08,26.27
+Corn,Luzon-South,2022-08,30.58
+Corn,Visayas,2022-08,29.81
+Corn,Mindanao,2022-08,26.41
+Corn,Luzon-North,2022-09,28.0
+Corn,Luzon-Central,2022-09,25.39
+Corn,Luzon-South,2022-09,31.35
+Corn,Visayas,2022-09,29.22
+Corn,Mindanao,2022-09,27.47
+Corn,Luzon-North,2022-10,28.19
+Corn,Luzon-Central,2022-10,24.31
+Corn,Luzon-South,2022-10,27.62
+Corn,Visayas,2022-10,29.05
+Corn,Mindanao,2022-10,24.63
+Corn,Luzon-North,2022-11,24.6
+Corn,Luzon-Central,2022-11,26.03
+Corn,Luzon-South,2022-11,27.12
+Corn,Visayas,2022-11,28.78
+Corn,Mindanao,2022-11,23.79
+Corn,Luzon-North,2022-12,26.09
+Corn,Luzon-Central,2022-12,23.74
+Corn,Luzon-South,2022-12,26.94
+Corn,Visayas,2022-12,28.56
+Corn,Mindanao,2022-12,23.95
+Corn,Luzon-North,2023-01,25.17
+Corn,Luzon-Central,2023-01,23.39
+Corn,Luzon-South,2023-01,27.27
+Corn,Visayas,2023-01,28.3
+Corn,Mindanao,2023-01,23.65
+Corn,Luzon-North,2023-02,24.83
+Corn,Luzon-Central,2023-02,25.47
+Corn,Luzon-South,2023-02,30.48
+Corn,Visayas,2023-02,27.47
+Corn,Mindanao,2023-02,24.42
+Corn,Luzon-North,2023-03,25.58
+Corn,Luzon-Central,2023-03,21.01
+Corn,Luzon-South,2023-03,26.53
+Corn,Visayas,2023-03,26.16
+Corn,Mindanao,2023-03,24.97
+Corn,Luzon-North,2023-04,24.6
+Corn,Luzon-Central,2023-04,22.99
+Corn,Luzon-South,2023-04,25.87
+Corn,Visayas,2023-04,27.13
+Corn,Mindanao,2023-04,22.52
+Corn,Luzon-North,2023-05,25.43
+Corn,Luzon-Central,2023-05,22.82
+Corn,Luzon-South,2023-05,26.47
+Corn,Visayas,2023-05,28.6
+Corn,Mindanao,2023-05,26.04
+Corn,Luzon-North,2023-06,27.54
+Corn,Luzon-Central,2023-06,25.89
+Corn,Luzon-South,2023-06,29.59
+Corn,Visayas,2023-06,30.19
+Corn,Mindanao,2023-06,26.8
+Corn,Luzon-North,2023-07,28.94
+Corn,Luzon-Central,2023-07,26.2
+Corn,Luzon-South,2023-07,29.2
+Corn,Visayas,2023-07,29.91
+Corn,Mindanao,2023-07,25.92
+Corn,Luzon-North,2023-08,29.12
+Corn,Luzon-Central,2023-08,26.6
+Corn,Luzon-South,2023-08,27.09
+Corn,Visayas,2023-08,30.09
+Corn,Mindanao,2023-08,24.1
+Corn,Luzon-North,2023-09,29.53
+Corn,Luzon-Central,2023-09,28.26
+Corn,Luzon-South,2023-09,28.31
+Corn,Visayas,2023-09,32.88
+Corn,Mindanao,2023-09,28.56
+Corn,Luzon-North,2023-10,28.59
+Corn,Luzon-Central,2023-10,29.59
+Corn,Luzon-South,2023-10,32.67
+Corn,Visayas,2023-10,28.87
+Corn,Mindanao,2023-10,27.83
+Corn,Luzon-North,2023-11,27.53
+Corn,Luzon-Central,2023-11,26.4
+Corn,Luzon-South,2023-11,29.61
+Corn,Visayas,2023-11,28.05
+Corn,Mindanao,2023-11,24.31
+Corn,Luzon-North,2023-12,25.38
+Corn,Luzon-Central,2023-12,24.46
+Corn,Luzon-South,2023-12,27.66
+Corn,Visayas,2023-12,26.52
+Corn,Mindanao,2023-12,23.33
+Corn,Luzon-North,2024-01,27.31
+Corn,Luzon-Central,2024-01,25.39
+Corn,Luzon-South,2024-01,28.4
+Corn,Visayas,2024-01,25.96
+Corn,Mindanao,2024-01,23.72
+Corn,Luzon-North,2024-02,25.87
+Corn,Luzon-Central,2024-02,25.59
+Corn,Luzon-South,2024-02,27.12
+Corn,Visayas,2024-02,30.08
+Corn,Mindanao,2024-02,24.68
+Corn,Luzon-North,2024-03,25.9
+Corn,Luzon-Central,2024-03,24.86
+Corn,Luzon-South,2024-03,28.13
+Corn,Visayas,2024-03,27.28
+Corn,Mindanao,2024-03,25.41
+Corn,Luzon-North,2024-04,26.26
+Corn,Luzon-Central,2024-04,24.84
+Corn,Luzon-South,2024-04,27.01
+Corn,Visayas,2024-04,28.45
+Corn,Mindanao,2024-04,25.09
+Corn,Luzon-North,2024-05,27.51
+Corn,Luzon-Central,2024-05,25.69
+Corn,Luzon-South,2024-05,28.79
+Corn,Visayas,2024-05,28.54
+Corn,Mindanao,2024-05,25.96
+Corn,Luzon-North,2024-06,27.38
+Corn,Luzon-Central,2024-06,23.59
+Corn,Luzon-South,2024-06,30.71
+Corn,Visayas,2024-06,29.77
+Corn,Mindanao,2024-06,24.0
+Corn,Luzon-North,2024-07,28.01
+Corn,Luzon-Central,2024-07,25.96
+Corn,Luzon-South,2024-07,32.82
+Corn,Visayas,2024-07,31.31
+Corn,Mindanao,2024-07,24.25
+Corn,Luzon-North,2024-08,30.52
+Corn,Luzon-Central,2024-08,27.95
+Corn,Luzon-South,2024-08,34.19
+Corn,Visayas,2024-08,30.4
+Corn,Mindanao,2024-08,24.53
+Corn,Luzon-North,2024-09,30.43
+Corn,Luzon-Central,2024-09,28.61
+Corn,Luzon-South,2024-09,31.18
+Corn,Visayas,2024-09,29.25
+Corn,Mindanao,2024-09,28.81
+Corn,Luzon-North,2024-10,31.77
+Corn,Luzon-Central,2024-10,25.46
+Corn,Luzon-South,2024-10,32.59
+Corn,Visayas,2024-10,30.76
+Corn,Mindanao,2024-10,30.47
+Corn,Luzon-North,2024-11,28.37
+Corn,Luzon-Central,2024-11,26.4
+Corn,Luzon-South,2024-11,30.76
+Corn,Visayas,2024-11,30.77
+Corn,Mindanao,2024-11,25.05
+Corn,Luzon-North,2024-12,28.25
+Corn,Luzon-Central,2024-12,25.52
+Corn,Luzon-South,2024-12,26.09
+Corn,Visayas,2024-12,32.46
+Corn,Mindanao,2024-12,24.93
+Corn,Luzon-North,2025-01,26.52
+Corn,Luzon-Central,2025-01,26.7
+Corn,Luzon-South,2025-01,26.48
+Corn,Visayas,2025-01,27.54
+Corn,Mindanao,2025-01,24.8
+Corn,Luzon-North,2025-02,26.71
+Corn,Luzon-Central,2025-02,26.42
+Corn,Luzon-South,2025-02,30.41
+Corn,Visayas,2025-02,28.91
+Corn,Mindanao,2025-02,26.13
+Corn,Luzon-North,2025-03,27.46
+Corn,Luzon-Central,2025-03,24.21
+Corn,Luzon-South,2025-03,28.31
+Corn,Visayas,2025-03,27.44
+Corn,Mindanao,2025-03,26.11
+Corn,Luzon-North,2025-04,27.05
+Corn,Luzon-Central,2025-04,25.42
+Corn,Luzon-South,2025-04,25.91
+Corn,Visayas,2025-04,28.73
+Corn,Mindanao,2025-04,23.66
+Corn,Luzon-North,2025-05,28.03
+Corn,Luzon-Central,2025-05,25.83
+Corn,Luzon-South,2025-05,27.27
+Corn,Visayas,2025-05,30.59
+Corn,Mindanao,2025-05,26.08
+Corn,Luzon-North,2025-06,27.41
+Corn,Luzon-Central,2025-06,28.69
+Corn,Luzon-South,2025-06,29.22
+Corn,Visayas,2025-06,30.04
+Corn,Mindanao,2025-06,26.43
+Corn,Luzon-North,2025-07,28.05
+Corn,Luzon-Central,2025-07,27.37
+Corn,Luzon-South,2025-07,30.36
+Corn,Visayas,2025-07,33.89
+Corn,Mindanao,2025-07,29.14
+Corn,Luzon-North,2025-08,30.22
+Corn,Luzon-Central,2025-08,31.76
+Corn,Luzon-South,2025-08,32.08
+Corn,Visayas,2025-08,33.69
+Corn,Mindanao,2025-08,29.73
+Corn,Luzon-North,2025-09,31.71
+Corn,Luzon-Central,2025-09,33.62
+Corn,Luzon-South,2025-09,33.21
+Corn,Visayas,2025-09,31.73
+Corn,Mindanao,2025-09,30.96
+Corn,Luzon-North,2025-10,29.59
+Corn,Luzon-Central,2025-10,28.56
+Corn,Luzon-South,2025-10,26.98
+Corn,Visayas,2025-10,34.26
+Corn,Mindanao,2025-10,29.24
+Corn,Luzon-North,2025-11,29.75
+Corn,Luzon-Central,2025-11,28.8
+Corn,Luzon-South,2025-11,32.57
+Corn,Visayas,2025-11,30.82
+Corn,Mindanao,2025-11,27.85
+Corn,Luzon-North,2025-12,27.07
+Corn,Luzon-Central,2025-12,26.51
+Corn,Luzon-South,2025-12,31.08
+Corn,Visayas,2025-12,30.95
+Corn,Mindanao,2025-12,24.4
+Corn,Luzon-North,2026-01,28.69
+Corn,Luzon-Central,2026-01,26.81
+Corn,Luzon-South,2026-01,28.38
+Corn,Visayas,2026-01,31.1
+Corn,Mindanao,2026-01,25.68
+Corn,Luzon-North,2026-02,26.04
+Corn,Luzon-Central,2026-02,25.62
+Corn,Luzon-South,2026-02,32.29
+Corn,Visayas,2026-02,28.2
+Corn,Mindanao,2026-02,26.57
+Corn,Luzon-North,2026-03,28.31
+Corn,Luzon-Central,2026-03,27.21
+Corn,Luzon-South,2026-03,27.08
+Corn,Visayas,2026-03,29.19
+Corn,Mindanao,2026-03,25.73
+Corn,Luzon-North,2026-04,28.35
+Corn,Luzon-Central,2026-04,25.32
+Corn,Luzon-South,2026-04,26.95
+Corn,Visayas,2026-04,30.91
+Corn,Mindanao,2026-04,26.75
+Rice,Luzon-North,2022-01,48.48
+Rice,Luzon-Central,2022-01,48.98
+Rice,Luzon-South,2022-01,52.79
+Rice,Visayas,2022-01,56.26
+Rice,Mindanao,2022-01,43.6
+Rice,Luzon-North,2022-02,50.52
+Rice,Luzon-Central,2022-02,47.83
+Rice,Luzon-South,2022-02,49.81
+Rice,Visayas,2022-02,54.83
+Rice,Mindanao,2022-02,46.79
+Rice,Luzon-North,2022-03,47.92
+Rice,Luzon-Central,2022-03,47.89
+Rice,Luzon-South,2022-03,47.72
+Rice,Visayas,2022-03,52.69
+Rice,Mindanao,2022-03,46.48
+Rice,Luzon-North,2022-04,49.33
+Rice,Luzon-Central,2022-04,49.2
+Rice,Luzon-South,2022-04,48.0
+Rice,Visayas,2022-04,48.57
+Rice,Mindanao,2022-04,45.77
+Rice,Luzon-North,2022-05,51.0
+Rice,Luzon-Central,2022-05,52.95
+Rice,Luzon-South,2022-05,53.97
+Rice,Visayas,2022-05,51.5
+Rice,Mindanao,2022-05,48.25
+Rice,Luzon-North,2022-06,49.93
+Rice,Luzon-Central,2022-06,46.33
+Rice,Luzon-South,2022-06,61.89
+Rice,Visayas,2022-06,57.23
+Rice,Mindanao,2022-06,50.22
+Rice,Luzon-North,2022-07,55.43
+Rice,Luzon-Central,2022-07,56.44
+Rice,Luzon-South,2022-07,57.41
+Rice,Visayas,2022-07,61.76
+Rice,Mindanao,2022-07,47.56
+Rice,Luzon-North,2022-08,52.78
+Rice,Luzon-Central,2022-08,58.35
+Rice,Luzon-South,2022-08,63.96
+Rice,Visayas,2022-08,62.83
+Rice,Mindanao,2022-08,53.36
+Rice,Luzon-North,2022-09,58.51
+Rice,Luzon-Central,2022-09,53.79
+Rice,Luzon-South,2022-09,65.61
+Rice,Visayas,2022-09,64.73
+Rice,Mindanao,2022-09,55.33
+Rice,Luzon-North,2022-10,57.26
+Rice,Luzon-Central,2022-10,56.78
+Rice,Luzon-South,2022-10,60.5
+Rice,Visayas,2022-10,62.96
+Rice,Mindanao,2022-10,49.21
+Rice,Luzon-North,2022-11,54.68
+Rice,Luzon-Central,2022-11,56.78
+Rice,Luzon-South,2022-11,54.53
+Rice,Visayas,2022-11,57.21
+Rice,Mindanao,2022-11,51.8
+Rice,Luzon-North,2022-12,55.01
+Rice,Luzon-Central,2022-12,51.98
+Rice,Luzon-South,2022-12,50.67
+Rice,Visayas,2022-12,58.12
+Rice,Mindanao,2022-12,45.94
+Rice,Luzon-North,2023-01,50.57
+Rice,Luzon-Central,2023-01,52.02
+Rice,Luzon-South,2023-01,54.56
+Rice,Visayas,2023-01,59.27
+Rice,Mindanao,2023-01,56.77
+Rice,Luzon-North,2023-02,55.04
+Rice,Luzon-Central,2023-02,52.7
+Rice,Luzon-South,2023-02,53.14
+Rice,Visayas,2023-02,55.38
+Rice,Mindanao,2023-02,46.65
+Rice,Luzon-North,2023-03,50.23
+Rice,Luzon-Central,2023-03,46.83
+Rice,Luzon-South,2023-03,52.39
+Rice,Visayas,2023-03,55.15
+Rice,Mindanao,2023-03,45.59
+Rice,Luzon-North,2023-04,47.66
+Rice,Luzon-Central,2023-04,45.9
+Rice,Luzon-South,2023-04,55.09
+Rice,Visayas,2023-04,55.57
+Rice,Mindanao,2023-04,50.16
+Rice,Luzon-North,2023-05,55.35
+Rice,Luzon-Central,2023-05,49.64
+Rice,Luzon-South,2023-05,57.08
+Rice,Visayas,2023-05,52.72
+Rice,Mindanao,2023-05,54.5
+Rice,Luzon-North,2023-06,58.28
+Rice,Luzon-Central,2023-06,52.23
+Rice,Luzon-South,2023-06,54.39
+Rice,Visayas,2023-06,60.52
+Rice,Mindanao,2023-06,46.36
+Rice,Luzon-North,2023-07,54.65
+Rice,Luzon-Central,2023-07,56.63
+Rice,Luzon-South,2023-07,59.93
+Rice,Visayas,2023-07,59.9
+Rice,Mindanao,2023-07,55.4
+Rice,Luzon-North,2023-08,56.73
+Rice,Luzon-Central,2023-08,58.26
+Rice,Luzon-South,2023-08,61.27
+Rice,Visayas,2023-08,61.89
+Rice,Mindanao,2023-08,56.94
+Rice,Luzon-North,2023-09,58.17
+Rice,Luzon-Central,2023-09,64.34
+Rice,Luzon-South,2023-09,62.39
+Rice,Visayas,2023-09,72.68
+Rice,Mindanao,2023-09,53.81
+Rice,Luzon-North,2023-10,61.07
+Rice,Luzon-Central,2023-10,53.49
+Rice,Luzon-South,2023-10,58.07
+Rice,Visayas,2023-10,64.53
+Rice,Mindanao,2023-10,57.0
+Rice,Luzon-North,2023-11,52.66
+Rice,Luzon-Central,2023-11,57.19
+Rice,Luzon-South,2023-11,56.7
+Rice,Visayas,2023-11,61.14
+Rice,Mindanao,2023-11,53.3
+Rice,Luzon-North,2023-12,57.03
+Rice,Luzon-Central,2023-12,48.38
+Rice,Luzon-South,2023-12,62.85
+Rice,Visayas,2023-12,61.49
+Rice,Mindanao,2023-12,50.41
+Rice,Luzon-North,2024-01,52.78
+Rice,Luzon-Central,2024-01,48.88
+Rice,Luzon-South,2024-01,54.44
+Rice,Visayas,2024-01,61.72
+Rice,Mindanao,2024-01,50.85
+Rice,Luzon-North,2024-02,52.72
+Rice,Luzon-Central,2024-02,52.23
+Rice,Luzon-South,2024-02,63.27
+Rice,Visayas,2024-02,59.36
+Rice,Mindanao,2024-02,50.45
+Rice,Luzon-North,2024-03,58.11
+Rice,Luzon-Central,2024-03,53.47
+Rice,Luzon-South,2024-03,57.29
+Rice,Visayas,2024-03,57.01
+Rice,Mindanao,2024-03,46.7
+Rice,Luzon-North,2024-04,50.95
+Rice,Luzon-Central,2024-04,50.71
+Rice,Luzon-South,2024-04,56.2
+Rice,Visayas,2024-04,59.49
+Rice,Mindanao,2024-04,51.72
+Rice,Luzon-North,2024-05,56.11
+Rice,Luzon-Central,2024-05,53.86
+Rice,Luzon-South,2024-05,55.33
+Rice,Visayas,2024-05,53.47
+Rice,Mindanao,2024-05,50.26
+Rice,Luzon-North,2024-06,55.25
+Rice,Luzon-Central,2024-06,53.88
+Rice,Luzon-South,2024-06,60.08
+Rice,Visayas,2024-06,58.76
+Rice,Mindanao,2024-06,50.96
+Rice,Luzon-North,2024-07,59.69
+Rice,Luzon-Central,2024-07,57.92
+Rice,Luzon-South,2024-07,60.92
+Rice,Visayas,2024-07,66.4
+Rice,Mindanao,2024-07,55.18
+Rice,Luzon-North,2024-08,59.91
+Rice,Luzon-Central,2024-08,60.73
+Rice,Luzon-South,2024-08,72.52
+Rice,Visayas,2024-08,65.88
+Rice,Mindanao,2024-08,62.13
+Rice,Luzon-North,2024-09,69.02
+Rice,Luzon-Central,2024-09,66.63
+Rice,Luzon-South,2024-09,65.01
+Rice,Visayas,2024-09,76.76
+Rice,Mindanao,2024-09,60.4
+Rice,Luzon-North,2024-10,61.74
+Rice,Luzon-Central,2024-10,59.34
+Rice,Luzon-South,2024-10,67.64
+Rice,Visayas,2024-10,67.71
+Rice,Mindanao,2024-10,57.64
+Rice,Luzon-North,2024-11,63.14
+Rice,Luzon-Central,2024-11,54.9
+Rice,Luzon-South,2024-11,59.05
+Rice,Visayas,2024-11,66.62
+Rice,Mindanao,2024-11,57.12
+Rice,Luzon-North,2024-12,61.62
+Rice,Luzon-Central,2024-12,53.08
+Rice,Luzon-South,2024-12,64.66
+Rice,Visayas,2024-12,64.62
+Rice,Mindanao,2024-12,59.12
+Rice,Luzon-North,2025-01,55.02
+Rice,Luzon-Central,2025-01,56.96
+Rice,Luzon-South,2025-01,60.77
+Rice,Visayas,2025-01,58.34
+Rice,Mindanao,2025-01,52.63
+Rice,Luzon-North,2025-02,62.28
+Rice,Luzon-Central,2025-02,55.27
+Rice,Luzon-South,2025-02,59.67
+Rice,Visayas,2025-02,66.43
+Rice,Mindanao,2025-02,57.54
+Rice,Luzon-North,2025-03,60.25
+Rice,Luzon-Central,2025-03,52.95
+Rice,Luzon-South,2025-03,60.12
+Rice,Visayas,2025-03,65.21
+Rice,Mindanao,2025-03,51.65
+Rice,Luzon-North,2025-04,54.95
+Rice,Luzon-Central,2025-04,57.07
+Rice,Luzon-South,2025-04,64.62
+Rice,Visayas,2025-04,58.1
+Rice,Mindanao,2025-04,46.2
+Rice,Luzon-North,2025-05,54.29
+Rice,Luzon-Central,2025-05,53.35
+Rice,Luzon-South,2025-05,61.04
+Rice,Visayas,2025-05,65.16
+Rice,Mindanao,2025-05,54.04
+Rice,Luzon-North,2025-06,59.05
+Rice,Luzon-Central,2025-06,59.2
+Rice,Luzon-South,2025-06,61.17
+Rice,Visayas,2025-06,65.94
+Rice,Mindanao,2025-06,55.09
+Rice,Luzon-North,2025-07,71.75
+Rice,Luzon-Central,2025-07,63.22
+Rice,Luzon-South,2025-07,63.66
+Rice,Visayas,2025-07,64.93
+Rice,Mindanao,2025-07,57.56
+Rice,Luzon-North,2025-08,61.11
+Rice,Luzon-Central,2025-08,61.59
+Rice,Luzon-South,2025-08,67.34
+Rice,Visayas,2025-08,75.09
+Rice,Mindanao,2025-08,60.61
+Rice,Luzon-North,2025-09,65.41
+Rice,Luzon-Central,2025-09,61.0
+Rice,Luzon-South,2025-09,67.31
+Rice,Visayas,2025-09,73.31
+Rice,Mindanao,2025-09,62.66
+Rice,Luzon-North,2025-10,69.7
+Rice,Luzon-Central,2025-10,61.33
+Rice,Luzon-South,2025-10,72.93
+Rice,Visayas,2025-10,72.16
+Rice,Mindanao,2025-10,61.33
+Rice,Luzon-North,2025-11,56.3
+Rice,Luzon-Central,2025-11,56.2
+Rice,Luzon-South,2025-11,68.15
+Rice,Visayas,2025-11,72.31
+Rice,Mindanao,2025-11,58.8
+Rice,Luzon-North,2025-12,63.97
+Rice,Luzon-Central,2025-12,57.95
+Rice,Luzon-South,2025-12,63.5
+Rice,Visayas,2025-12,64.35
+Rice,Mindanao,2025-12,60.1
+Rice,Luzon-North,2026-01,62.97
+Rice,Luzon-Central,2026-01,58.73
+Rice,Luzon-South,2026-01,63.93
+Rice,Visayas,2026-01,68.72
+Rice,Mindanao,2026-01,58.5
+Rice,Luzon-North,2026-02,59.6
+Rice,Luzon-Central,2026-02,64.82
+Rice,Luzon-South,2026-02,66.13
+Rice,Visayas,2026-02,67.2
+Rice,Mindanao,2026-02,62.1
+Rice,Luzon-North,2026-03,63.67
+Rice,Luzon-Central,2026-03,57.89
+Rice,Luzon-South,2026-03,65.3
+Rice,Visayas,2026-03,61.91
+Rice,Mindanao,2026-03,54.52
+Rice,Luzon-North,2026-04,53.41
+Rice,Luzon-Central,2026-04,61.33
+Rice,Luzon-South,2026-04,57.22
+Rice,Visayas,2026-04,67.25
+Rice,Mindanao,2026-04,53.67
+Squash,Luzon-North,2022-01,31.69
+Squash,Luzon-Central,2022-01,31.13
+Squash,Luzon-South,2022-01,34.63
+Squash,Visayas,2022-01,37.62
+Squash,Mindanao,2022-01,30.29
+Squash,Luzon-North,2022-02,33.41
+Squash,Luzon-Central,2022-02,29.8
+Squash,Luzon-South,2022-02,34.8
+Squash,Visayas,2022-02,34.83
+Squash,Mindanao,2022-02,29.07
+Squash,Luzon-North,2022-03,30.9
+Squash,Luzon-Central,2022-03,29.71
+Squash,Luzon-South,2022-03,32.91
+Squash,Visayas,2022-03,34.2
+Squash,Mindanao,2022-03,28.14
+Squash,Luzon-North,2022-04,29.59
+Squash,Luzon-Central,2022-04,30.6
+Squash,Luzon-South,2022-04,29.53
+Squash,Visayas,2022-04,32.16
+Squash,Mindanao,2022-04,30.79
+Squash,Luzon-North,2022-05,27.12
+Squash,Luzon-Central,2022-05,29.07
+Squash,Luzon-South,2022-05,34.07
+Squash,Visayas,2022-05,31.08
+Squash,Mindanao,2022-05,32.96
+Squash,Luzon-North,2022-06,28.43
+Squash,Luzon-Central,2022-06,33.6
+Squash,Luzon-South,2022-06,36.95
+Squash,Visayas,2022-06,36.88
+Squash,Mindanao,2022-06,30.03
+Squash,Luzon-North,2022-07,34.21
+Squash,Luzon-Central,2022-07,30.82
+Squash,Luzon-South,2022-07,36.72
+Squash,Visayas,2022-07,34.27
+Squash,Mindanao,2022-07,30.83
+Squash,Luzon-North,2022-08,36.97
+Squash,Luzon-Central,2022-08,31.92
+Squash,Luzon-South,2022-08,36.3
+Squash,Visayas,2022-08,38.35
+Squash,Mindanao,2022-08,30.55
+Squash,Luzon-North,2022-09,37.95
+Squash,Luzon-Central,2022-09,35.01
+Squash,Luzon-South,2022-09,34.8
+Squash,Visayas,2022-09,38.64
+Squash,Mindanao,2022-09,32.06
+Squash,Luzon-North,2022-10,33.44
+Squash,Luzon-Central,2022-10,33.33
+Squash,Luzon-South,2022-10,35.02
+Squash,Visayas,2022-10,39.15
+Squash,Mindanao,2022-10,31.03
+Squash,Luzon-North,2022-11,34.27
+Squash,Luzon-Central,2022-11,31.29
+Squash,Luzon-South,2022-11,35.76
+Squash,Visayas,2022-11,34.32
+Squash,Mindanao,2022-11,29.61
+Squash,Luzon-North,2022-12,30.18
+Squash,Luzon-Central,2022-12,31.63
+Squash,Luzon-South,2022-12,35.2
+Squash,Visayas,2022-12,38.25
+Squash,Mindanao,2022-12,31.7
+Squash,Luzon-North,2023-01,32.43
+Squash,Luzon-Central,2023-01,30.42
+Squash,Luzon-South,2023-01,34.28
+Squash,Visayas,2023-01,34.54
+Squash,Mindanao,2023-01,31.96
+Squash,Luzon-North,2023-02,33.54
+Squash,Luzon-Central,2023-02,29.46
+Squash,Luzon-South,2023-02,32.47
+Squash,Visayas,2023-02,36.96
+Squash,Mindanao,2023-02,30.25
+Squash,Luzon-North,2023-03,30.71
+Squash,Luzon-Central,2023-03,31.6
+Squash,Luzon-South,2023-03,31.99
+Squash,Visayas,2023-03,33.09
+Squash,Mindanao,2023-03,28.23
+Squash,Luzon-North,2023-04,27.74
+Squash,Luzon-Central,2023-04,30.8
+Squash,Luzon-South,2023-04,30.34
+Squash,Visayas,2023-04,32.27
+Squash,Mindanao,2023-04,27.54
+Squash,Luzon-North,2023-05,32.54
+Squash,Luzon-Central,2023-05,30.04
+Squash,Luzon-South,2023-05,32.99
+Squash,Visayas,2023-05,31.06
+Squash,Mindanao,2023-05,29.07
+Squash,Luzon-North,2023-06,30.27
+Squash,Luzon-Central,2023-06,31.85
+Squash,Luzon-South,2023-06,34.94
+Squash,Visayas,2023-06,35.26
+Squash,Mindanao,2023-06,33.5
+Squash,Luzon-North,2023-07,34.53
+Squash,Luzon-Central,2023-07,33.26
+Squash,Luzon-South,2023-07,35.58
+Squash,Visayas,2023-07,35.98
+Squash,Mindanao,2023-07,32.8
+Squash,Luzon-North,2023-08,37.19
+Squash,Luzon-Central,2023-08,31.64
+Squash,Luzon-South,2023-08,38.96
+Squash,Visayas,2023-08,39.04
+Squash,Mindanao,2023-08,34.35
+Squash,Luzon-North,2023-09,36.73
+Squash,Luzon-Central,2023-09,32.31
+Squash,Luzon-South,2023-09,35.47
+Squash,Visayas,2023-09,42.3
+Squash,Mindanao,2023-09,33.8
+Squash,Luzon-North,2023-10,32.16
+Squash,Luzon-Central,2023-10,33.8
+Squash,Luzon-South,2023-10,35.68
+Squash,Visayas,2023-10,33.93
+Squash,Mindanao,2023-10,28.5
+Squash,Luzon-North,2023-11,30.07
+Squash,Luzon-Central,2023-11,31.81
+Squash,Luzon-South,2023-11,34.24
+Squash,Visayas,2023-11,34.87
+Squash,Mindanao,2023-11,30.83
+Squash,Luzon-North,2023-12,33.01
+Squash,Luzon-Central,2023-12,27.53
+Squash,Luzon-South,2023-12,33.15
+Squash,Visayas,2023-12,33.18
+Squash,Mindanao,2023-12,27.97
+Squash,Luzon-North,2024-01,31.18
+Squash,Luzon-Central,2024-01,30.58
+Squash,Luzon-South,2024-01,33.21
+Squash,Visayas,2024-01,32.1
+Squash,Mindanao,2024-01,29.09
+Squash,Luzon-North,2024-02,35.29
+Squash,Luzon-Central,2024-02,29.15
+Squash,Luzon-South,2024-02,30.82
+Squash,Visayas,2024-02,35.1
+Squash,Mindanao,2024-02,30.7
+Squash,Luzon-North,2024-03,31.82
+Squash,Luzon-Central,2024-03,28.18
+Squash,Luzon-South,2024-03,34.28
+Squash,Visayas,2024-03,32.27
+Squash,Mindanao,2024-03,27.28
+Squash,Luzon-North,2024-04,29.84
+Squash,Luzon-Central,2024-04,29.39
+Squash,Luzon-South,2024-04,33.47
+Squash,Visayas,2024-04,34.28
+Squash,Mindanao,2024-04,28.59
+Squash,Luzon-North,2024-05,32.89
+Squash,Luzon-Central,2024-05,30.29
+Squash,Luzon-South,2024-05,34.47
+Squash,Visayas,2024-05,31.55
+Squash,Mindanao,2024-05,26.92
+Squash,Luzon-North,2024-06,33.97
+Squash,Luzon-Central,2024-06,29.22
+Squash,Luzon-South,2024-06,33.82
+Squash,Visayas,2024-06,35.15
+Squash,Mindanao,2024-06,29.67
+Squash,Luzon-North,2024-07,32.91
+Squash,Luzon-Central,2024-07,34.57
+Squash,Luzon-South,2024-07,30.88
+Squash,Visayas,2024-07,37.97
+Squash,Mindanao,2024-07,34.91
+Squash,Luzon-North,2024-08,35.32
+Squash,Luzon-Central,2024-08,33.83
+Squash,Luzon-South,2024-08,38.39
+Squash,Visayas,2024-08,41.58
+Squash,Mindanao,2024-08,30.86
+Squash,Luzon-North,2024-09,36.08
+Squash,Luzon-Central,2024-09,34.16
+Squash,Luzon-South,2024-09,38.77
+Squash,Visayas,2024-09,39.1
+Squash,Mindanao,2024-09,34.51
+Squash,Luzon-North,2024-10,33.91
+Squash,Luzon-Central,2024-10,33.34
+Squash,Luzon-South,2024-10,35.15
+Squash,Visayas,2024-10,36.17
+Squash,Mindanao,2024-10,31.99
+Squash,Luzon-North,2024-11,32.49
+Squash,Luzon-Central,2024-11,29.57
+Squash,Luzon-South,2024-11,37.05
+Squash,Visayas,2024-11,35.1
+Squash,Mindanao,2024-11,28.32
+Squash,Luzon-North,2024-12,33.85
+Squash,Luzon-Central,2024-12,29.64
+Squash,Luzon-South,2024-12,34.54
+Squash,Visayas,2024-12,34.62
+Squash,Mindanao,2024-12,30.21
+Squash,Luzon-North,2025-01,32.36
+Squash,Luzon-Central,2025-01,29.91
+Squash,Luzon-South,2025-01,33.75
+Squash,Visayas,2025-01,38.17
+Squash,Mindanao,2025-01,26.5
+Squash,Luzon-North,2025-02,32.19
+Squash,Luzon-Central,2025-02,31.47
+Squash,Luzon-South,2025-02,31.91
+Squash,Visayas,2025-02,32.28
+Squash,Mindanao,2025-02,33.06
+Squash,Luzon-North,2025-03,30.54
+Squash,Luzon-Central,2025-03,32.98
+Squash,Luzon-South,2025-03,33.55
+Squash,Visayas,2025-03,33.74
+Squash,Mindanao,2025-03,29.63
+Squash,Luzon-North,2025-04,31.78
+Squash,Luzon-Central,2025-04,31.32
+Squash,Luzon-South,2025-04,33.05
+Squash,Visayas,2025-04,33.51
+Squash,Mindanao,2025-04,28.9
+Squash,Luzon-North,2025-05,33.57
+Squash,Luzon-Central,2025-05,31.42
+Squash,Luzon-South,2025-05,31.37
+Squash,Visayas,2025-05,32.88
+Squash,Mindanao,2025-05,29.73
+Squash,Luzon-North,2025-06,31.71
+Squash,Luzon-Central,2025-06,30.83
+Squash,Luzon-South,2025-06,32.73
+Squash,Visayas,2025-06,34.89
+Squash,Mindanao,2025-06,31.09
+Squash,Luzon-North,2025-07,35.38
+Squash,Luzon-Central,2025-07,32.37
+Squash,Luzon-South,2025-07,39.05
+Squash,Visayas,2025-07,36.26
+Squash,Mindanao,2025-07,36.34
+Squash,Luzon-North,2025-08,37.07
+Squash,Luzon-Central,2025-08,34.74
+Squash,Luzon-South,2025-08,36.15
+Squash,Visayas,2025-08,32.75
+Squash,Mindanao,2025-08,32.58
+Squash,Luzon-North,2025-09,36.27
+Squash,Luzon-Central,2025-09,37.83
+Squash,Luzon-South,2025-09,35.14
+Squash,Visayas,2025-09,42.53
+Squash,Mindanao,2025-09,33.01
+Squash,Luzon-North,2025-10,35.92
+Squash,Luzon-Central,2025-10,29.06
+Squash,Luzon-South,2025-10,36.66
+Squash,Visayas,2025-10,36.8
+Squash,Mindanao,2025-10,33.34
+Squash,Luzon-North,2025-11,32.89
+Squash,Luzon-Central,2025-11,29.64
+Squash,Luzon-South,2025-11,36.01
+Squash,Visayas,2025-11,36.59
+Squash,Mindanao,2025-11,31.36
+Squash,Luzon-North,2025-12,33.73
+Squash,Luzon-Central,2025-12,32.52
+Squash,Luzon-South,2025-12,33.67
+Squash,Visayas,2025-12,32.32
+Squash,Mindanao,2025-12,27.79
+Squash,Luzon-North,2026-01,34.27
+Squash,Luzon-Central,2026-01,31.92
+Squash,Luzon-South,2026-01,33.89
+Squash,Visayas,2026-01,33.92
+Squash,Mindanao,2026-01,29.91
+Squash,Luzon-North,2026-02,32.15
+Squash,Luzon-Central,2026-02,30.31
+Squash,Luzon-South,2026-02,32.54
+Squash,Visayas,2026-02,38.43
+Squash,Mindanao,2026-02,30.2
+Squash,Luzon-North,2026-03,30.21
+Squash,Luzon-Central,2026-03,27.96
+Squash,Luzon-South,2026-03,31.52
+Squash,Visayas,2026-03,34.85
+Squash,Mindanao,2026-03,30.07
+Squash,Luzon-North,2026-04,30.49
+Squash,Luzon-Central,2026-04,29.67
+Squash,Luzon-South,2026-04,31.88
+Squash,Visayas,2026-04,31.45
+Squash,Mindanao,2026-04,30.54
+Okra,Luzon-North,2022-01,56.19
+Okra,Luzon-Central,2022-01,46.19
+Okra,Luzon-South,2022-01,52.14
+Okra,Visayas,2022-01,56.38
+Okra,Mindanao,2022-01,45.93
+Okra,Luzon-North,2022-02,46.74
+Okra,Luzon-Central,2022-02,45.93
+Okra,Luzon-South,2022-02,53.0
+Okra,Visayas,2022-02,55.18
+Okra,Mindanao,2022-02,46.49
+Okra,Luzon-North,2022-03,51.38
+Okra,Luzon-Central,2022-03,49.3
+Okra,Luzon-South,2022-03,52.2
+Okra,Visayas,2022-03,52.91
+Okra,Mindanao,2022-03,44.92
+Okra,Luzon-North,2022-04,49.98
+Okra,Luzon-Central,2022-04,48.84
+Okra,Luzon-South,2022-04,51.22
+Okra,Visayas,2022-04,53.71
+Okra,Mindanao,2022-04,44.5
+Okra,Luzon-North,2022-05,46.35
+Okra,Luzon-Central,2022-05,45.48
+Okra,Luzon-South,2022-05,54.37
+Okra,Visayas,2022-05,55.06
+Okra,Mindanao,2022-05,50.07
+Okra,Luzon-North,2022-06,52.29
+Okra,Luzon-Central,2022-06,52.22
+Okra,Luzon-South,2022-06,58.37
+Okra,Visayas,2022-06,59.11
+Okra,Mindanao,2022-06,47.02
+Okra,Luzon-North,2022-07,53.41
+Okra,Luzon-Central,2022-07,52.09
+Okra,Luzon-South,2022-07,53.82
+Okra,Visayas,2022-07,59.6
+Okra,Mindanao,2022-07,52.7
+Okra,Luzon-North,2022-08,55.37
+Okra,Luzon-Central,2022-08,59.84
+Okra,Luzon-South,2022-08,58.71
+Okra,Visayas,2022-08,60.65
+Okra,Mindanao,2022-08,52.13
+Okra,Luzon-North,2022-09,55.97
+Okra,Luzon-Central,2022-09,56.87
+Okra,Luzon-South,2022-09,60.99
+Okra,Visayas,2022-09,67.88
+Okra,Mindanao,2022-09,55.61
+Okra,Luzon-North,2022-10,57.71
+Okra,Luzon-Central,2022-10,53.36
+Okra,Luzon-South,2022-10,54.84
+Okra,Visayas,2022-10,60.43
+Okra,Mindanao,2022-10,50.05
+Okra,Luzon-North,2022-11,55.86
+Okra,Luzon-Central,2022-11,51.11
+Okra,Luzon-South,2022-11,60.65
+Okra,Visayas,2022-11,59.7
+Okra,Mindanao,2022-11,51.66
+Okra,Luzon-North,2022-12,53.11
+Okra,Luzon-Central,2022-12,50.93
+Okra,Luzon-South,2022-12,56.93
+Okra,Visayas,2022-12,59.32
+Okra,Mindanao,2022-12,47.1
+Okra,Luzon-North,2023-01,54.04
+Okra,Luzon-Central,2023-01,57.27
+Okra,Luzon-South,2023-01,55.13
+Okra,Visayas,2023-01,56.24
+Okra,Mindanao,2023-01,47.35
+Okra,Luzon-North,2023-02,49.15
+Okra,Luzon-Central,2023-02,53.89
+Okra,Luzon-South,2023-02,55.8
+Okra,Visayas,2023-02,58.08
+Okra,Mindanao,2023-02,53.82
+Okra,Luzon-North,2023-03,58.08
+Okra,Luzon-Central,2023-03,47.34
+Okra,Luzon-South,2023-03,57.04
+Okra,Visayas,2023-03,57.47
+Okra,Mindanao,2023-03,48.95
+Okra,Luzon-North,2023-04,52.54
+Okra,Luzon-Central,2023-04,49.2
+Okra,Luzon-South,2023-04,58.16
+Okra,Visayas,2023-04,57.12
+Okra,Mindanao,2023-04,48.54
+Okra,Luzon-North,2023-05,55.89
+Okra,Luzon-Central,2023-05,52.77
+Okra,Luzon-South,2023-05,56.52
+Okra,Visayas,2023-05,57.75
+Okra,Mindanao,2023-05,53.23
+Okra,Luzon-North,2023-06,56.41
+Okra,Luzon-Central,2023-06,52.57
+Okra,Luzon-South,2023-06,55.29
+Okra,Visayas,2023-06,58.39
+Okra,Mindanao,2023-06,48.48
+Okra,Luzon-North,2023-07,57.18
+Okra,Luzon-Central,2023-07,55.3
+Okra,Luzon-South,2023-07,53.6
+Okra,Visayas,2023-07,61.48
+Okra,Mindanao,2023-07,54.61
+Okra,Luzon-North,2023-08,60.36
+Okra,Luzon-Central,2023-08,54.72
+Okra,Luzon-South,2023-08,66.84
+Okra,Visayas,2023-08,62.4
+Okra,Mindanao,2023-08,52.25
+Okra,Luzon-North,2023-09,57.91
+Okra,Luzon-Central,2023-09,58.73
+Okra,Luzon-South,2023-09,67.44
+Okra,Visayas,2023-09,69.97
+Okra,Mindanao,2023-09,57.53
+Okra,Luzon-North,2023-10,55.76
+Okra,Luzon-Central,2023-10,55.05
+Okra,Luzon-South,2023-10,59.46
+Okra,Visayas,2023-10,63.47
+Okra,Mindanao,2023-10,50.25
+Okra,Luzon-North,2023-11,56.57
+Okra,Luzon-Central,2023-11,55.75
+Okra,Luzon-South,2023-11,58.63
+Okra,Visayas,2023-11,62.15
+Okra,Mindanao,2023-11,49.86
+Okra,Luzon-North,2023-12,51.36
+Okra,Luzon-Central,2023-12,51.48
+Okra,Luzon-South,2023-12,61.53
+Okra,Visayas,2023-12,62.9
+Okra,Mindanao,2023-12,50.34
+Okra,Luzon-North,2024-01,58.99
+Okra,Luzon-Central,2024-01,52.55
+Okra,Luzon-South,2024-01,62.84
+Okra,Visayas,2024-01,61.54
+Okra,Mindanao,2024-01,50.58
+Okra,Luzon-North,2024-02,58.12
+Okra,Luzon-Central,2024-02,51.58
+Okra,Luzon-South,2024-02,55.94
+Okra,Visayas,2024-02,55.99
+Okra,Mindanao,2024-02,52.65
+Okra,Luzon-North,2024-03,54.3
+Okra,Luzon-Central,2024-03,52.07
+Okra,Luzon-South,2024-03,56.0
+Okra,Visayas,2024-03,63.03
+Okra,Mindanao,2024-03,49.56
+Okra,Luzon-North,2024-04,52.17
+Okra,Luzon-Central,2024-04,55.2
+Okra,Luzon-South,2024-04,60.88
+Okra,Visayas,2024-04,59.45
+Okra,Mindanao,2024-04,45.96
+Okra,Luzon-North,2024-05,53.84
+Okra,Luzon-Central,2024-05,54.92
+Okra,Luzon-South,2024-05,58.33
+Okra,Visayas,2024-05,64.6
+Okra,Mindanao,2024-05,48.09
+Okra,Luzon-North,2024-06,60.0
+Okra,Luzon-Central,2024-06,53.96
+Okra,Luzon-South,2024-06,64.96
+Okra,Visayas,2024-06,62.44
+Okra,Mindanao,2024-06,56.75
+Okra,Luzon-North,2024-07,58.06
+Okra,Luzon-Central,2024-07,53.54
+Okra,Luzon-South,2024-07,59.5
+Okra,Visayas,2024-07,62.84
+Okra,Mindanao,2024-07,52.94
+Okra,Luzon-North,2024-08,66.93
+Okra,Luzon-Central,2024-08,64.68
+Okra,Luzon-South,2024-08,67.21
+Okra,Visayas,2024-08,64.67
+Okra,Mindanao,2024-08,58.38
+Okra,Luzon-North,2024-09,62.37
+Okra,Luzon-Central,2024-09,66.51
+Okra,Luzon-South,2024-09,68.89
+Okra,Visayas,2024-09,71.46
+Okra,Mindanao,2024-09,58.86
+Okra,Luzon-North,2024-10,56.26
+Okra,Luzon-Central,2024-10,57.74
+Okra,Luzon-South,2024-10,62.01
+Okra,Visayas,2024-10,68.81
+Okra,Mindanao,2024-10,58.45
+Okra,Luzon-North,2024-11,56.97
+Okra,Luzon-Central,2024-11,55.87
+Okra,Luzon-South,2024-11,67.19
+Okra,Visayas,2024-11,61.02
+Okra,Mindanao,2024-11,52.66
+Okra,Luzon-North,2024-12,57.77
+Okra,Luzon-Central,2024-12,54.14
+Okra,Luzon-South,2024-12,60.05
+Okra,Visayas,2024-12,64.79
+Okra,Mindanao,2024-12,59.06
+Okra,Luzon-North,2025-01,53.48
+Okra,Luzon-Central,2025-01,56.31
+Okra,Luzon-South,2025-01,61.77
+Okra,Visayas,2025-01,63.14
+Okra,Mindanao,2025-01,54.08
+Okra,Luzon-North,2025-02,57.97
+Okra,Luzon-Central,2025-02,59.46
+Okra,Luzon-South,2025-02,60.48
+Okra,Visayas,2025-02,63.28
+Okra,Mindanao,2025-02,54.84
+Okra,Luzon-North,2025-03,57.75
+Okra,Luzon-Central,2025-03,54.67
+Okra,Luzon-South,2025-03,63.32
+Okra,Visayas,2025-03,62.01
+Okra,Mindanao,2025-03,53.88
+Okra,Luzon-North,2025-04,56.96
+Okra,Luzon-Central,2025-04,52.07
+Okra,Luzon-South,2025-04,57.47
+Okra,Visayas,2025-04,58.43
+Okra,Mindanao,2025-04,53.62
+Okra,Luzon-North,2025-05,56.46
+Okra,Luzon-Central,2025-05,53.23
+Okra,Luzon-South,2025-05,62.21
+Okra,Visayas,2025-05,64.89
+Okra,Mindanao,2025-05,49.66
+Okra,Luzon-North,2025-06,66.39
+Okra,Luzon-Central,2025-06,58.86
+Okra,Luzon-South,2025-06,63.94
+Okra,Visayas,2025-06,69.64
+Okra,Mindanao,2025-06,57.13
+Okra,Luzon-North,2025-07,61.38
+Okra,Luzon-Central,2025-07,67.43
+Okra,Luzon-South,2025-07,62.89
+Okra,Visayas,2025-07,68.03
+Okra,Mindanao,2025-07,61.36
+Okra,Luzon-North,2025-08,63.05
+Okra,Luzon-Central,2025-08,63.62
+Okra,Luzon-South,2025-08,71.29
+Okra,Visayas,2025-08,80.58
+Okra,Mindanao,2025-08,59.18
+Okra,Luzon-North,2025-09,67.97
+Okra,Luzon-Central,2025-09,67.56
+Okra,Luzon-South,2025-09,71.83
+Okra,Visayas,2025-09,69.16
+Okra,Mindanao,2025-09,64.66
+Okra,Luzon-North,2025-10,66.34
+Okra,Luzon-Central,2025-10,64.76
+Okra,Luzon-South,2025-10,73.21
+Okra,Visayas,2025-10,74.88
+Okra,Mindanao,2025-10,62.62
+Okra,Luzon-North,2025-11,63.58
+Okra,Luzon-Central,2025-11,56.8
+Okra,Luzon-South,2025-11,65.29
+Okra,Visayas,2025-11,68.36
+Okra,Mindanao,2025-11,57.06
+Okra,Luzon-North,2025-12,61.95
+Okra,Luzon-Central,2025-12,56.74
+Okra,Luzon-South,2025-12,69.7
+Okra,Visayas,2025-12,73.74
+Okra,Mindanao,2025-12,56.22
+Okra,Luzon-North,2026-01,63.17
+Okra,Luzon-Central,2026-01,58.75
+Okra,Luzon-South,2026-01,69.13
+Okra,Visayas,2026-01,68.34
+Okra,Mindanao,2026-01,57.82
+Okra,Luzon-North,2026-02,61.51
+Okra,Luzon-Central,2026-02,60.1
+Okra,Luzon-South,2026-02,62.05
+Okra,Visayas,2026-02,69.46
+Okra,Mindanao,2026-02,55.79
+Okra,Luzon-North,2026-03,62.21
+Okra,Luzon-Central,2026-03,58.54
+Okra,Luzon-South,2026-03,67.1
+Okra,Visayas,2026-03,65.38
+Okra,Mindanao,2026-03,59.23
+Okra,Luzon-North,2026-04,57.46
+Okra,Luzon-Central,2026-04,59.59
+Okra,Luzon-South,2026-04,62.54
+Okra,Visayas,2026-04,65.69
+Okra,Mindanao,2026-04,56.22
+String Beans,Luzon-North,2022-01,53.94
+String Beans,Luzon-Central,2022-01,58.53
+String Beans,Luzon-South,2022-01,58.29
+String Beans,Visayas,2022-01,68.71
+String Beans,Mindanao,2022-01,50.3
+String Beans,Luzon-North,2022-02,57.35
+String Beans,Luzon-Central,2022-02,53.11
+String Beans,Luzon-South,2022-02,68.6
+String Beans,Visayas,2022-02,61.01
+String Beans,Mindanao,2022-02,56.47
+String Beans,Luzon-North,2022-03,57.33
+String Beans,Luzon-Central,2022-03,51.46
+String Beans,Luzon-South,2022-03,60.81
+String Beans,Visayas,2022-03,65.73
+String Beans,Mindanao,2022-03,54.28
+String Beans,Luzon-North,2022-04,61.43
+String Beans,Luzon-Central,2022-04,55.3
+String Beans,Luzon-South,2022-04,61.62
+String Beans,Visayas,2022-04,62.14
+String Beans,Mindanao,2022-04,55.5
+String Beans,Luzon-North,2022-05,65.98
+String Beans,Luzon-Central,2022-05,58.9
+String Beans,Luzon-South,2022-05,63.89
+String Beans,Visayas,2022-05,63.07
+String Beans,Mindanao,2022-05,53.92
+String Beans,Luzon-North,2022-06,67.74
+String Beans,Luzon-Central,2022-06,57.22
+String Beans,Luzon-South,2022-06,63.25
+String Beans,Visayas,2022-06,67.84
+String Beans,Mindanao,2022-06,57.45
+String Beans,Luzon-North,2022-07,71.77
+String Beans,Luzon-Central,2022-07,55.33
+String Beans,Luzon-South,2022-07,69.88
+String Beans,Visayas,2022-07,73.12
+String Beans,Mindanao,2022-07,57.39
+String Beans,Luzon-North,2022-08,66.7
+String Beans,Luzon-Central,2022-08,67.6
+String Beans,Luzon-South,2022-08,78.26
+String Beans,Visayas,2022-08,71.01
+String Beans,Mindanao,2022-08,59.04
+String Beans,Luzon-North,2022-09,74.06
+String Beans,Luzon-Central,2022-09,72.96
+String Beans,Luzon-South,2022-09,72.91
+String Beans,Visayas,2022-09,67.83
+String Beans,Mindanao,2022-09,70.45
+String Beans,Luzon-North,2022-10,67.84
+String Beans,Luzon-Central,2022-10,69.47
+String Beans,Luzon-South,2022-10,71.79
+String Beans,Visayas,2022-10,72.61
+String Beans,Mindanao,2022-10,62.28
+String Beans,Luzon-North,2022-11,69.92
+String Beans,Luzon-Central,2022-11,67.0
+String Beans,Luzon-South,2022-11,61.07
+String Beans,Visayas,2022-11,67.04
+String Beans,Mindanao,2022-11,65.95
+String Beans,Luzon-North,2022-12,63.06
+String Beans,Luzon-Central,2022-12,57.47
+String Beans,Luzon-South,2022-12,67.47
+String Beans,Visayas,2022-12,69.0
+String Beans,Mindanao,2022-12,59.45
+String Beans,Luzon-North,2023-01,63.1
+String Beans,Luzon-Central,2023-01,61.1
+String Beans,Luzon-South,2023-01,66.33
+String Beans,Visayas,2023-01,70.98
+String Beans,Mindanao,2023-01,57.68
+String Beans,Luzon-North,2023-02,64.12
+String Beans,Luzon-Central,2023-02,62.01
+String Beans,Luzon-South,2023-02,72.77
+String Beans,Visayas,2023-02,71.57
+String Beans,Mindanao,2023-02,60.17
+String Beans,Luzon-North,2023-03,65.17
+String Beans,Luzon-Central,2023-03,62.17
+String Beans,Luzon-South,2023-03,70.27
+String Beans,Visayas,2023-03,70.28
+String Beans,Mindanao,2023-03,64.32
+String Beans,Luzon-North,2023-04,67.46
+String Beans,Luzon-Central,2023-04,60.56
+String Beans,Luzon-South,2023-04,65.0
+String Beans,Visayas,2023-04,71.28
+String Beans,Mindanao,2023-04,60.31
+String Beans,Luzon-North,2023-05,64.62
+String Beans,Luzon-Central,2023-05,57.73
+String Beans,Luzon-South,2023-05,61.93
+String Beans,Visayas,2023-05,71.34
+String Beans,Mindanao,2023-05,62.71
+String Beans,Luzon-North,2023-06,70.74
+String Beans,Luzon-Central,2023-06,61.08
+String Beans,Luzon-South,2023-06,75.11
+String Beans,Visayas,2023-06,71.49
+String Beans,Mindanao,2023-06,64.47
+String Beans,Luzon-North,2023-07,71.91
+String Beans,Luzon-Central,2023-07,64.91
+String Beans,Luzon-South,2023-07,71.77
+String Beans,Visayas,2023-07,68.19
+String Beans,Mindanao,2023-07,62.5
+String Beans,Luzon-North,2023-08,67.57
+String Beans,Luzon-Central,2023-08,72.85
+String Beans,Luzon-South,2023-08,78.21
+String Beans,Visayas,2023-08,83.87
+String Beans,Mindanao,2023-08,70.29
+String Beans,Luzon-North,2023-09,73.68
+String Beans,Luzon-Central,2023-09,74.31
+String Beans,Luzon-South,2023-09,78.34
+String Beans,Visayas,2023-09,84.68
+String Beans,Mindanao,2023-09,71.88
+String Beans,Luzon-North,2023-10,70.18
+String Beans,Luzon-Central,2023-10,70.88
+String Beans,Luzon-South,2023-10,77.73
+String Beans,Visayas,2023-10,78.5
+String Beans,Mindanao,2023-10,71.73
+String Beans,Luzon-North,2023-11,76.18
+String Beans,Luzon-Central,2023-11,66.12
+String Beans,Luzon-South,2023-11,72.38
+String Beans,Visayas,2023-11,67.26
+String Beans,Mindanao,2023-11,64.83
+String Beans,Luzon-North,2023-12,67.7
+String Beans,Luzon-Central,2023-12,59.27
+String Beans,Luzon-South,2023-12,73.72
+String Beans,Visayas,2023-12,76.96
+String Beans,Mindanao,2023-12,62.01
+String Beans,Luzon-North,2024-01,68.36
+String Beans,Luzon-Central,2024-01,63.64
+String Beans,Luzon-South,2024-01,75.93
+String Beans,Visayas,2024-01,69.52
+String Beans,Mindanao,2024-01,63.76
+String Beans,Luzon-North,2024-02,76.94
+String Beans,Luzon-Central,2024-02,67.47
+String Beans,Luzon-South,2024-02,75.32
+String Beans,Visayas,2024-02,75.15
+String Beans,Mindanao,2024-02,61.36
+String Beans,Luzon-North,2024-03,68.29
+String Beans,Luzon-Central,2024-03,67.0
+String Beans,Luzon-South,2024-03,68.15
+String Beans,Visayas,2024-03,75.13
+String Beans,Mindanao,2024-03,67.57
+String Beans,Luzon-North,2024-04,71.77
+String Beans,Luzon-Central,2024-04,60.22
+String Beans,Luzon-South,2024-04,68.04
+String Beans,Visayas,2024-04,67.64
+String Beans,Mindanao,2024-04,66.75
+String Beans,Luzon-North,2024-05,72.11
+String Beans,Luzon-Central,2024-05,69.53
+String Beans,Luzon-South,2024-05,70.24
+String Beans,Visayas,2024-05,71.16
+String Beans,Mindanao,2024-05,65.32
+String Beans,Luzon-North,2024-06,73.66
+String Beans,Luzon-Central,2024-06,67.35
+String Beans,Luzon-South,2024-06,77.5
+String Beans,Visayas,2024-06,81.7
+String Beans,Mindanao,2024-06,68.94
+String Beans,Luzon-North,2024-07,71.96
+String Beans,Luzon-Central,2024-07,65.17
+String Beans,Luzon-South,2024-07,78.67
+String Beans,Visayas,2024-07,82.65
+String Beans,Mindanao,2024-07,69.68
+String Beans,Luzon-North,2024-08,78.31
+String Beans,Luzon-Central,2024-08,74.17
+String Beans,Luzon-South,2024-08,87.04
+String Beans,Visayas,2024-08,86.2
+String Beans,Mindanao,2024-08,74.89
+String Beans,Luzon-North,2024-09,78.02
+String Beans,Luzon-Central,2024-09,76.28
+String Beans,Luzon-South,2024-09,86.81
+String Beans,Visayas,2024-09,84.11
+String Beans,Mindanao,2024-09,71.46
+String Beans,Luzon-North,2024-10,78.25
+String Beans,Luzon-Central,2024-10,80.96
+String Beans,Luzon-South,2024-10,84.33
+String Beans,Visayas,2024-10,92.19
+String Beans,Mindanao,2024-10,73.5
+String Beans,Luzon-North,2024-11,74.44
+String Beans,Luzon-Central,2024-11,67.54
+String Beans,Luzon-South,2024-11,77.11
+String Beans,Visayas,2024-11,87.53
+String Beans,Mindanao,2024-11,71.48
+String Beans,Luzon-North,2024-12,77.32
+String Beans,Luzon-Central,2024-12,74.13
+String Beans,Luzon-South,2024-12,78.28
+String Beans,Visayas,2024-12,79.73
+String Beans,Mindanao,2024-12,69.78
+String Beans,Luzon-North,2025-01,77.58
+String Beans,Luzon-Central,2025-01,73.71
+String Beans,Luzon-South,2025-01,80.76
+String Beans,Visayas,2025-01,81.69
+String Beans,Mindanao,2025-01,67.12
+String Beans,Luzon-North,2025-02,74.55
+String Beans,Luzon-Central,2025-02,69.11
+String Beans,Luzon-South,2025-02,83.3
+String Beans,Visayas,2025-02,73.01
+String Beans,Mindanao,2025-02,69.49
+String Beans,Luzon-North,2025-03,82.49
+String Beans,Luzon-Central,2025-03,69.54
+String Beans,Luzon-South,2025-03,72.99
+String Beans,Visayas,2025-03,79.52
+String Beans,Mindanao,2025-03,72.96
+String Beans,Luzon-North,2025-04,72.81
+String Beans,Luzon-Central,2025-04,72.62
+String Beans,Luzon-South,2025-04,77.45
+String Beans,Visayas,2025-04,77.79
+String Beans,Mindanao,2025-04,79.01
+String Beans,Luzon-North,2025-05,75.66
+String Beans,Luzon-Central,2025-05,70.43
+String Beans,Luzon-South,2025-05,77.22
+String Beans,Visayas,2025-05,82.97
+String Beans,Mindanao,2025-05,71.55
+String Beans,Luzon-North,2025-06,82.01
+String Beans,Luzon-Central,2025-06,76.34
+String Beans,Luzon-South,2025-06,76.98
+String Beans,Visayas,2025-06,87.55
+String Beans,Mindanao,2025-06,72.3
+String Beans,Luzon-North,2025-07,80.62
+String Beans,Luzon-Central,2025-07,72.69
+String Beans,Luzon-South,2025-07,83.41
+String Beans,Visayas,2025-07,85.12
+String Beans,Mindanao,2025-07,75.92
+String Beans,Luzon-North,2025-08,79.96
+String Beans,Luzon-Central,2025-08,82.99
+String Beans,Luzon-South,2025-08,91.1
+String Beans,Visayas,2025-08,87.91
+String Beans,Mindanao,2025-08,77.69
+String Beans,Luzon-North,2025-09,84.56
+String Beans,Luzon-Central,2025-09,88.67
+String Beans,Luzon-South,2025-09,81.04
+String Beans,Visayas,2025-09,93.78
+String Beans,Mindanao,2025-09,75.35
+String Beans,Luzon-North,2025-10,83.87
+String Beans,Luzon-Central,2025-10,85.78
+String Beans,Luzon-South,2025-10,87.17
+String Beans,Visayas,2025-10,93.22
+String Beans,Mindanao,2025-10,76.35
+String Beans,Luzon-North,2025-11,89.37
+String Beans,Luzon-Central,2025-11,81.79
+String Beans,Luzon-South,2025-11,90.37
+String Beans,Visayas,2025-11,82.15
+String Beans,Mindanao,2025-11,71.6
+String Beans,Luzon-North,2025-12,84.71
+String Beans,Luzon-Central,2025-12,76.4
+String Beans,Luzon-South,2025-12,83.3
+String Beans,Visayas,2025-12,88.25
+String Beans,Mindanao,2025-12,70.05
+String Beans,Luzon-North,2026-01,84.0
+String Beans,Luzon-Central,2026-01,77.71
+String Beans,Luzon-South,2026-01,86.96
+String Beans,Visayas,2026-01,84.42
+String Beans,Mindanao,2026-01,77.15
+String Beans,Luzon-North,2026-02,78.52
+String Beans,Luzon-Central,2026-02,81.87
+String Beans,Luzon-South,2026-02,90.29
+String Beans,Visayas,2026-02,91.91
+String Beans,Mindanao,2026-02,77.65
+String Beans,Luzon-North,2026-03,81.92
+String Beans,Luzon-Central,2026-03,65.91
+String Beans,Luzon-South,2026-03,86.85
+String Beans,Visayas,2026-03,84.58
+String Beans,Mindanao,2026-03,74.2
+String Beans,Luzon-North,2026-04,77.96
+String Beans,Luzon-Central,2026-04,70.64
+String Beans,Luzon-South,2026-04,80.8
+String Beans,Visayas,2026-04,88.22
+String Beans,Mindanao,2026-04,78.76
+Spinach,Luzon-North,2022-01,62.06
+Spinach,Luzon-Central,2022-01,66.93
+Spinach,Luzon-South,2022-01,65.24
+Spinach,Visayas,2022-01,77.48
+Spinach,Mindanao,2022-01,60.6
+Spinach,Luzon-North,2022-02,62.21
+Spinach,Luzon-Central,2022-02,65.55
+Spinach,Luzon-South,2022-02,74.12
+Spinach,Visayas,2022-02,65.25
+Spinach,Mindanao,2022-02,65.24
+Spinach,Luzon-North,2022-03,62.31
+Spinach,Luzon-Central,2022-03,65.18
+Spinach,Luzon-South,2022-03,65.1
+Spinach,Visayas,2022-03,62.88
+Spinach,Mindanao,2022-03,60.25
+Spinach,Luzon-North,2022-04,65.53
+Spinach,Luzon-Central,2022-04,66.43
+Spinach,Luzon-South,2022-04,71.43
+Spinach,Visayas,2022-04,69.99
+Spinach,Mindanao,2022-04,57.55
+Spinach,Luzon-North,2022-05,62.35
+Spinach,Luzon-Central,2022-05,60.55
+Spinach,Luzon-South,2022-05,64.42
+Spinach,Visayas,2022-05,68.19
+Spinach,Mindanao,2022-05,51.96
+Spinach,Luzon-North,2022-06,67.31
+Spinach,Luzon-Central,2022-06,63.95
+Spinach,Luzon-South,2022-06,79.03
+Spinach,Visayas,2022-06,74.78
+Spinach,Mindanao,2022-06,60.55
+Spinach,Luzon-North,2022-07,70.7
+Spinach,Luzon-Central,2022-07,61.96
+Spinach,Luzon-South,2022-07,70.02
+Spinach,Visayas,2022-07,67.32
+Spinach,Mindanao,2022-07,68.54
+Spinach,Luzon-North,2022-08,74.26
+Spinach,Luzon-Central,2022-08,65.17
+Spinach,Luzon-South,2022-08,75.5
+Spinach,Visayas,2022-08,81.59
+Spinach,Mindanao,2022-08,68.74
+Spinach,Luzon-North,2022-09,74.93
+Spinach,Luzon-Central,2022-09,67.56
+Spinach,Luzon-South,2022-09,74.75
+Spinach,Visayas,2022-09,79.79
+Spinach,Mindanao,2022-09,71.53
+Spinach,Luzon-North,2022-10,68.05
+Spinach,Luzon-Central,2022-10,64.33
+Spinach,Luzon-South,2022-10,78.8
+Spinach,Visayas,2022-10,73.1
+Spinach,Mindanao,2022-10,69.58
+Spinach,Luzon-North,2022-11,67.95
+Spinach,Luzon-Central,2022-11,67.29
+Spinach,Luzon-South,2022-11,76.64
+Spinach,Visayas,2022-11,75.0
+Spinach,Mindanao,2022-11,64.86
+Spinach,Luzon-North,2022-12,62.87
+Spinach,Luzon-Central,2022-12,61.06
+Spinach,Luzon-South,2022-12,71.42
+Spinach,Visayas,2022-12,76.63
+Spinach,Mindanao,2022-12,65.55
+Spinach,Luzon-North,2023-01,73.62
+Spinach,Luzon-Central,2023-01,64.33
+Spinach,Luzon-South,2023-01,69.98
+Spinach,Visayas,2023-01,74.84
+Spinach,Mindanao,2023-01,61.42
+Spinach,Luzon-North,2023-02,65.86
+Spinach,Luzon-Central,2023-02,60.1
+Spinach,Luzon-South,2023-02,72.81
+Spinach,Visayas,2023-02,67.53
+Spinach,Mindanao,2023-02,63.01
+Spinach,Luzon-North,2023-03,59.6
+Spinach,Luzon-Central,2023-03,64.97
+Spinach,Luzon-South,2023-03,63.9
+Spinach,Visayas,2023-03,72.21
+Spinach,Mindanao,2023-03,54.92
+Spinach,Luzon-North,2023-04,62.18
+Spinach,Luzon-Central,2023-04,64.63
+Spinach,Luzon-South,2023-04,64.07
+Spinach,Visayas,2023-04,68.89
+Spinach,Mindanao,2023-04,57.71
+Spinach,Luzon-North,2023-05,57.48
+Spinach,Luzon-Central,2023-05,63.34
+Spinach,Luzon-South,2023-05,69.7
+Spinach,Visayas,2023-05,66.29
+Spinach,Mindanao,2023-05,62.16
+Spinach,Luzon-North,2023-06,65.02
+Spinach,Luzon-Central,2023-06,61.75
+Spinach,Luzon-South,2023-06,71.13
+Spinach,Visayas,2023-06,70.64
+Spinach,Mindanao,2023-06,70.2
+Spinach,Luzon-North,2023-07,64.37
+Spinach,Luzon-Central,2023-07,69.48
+Spinach,Luzon-South,2023-07,76.91
+Spinach,Visayas,2023-07,67.92
+Spinach,Mindanao,2023-07,59.29
+Spinach,Luzon-North,2023-08,75.27
+Spinach,Luzon-Central,2023-08,68.59
+Spinach,Luzon-South,2023-08,78.35
+Spinach,Visayas,2023-08,83.57
+Spinach,Mindanao,2023-08,66.82
+Spinach,Luzon-North,2023-09,70.67
+Spinach,Luzon-Central,2023-09,61.87
+Spinach,Luzon-South,2023-09,79.17
+Spinach,Visayas,2023-09,76.87
+Spinach,Mindanao,2023-09,70.5
+Spinach,Luzon-North,2023-10,72.9
+Spinach,Luzon-Central,2023-10,64.39
+Spinach,Luzon-South,2023-10,82.19
+Spinach,Visayas,2023-10,82.04
+Spinach,Mindanao,2023-10,69.86
+Spinach,Luzon-North,2023-11,64.11
+Spinach,Luzon-Central,2023-11,64.09
+Spinach,Luzon-South,2023-11,69.59
+Spinach,Visayas,2023-11,72.07
+Spinach,Mindanao,2023-11,59.81
+Spinach,Luzon-North,2023-12,68.34
+Spinach,Luzon-Central,2023-12,64.95
+Spinach,Luzon-South,2023-12,71.52
+Spinach,Visayas,2023-12,70.41
+Spinach,Mindanao,2023-12,66.22
+Spinach,Luzon-North,2024-01,67.6
+Spinach,Luzon-Central,2024-01,55.49
+Spinach,Luzon-South,2024-01,68.07
+Spinach,Visayas,2024-01,72.13
+Spinach,Mindanao,2024-01,65.29
+Spinach,Luzon-North,2024-02,66.05
+Spinach,Luzon-Central,2024-02,63.57
+Spinach,Luzon-South,2024-02,68.08
+Spinach,Visayas,2024-02,74.84
+Spinach,Mindanao,2024-02,60.97
+Spinach,Luzon-North,2024-03,63.16
+Spinach,Luzon-Central,2024-03,60.2
+Spinach,Luzon-South,2024-03,70.29
+Spinach,Visayas,2024-03,68.46
+Spinach,Mindanao,2024-03,55.49
+Spinach,Luzon-North,2024-04,66.55
+Spinach,Luzon-Central,2024-04,59.78
+Spinach,Luzon-South,2024-04,68.97
+Spinach,Visayas,2024-04,71.0
+Spinach,Mindanao,2024-04,63.63
+Spinach,Luzon-North,2024-05,69.41
+Spinach,Luzon-Central,2024-05,61.5
+Spinach,Luzon-South,2024-05,68.68
+Spinach,Visayas,2024-05,66.64
+Spinach,Mindanao,2024-05,66.49
+Spinach,Luzon-North,2024-06,70.26
+Spinach,Luzon-Central,2024-06,70.59
+Spinach,Luzon-South,2024-06,71.03
+Spinach,Visayas,2024-06,66.64
+Spinach,Mindanao,2024-06,68.83
+Spinach,Luzon-North,2024-07,71.18
+Spinach,Luzon-Central,2024-07,68.47
+Spinach,Luzon-South,2024-07,74.6
+Spinach,Visayas,2024-07,78.99
+Spinach,Mindanao,2024-07,67.65
+Spinach,Luzon-North,2024-08,68.41
+Spinach,Luzon-Central,2024-08,75.22
+Spinach,Luzon-South,2024-08,75.97
+Spinach,Visayas,2024-08,78.39
+Spinach,Mindanao,2024-08,75.09
+Spinach,Luzon-North,2024-09,79.25
+Spinach,Luzon-Central,2024-09,71.51
+Spinach,Luzon-South,2024-09,72.17
+Spinach,Visayas,2024-09,82.49
+Spinach,Mindanao,2024-09,72.36
+Spinach,Luzon-North,2024-10,72.86
+Spinach,Luzon-Central,2024-10,65.85
+Spinach,Luzon-South,2024-10,73.77
+Spinach,Visayas,2024-10,74.04
+Spinach,Mindanao,2024-10,68.76
+Spinach,Luzon-North,2024-11,72.01
+Spinach,Luzon-Central,2024-11,69.81
+Spinach,Luzon-South,2024-11,69.97
+Spinach,Visayas,2024-11,75.59
+Spinach,Mindanao,2024-11,66.12
+Spinach,Luzon-North,2024-12,66.17
+Spinach,Luzon-Central,2024-12,64.7
+Spinach,Luzon-South,2024-12,78.87
+Spinach,Visayas,2024-12,74.09
+Spinach,Mindanao,2024-12,65.94
+Spinach,Luzon-North,2025-01,66.51
+Spinach,Luzon-Central,2025-01,65.41
+Spinach,Luzon-South,2025-01,65.27
+Spinach,Visayas,2025-01,73.34
+Spinach,Mindanao,2025-01,67.0
+Spinach,Luzon-North,2025-02,75.22
+Spinach,Luzon-Central,2025-02,69.26
+Spinach,Luzon-South,2025-02,73.93
+Spinach,Visayas,2025-02,73.72
+Spinach,Mindanao,2025-02,61.41
+Spinach,Luzon-North,2025-03,65.58
+Spinach,Luzon-Central,2025-03,65.41
+Spinach,Luzon-South,2025-03,66.69
+Spinach,Visayas,2025-03,74.73
+Spinach,Mindanao,2025-03,58.46
+Spinach,Luzon-North,2025-04,59.68
+Spinach,Luzon-Central,2025-04,59.71
+Spinach,Luzon-South,2025-04,63.06
+Spinach,Visayas,2025-04,65.9
+Spinach,Mindanao,2025-04,64.37
+Spinach,Luzon-North,2025-05,66.29
+Spinach,Luzon-Central,2025-05,64.98
+Spinach,Luzon-South,2025-05,74.38
+Spinach,Visayas,2025-05,76.87
+Spinach,Mindanao,2025-05,60.7
+Spinach,Luzon-North,2025-06,74.41
+Spinach,Luzon-Central,2025-06,68.28
+Spinach,Luzon-South,2025-06,73.28
+Spinach,Visayas,2025-06,77.03
+Spinach,Mindanao,2025-06,60.27
+Spinach,Luzon-North,2025-07,69.09
+Spinach,Luzon-Central,2025-07,68.67
+Spinach,Luzon-South,2025-07,77.82
+Spinach,Visayas,2025-07,76.23
+Spinach,Mindanao,2025-07,66.46
+Spinach,Luzon-North,2025-08,79.1
+Spinach,Luzon-Central,2025-08,77.53
+Spinach,Luzon-South,2025-08,82.25
+Spinach,Visayas,2025-08,86.64
+Spinach,Mindanao,2025-08,68.74
+Spinach,Luzon-North,2025-09,75.73
+Spinach,Luzon-Central,2025-09,75.01
+Spinach,Luzon-South,2025-09,79.54
+Spinach,Visayas,2025-09,80.96
+Spinach,Mindanao,2025-09,77.43
+Spinach,Luzon-North,2025-10,73.51
+Spinach,Luzon-Central,2025-10,67.84
+Spinach,Luzon-South,2025-10,79.87
+Spinach,Visayas,2025-10,87.56
+Spinach,Mindanao,2025-10,69.34
+Spinach,Luzon-North,2025-11,74.54
+Spinach,Luzon-Central,2025-11,65.93
+Spinach,Luzon-South,2025-11,71.92
+Spinach,Visayas,2025-11,73.22
+Spinach,Mindanao,2025-11,64.83
+Spinach,Luzon-North,2025-12,75.26
+Spinach,Luzon-Central,2025-12,62.35
+Spinach,Luzon-South,2025-12,78.3
+Spinach,Visayas,2025-12,70.69
+Spinach,Mindanao,2025-12,63.35
+Spinach,Luzon-North,2026-01,71.9
+Spinach,Luzon-Central,2026-01,68.34
+Spinach,Luzon-South,2026-01,73.49
+Spinach,Visayas,2026-01,68.39
+Spinach,Mindanao,2026-01,65.35
+Spinach,Luzon-North,2026-02,65.57
+Spinach,Luzon-Central,2026-02,74.86
+Spinach,Luzon-South,2026-02,71.78
+Spinach,Visayas,2026-02,75.33
+Spinach,Mindanao,2026-02,60.58
+Spinach,Luzon-North,2026-03,65.5
+Spinach,Luzon-Central,2026-03,60.26
+Spinach,Luzon-South,2026-03,73.92
+Spinach,Visayas,2026-03,71.52
+Spinach,Mindanao,2026-03,64.16
+Spinach,Luzon-North,2026-04,64.22
+Spinach,Luzon-Central,2026-04,62.24
+Spinach,Luzon-South,2026-04,74.32
+Spinach,Visayas,2026-04,68.33
+Spinach,Mindanao,2026-04,56.27
+Pechay,Luzon-North,2022-01,37.72
+Pechay,Luzon-Central,2022-01,37.56
+Pechay,Luzon-South,2022-01,43.91
+Pechay,Visayas,2022-01,41.43
+Pechay,Mindanao,2022-01,38.83
+Pechay,Luzon-North,2022-02,38.82
+Pechay,Luzon-Central,2022-02,41.45
+Pechay,Luzon-South,2022-02,44.99
+Pechay,Visayas,2022-02,42.38
+Pechay,Mindanao,2022-02,36.97
+Pechay,Luzon-North,2022-03,37.52
+Pechay,Luzon-Central,2022-03,37.95
+Pechay,Luzon-South,2022-03,43.46
+Pechay,Visayas,2022-03,39.22
+Pechay,Mindanao,2022-03,38.07
+Pechay,Luzon-North,2022-04,36.35
+Pechay,Luzon-Central,2022-04,35.76
+Pechay,Luzon-South,2022-04,37.21
+Pechay,Visayas,2022-04,46.46
+Pechay,Mindanao,2022-04,36.3
+Pechay,Luzon-North,2022-05,40.4
+Pechay,Luzon-Central,2022-05,37.02
+Pechay,Luzon-South,2022-05,44.14
+Pechay,Visayas,2022-05,38.57
+Pechay,Mindanao,2022-05,37.17
+Pechay,Luzon-North,2022-06,46.34
+Pechay,Luzon-Central,2022-06,39.3
+Pechay,Luzon-South,2022-06,43.86
+Pechay,Visayas,2022-06,46.59
+Pechay,Mindanao,2022-06,37.24
+Pechay,Luzon-North,2022-07,43.2
+Pechay,Luzon-Central,2022-07,43.42
+Pechay,Luzon-South,2022-07,45.75
+Pechay,Visayas,2022-07,47.47
+Pechay,Mindanao,2022-07,39.43
+Pechay,Luzon-North,2022-08,46.14
+Pechay,Luzon-Central,2022-08,43.73
+Pechay,Luzon-South,2022-08,51.16
+Pechay,Visayas,2022-08,50.83
+Pechay,Mindanao,2022-08,41.73
+Pechay,Luzon-North,2022-09,40.78
+Pechay,Luzon-Central,2022-09,46.2
+Pechay,Luzon-South,2022-09,50.63
+Pechay,Visayas,2022-09,47.88
+Pechay,Mindanao,2022-09,38.89
+Pechay,Luzon-North,2022-10,42.44
+Pechay,Luzon-Central,2022-10,45.21
+Pechay,Luzon-South,2022-10,44.74
+Pechay,Visayas,2022-10,47.49
+Pechay,Mindanao,2022-10,42.32
+Pechay,Luzon-North,2022-11,45.32
+Pechay,Luzon-Central,2022-11,40.96
+Pechay,Luzon-South,2022-11,44.61
+Pechay,Visayas,2022-11,44.85
+Pechay,Mindanao,2022-11,42.95
+Pechay,Luzon-North,2022-12,44.3
+Pechay,Luzon-Central,2022-12,40.18
+Pechay,Luzon-South,2022-12,41.07
+Pechay,Visayas,2022-12,43.62
+Pechay,Mindanao,2022-12,40.24
+Pechay,Luzon-North,2023-01,40.73
+Pechay,Luzon-Central,2023-01,42.37
+Pechay,Luzon-South,2023-01,45.16
+Pechay,Visayas,2023-01,46.3
+Pechay,Mindanao,2023-01,40.58
+Pechay,Luzon-North,2023-02,43.5
+Pechay,Luzon-Central,2023-02,39.01
+Pechay,Luzon-South,2023-02,43.84
+Pechay,Visayas,2023-02,51.21
+Pechay,Mindanao,2023-02,37.09
+Pechay,Luzon-North,2023-03,40.37
+Pechay,Luzon-Central,2023-03,41.81
+Pechay,Luzon-South,2023-03,43.07
+Pechay,Visayas,2023-03,42.84
+Pechay,Mindanao,2023-03,35.91
+Pechay,Luzon-North,2023-04,42.21
+Pechay,Luzon-Central,2023-04,41.48
+Pechay,Luzon-South,2023-04,46.19
+Pechay,Visayas,2023-04,44.52
+Pechay,Mindanao,2023-04,40.23
+Pechay,Luzon-North,2023-05,39.98
+Pechay,Luzon-Central,2023-05,40.81
+Pechay,Luzon-South,2023-05,42.77
+Pechay,Visayas,2023-05,45.92
+Pechay,Mindanao,2023-05,40.68
+Pechay,Luzon-North,2023-06,46.44
+Pechay,Luzon-Central,2023-06,40.22
+Pechay,Luzon-South,2023-06,49.22
+Pechay,Visayas,2023-06,46.48
+Pechay,Mindanao,2023-06,38.89
+Pechay,Luzon-North,2023-07,45.19
+Pechay,Luzon-Central,2023-07,40.56
+Pechay,Luzon-South,2023-07,47.87
+Pechay,Visayas,2023-07,49.94
+Pechay,Mindanao,2023-07,41.97
+Pechay,Luzon-North,2023-08,49.26
+Pechay,Luzon-Central,2023-08,45.33
+Pechay,Luzon-South,2023-08,50.38
+Pechay,Visayas,2023-08,48.08
+Pechay,Mindanao,2023-08,44.71
+Pechay,Luzon-North,2023-09,46.99
+Pechay,Luzon-Central,2023-09,46.05
+Pechay,Luzon-South,2023-09,51.29
+Pechay,Visayas,2023-09,53.51
+Pechay,Mindanao,2023-09,41.88
+Pechay,Luzon-North,2023-10,43.82
+Pechay,Luzon-Central,2023-10,44.95
+Pechay,Luzon-South,2023-10,51.1
+Pechay,Visayas,2023-10,52.26
+Pechay,Mindanao,2023-10,46.18
+Pechay,Luzon-North,2023-11,48.04
+Pechay,Luzon-Central,2023-11,44.38
+Pechay,Luzon-South,2023-11,47.31
+Pechay,Visayas,2023-11,46.2
+Pechay,Mindanao,2023-11,39.96
+Pechay,Luzon-North,2023-12,43.38
+Pechay,Luzon-Central,2023-12,43.21
+Pechay,Luzon-South,2023-12,47.16
+Pechay,Visayas,2023-12,47.98
+Pechay,Mindanao,2023-12,40.99
+Pechay,Luzon-North,2024-01,46.03
+Pechay,Luzon-Central,2024-01,43.29
+Pechay,Luzon-South,2024-01,47.56
+Pechay,Visayas,2024-01,48.94
+Pechay,Mindanao,2024-01,40.37
+Pechay,Luzon-North,2024-02,42.52
+Pechay,Luzon-Central,2024-02,44.1
+Pechay,Luzon-South,2024-02,48.06
+Pechay,Visayas,2024-02,47.89
+Pechay,Mindanao,2024-02,40.83
+Pechay,Luzon-North,2024-03,48.65
+Pechay,Luzon-Central,2024-03,40.34
+Pechay,Luzon-South,2024-03,45.36
+Pechay,Visayas,2024-03,47.8
+Pechay,Mindanao,2024-03,38.28
+Pechay,Luzon-North,2024-04,43.68
+Pechay,Luzon-Central,2024-04,45.44
+Pechay,Luzon-South,2024-04,47.73
+Pechay,Visayas,2024-04,48.39
+Pechay,Mindanao,2024-04,41.59
+Pechay,Luzon-North,2024-05,44.78
+Pechay,Luzon-Central,2024-05,44.8
+Pechay,Luzon-South,2024-05,46.4
+Pechay,Visayas,2024-05,47.08
+Pechay,Mindanao,2024-05,41.63
+Pechay,Luzon-North,2024-06,48.68
+Pechay,Luzon-Central,2024-06,45.44
+Pechay,Luzon-South,2024-06,50.55
+Pechay,Visayas,2024-06,45.2
+Pechay,Mindanao,2024-06,45.89
+Pechay,Luzon-North,2024-07,53.79
+Pechay,Luzon-Central,2024-07,49.31
+Pechay,Luzon-South,2024-07,49.76
+Pechay,Visayas,2024-07,49.8
+Pechay,Mindanao,2024-07,45.4
+Pechay,Luzon-North,2024-08,48.18
+Pechay,Luzon-Central,2024-08,50.42
+Pechay,Luzon-South,2024-08,51.82
+Pechay,Visayas,2024-08,57.37
+Pechay,Mindanao,2024-08,50.34
+Pechay,Luzon-North,2024-09,46.58
+Pechay,Luzon-Central,2024-09,50.5
+Pechay,Luzon-South,2024-09,52.54
+Pechay,Visayas,2024-09,52.04
+Pechay,Mindanao,2024-09,46.73
+Pechay,Luzon-North,2024-10,49.67
+Pechay,Luzon-Central,2024-10,50.7
+Pechay,Luzon-South,2024-10,48.72
+Pechay,Visayas,2024-10,57.08
+Pechay,Mindanao,2024-10,51.42
+Pechay,Luzon-North,2024-11,49.07
+Pechay,Luzon-Central,2024-11,46.99
+Pechay,Luzon-South,2024-11,50.0
+Pechay,Visayas,2024-11,48.44
+Pechay,Mindanao,2024-11,45.5
+Pechay,Luzon-North,2024-12,47.83
+Pechay,Luzon-Central,2024-12,46.7
+Pechay,Luzon-South,2024-12,55.6
+Pechay,Visayas,2024-12,52.52
+Pechay,Mindanao,2024-12,44.57
+Pechay,Luzon-North,2025-01,50.83
+Pechay,Luzon-Central,2025-01,42.21
+Pechay,Luzon-South,2025-01,46.67
+Pechay,Visayas,2025-01,49.96
+Pechay,Mindanao,2025-01,42.41
+Pechay,Luzon-North,2025-02,49.01
+Pechay,Luzon-Central,2025-02,44.75
+Pechay,Luzon-South,2025-02,54.06
+Pechay,Visayas,2025-02,55.04
+Pechay,Mindanao,2025-02,45.74
+Pechay,Luzon-North,2025-03,45.25
+Pechay,Luzon-Central,2025-03,45.66
+Pechay,Luzon-South,2025-03,50.41
+Pechay,Visayas,2025-03,47.17
+Pechay,Mindanao,2025-03,43.65
+Pechay,Luzon-North,2025-04,47.49
+Pechay,Luzon-Central,2025-04,44.51
+Pechay,Luzon-South,2025-04,51.95
+Pechay,Visayas,2025-04,52.55
+Pechay,Mindanao,2025-04,40.9
+Pechay,Luzon-North,2025-05,47.33
+Pechay,Luzon-Central,2025-05,43.27
+Pechay,Luzon-South,2025-05,50.82
+Pechay,Visayas,2025-05,48.6
+Pechay,Mindanao,2025-05,45.77
+Pechay,Luzon-North,2025-06,50.14
+Pechay,Luzon-Central,2025-06,49.51
+Pechay,Luzon-South,2025-06,51.27
+Pechay,Visayas,2025-06,49.25
+Pechay,Mindanao,2025-06,49.78
+Pechay,Luzon-North,2025-07,50.42
+Pechay,Luzon-Central,2025-07,52.19
+Pechay,Luzon-South,2025-07,54.55
+Pechay,Visayas,2025-07,56.78
+Pechay,Mindanao,2025-07,51.63
+Pechay,Luzon-North,2025-08,54.44
+Pechay,Luzon-Central,2025-08,54.99
+Pechay,Luzon-South,2025-08,52.04
+Pechay,Visayas,2025-08,60.33
+Pechay,Mindanao,2025-08,49.18
+Pechay,Luzon-North,2025-09,54.39
+Pechay,Luzon-Central,2025-09,52.59
+Pechay,Luzon-South,2025-09,58.49
+Pechay,Visayas,2025-09,64.04
+Pechay,Mindanao,2025-09,46.21
+Pechay,Luzon-North,2025-10,53.16
+Pechay,Luzon-Central,2025-10,49.1
+Pechay,Luzon-South,2025-10,58.94
+Pechay,Visayas,2025-10,56.07
+Pechay,Mindanao,2025-10,50.46
+Pechay,Luzon-North,2025-11,49.33
+Pechay,Luzon-Central,2025-11,49.93
+Pechay,Luzon-South,2025-11,55.53
+Pechay,Visayas,2025-11,53.28
+Pechay,Mindanao,2025-11,46.92
+Pechay,Luzon-North,2025-12,46.04
+Pechay,Luzon-Central,2025-12,48.31
+Pechay,Luzon-South,2025-12,54.27
+Pechay,Visayas,2025-12,52.04
+Pechay,Mindanao,2025-12,48.68
+Pechay,Luzon-North,2026-01,44.63
+Pechay,Luzon-Central,2026-01,43.38
+Pechay,Luzon-South,2026-01,48.66
+Pechay,Visayas,2026-01,52.48
+Pechay,Mindanao,2026-01,46.35
+Pechay,Luzon-North,2026-02,49.83
+Pechay,Luzon-Central,2026-02,47.87
+Pechay,Luzon-South,2026-02,54.43
+Pechay,Visayas,2026-02,52.75
+Pechay,Mindanao,2026-02,43.59
+Pechay,Luzon-North,2026-03,45.7
+Pechay,Luzon-Central,2026-03,51.72
+Pechay,Luzon-South,2026-03,45.15
+Pechay,Visayas,2026-03,52.17
+Pechay,Mindanao,2026-03,48.62
+Pechay,Luzon-North,2026-04,49.62
+Pechay,Luzon-Central,2026-04,44.59
+Pechay,Luzon-South,2026-04,50.88
+Pechay,Visayas,2026-04,54.59
+Pechay,Mindanao,2026-04,47.78
+Sweet Potato,Luzon-North,2022-01,36.33
+Sweet Potato,Luzon-Central,2022-01,34.02
+Sweet Potato,Luzon-South,2022-01,38.78
+Sweet Potato,Visayas,2022-01,40.43
+Sweet Potato,Mindanao,2022-01,31.99
+Sweet Potato,Luzon-North,2022-02,32.47
+Sweet Potato,Luzon-Central,2022-02,34.28
+Sweet Potato,Luzon-South,2022-02,40.03
+Sweet Potato,Visayas,2022-02,39.11
+Sweet Potato,Mindanao,2022-02,32.94
+Sweet Potato,Luzon-North,2022-03,38.05
+Sweet Potato,Luzon-Central,2022-03,30.92
+Sweet Potato,Luzon-South,2022-03,37.28
+Sweet Potato,Visayas,2022-03,35.64
+Sweet Potato,Mindanao,2022-03,31.67
+Sweet Potato,Luzon-North,2022-04,33.78
+Sweet Potato,Luzon-Central,2022-04,34.73
+Sweet Potato,Luzon-South,2022-04,33.66
+Sweet Potato,Visayas,2022-04,35.35
+Sweet Potato,Mindanao,2022-04,28.79
+Sweet Potato,Luzon-North,2022-05,35.18
+Sweet Potato,Luzon-Central,2022-05,32.22
+Sweet Potato,Luzon-South,2022-05,36.82
+Sweet Potato,Visayas,2022-05,35.1
+Sweet Potato,Mindanao,2022-05,31.37
+Sweet Potato,Luzon-North,2022-06,37.62
+Sweet Potato,Luzon-Central,2022-06,34.03
+Sweet Potato,Luzon-South,2022-06,38.72
+Sweet Potato,Visayas,2022-06,39.64
+Sweet Potato,Mindanao,2022-06,32.67
+Sweet Potato,Luzon-North,2022-07,33.95
+Sweet Potato,Luzon-Central,2022-07,37.09
+Sweet Potato,Luzon-South,2022-07,38.99
+Sweet Potato,Visayas,2022-07,41.72
+Sweet Potato,Mindanao,2022-07,30.8
+Sweet Potato,Luzon-North,2022-08,35.4
+Sweet Potato,Luzon-Central,2022-08,33.08
+Sweet Potato,Luzon-South,2022-08,38.74
+Sweet Potato,Visayas,2022-08,43.85
+Sweet Potato,Mindanao,2022-08,36.9
+Sweet Potato,Luzon-North,2022-09,39.24
+Sweet Potato,Luzon-Central,2022-09,37.98
+Sweet Potato,Luzon-South,2022-09,42.84
+Sweet Potato,Visayas,2022-09,41.81
+Sweet Potato,Mindanao,2022-09,37.28
+Sweet Potato,Luzon-North,2022-10,38.18
+Sweet Potato,Luzon-Central,2022-10,32.42
+Sweet Potato,Luzon-South,2022-10,39.04
+Sweet Potato,Visayas,2022-10,43.73
+Sweet Potato,Mindanao,2022-10,34.56
+Sweet Potato,Luzon-North,2022-11,35.56
+Sweet Potato,Luzon-Central,2022-11,33.34
+Sweet Potato,Luzon-South,2022-11,36.7
+Sweet Potato,Visayas,2022-11,40.86
+Sweet Potato,Mindanao,2022-11,32.87
+Sweet Potato,Luzon-North,2022-12,33.33
+Sweet Potato,Luzon-Central,2022-12,28.48
+Sweet Potato,Luzon-South,2022-12,35.83
+Sweet Potato,Visayas,2022-12,34.21
+Sweet Potato,Mindanao,2022-12,29.69
+Sweet Potato,Luzon-North,2023-01,36.54
+Sweet Potato,Luzon-Central,2023-01,34.93
+Sweet Potato,Luzon-South,2023-01,33.36
+Sweet Potato,Visayas,2023-01,39.57
+Sweet Potato,Mindanao,2023-01,33.43
+Sweet Potato,Luzon-North,2023-02,33.78
+Sweet Potato,Luzon-Central,2023-02,34.99
+Sweet Potato,Luzon-South,2023-02,33.91
+Sweet Potato,Visayas,2023-02,35.68
+Sweet Potato,Mindanao,2023-02,30.34
+Sweet Potato,Luzon-North,2023-03,32.21
+Sweet Potato,Luzon-Central,2023-03,34.18
+Sweet Potato,Luzon-South,2023-03,33.43
+Sweet Potato,Visayas,2023-03,34.72
+Sweet Potato,Mindanao,2023-03,30.21
+Sweet Potato,Luzon-North,2023-04,34.1
+Sweet Potato,Luzon-Central,2023-04,31.87
+Sweet Potato,Luzon-South,2023-04,36.99
+Sweet Potato,Visayas,2023-04,35.17
+Sweet Potato,Mindanao,2023-04,29.38
+Sweet Potato,Luzon-North,2023-05,33.61
+Sweet Potato,Luzon-Central,2023-05,33.16
+Sweet Potato,Luzon-South,2023-05,34.52
+Sweet Potato,Visayas,2023-05,37.75
+Sweet Potato,Mindanao,2023-05,34.97
+Sweet Potato,Luzon-North,2023-06,34.85
+Sweet Potato,Luzon-Central,2023-06,34.53
+Sweet Potato,Luzon-South,2023-06,40.23
+Sweet Potato,Visayas,2023-06,37.5
+Sweet Potato,Mindanao,2023-06,31.96
+Sweet Potato,Luzon-North,2023-07,34.93
+Sweet Potato,Luzon-Central,2023-07,36.18
+Sweet Potato,Luzon-South,2023-07,39.79
+Sweet Potato,Visayas,2023-07,39.6
+Sweet Potato,Mindanao,2023-07,34.43
+Sweet Potato,Luzon-North,2023-08,41.18
+Sweet Potato,Luzon-Central,2023-08,38.78
+Sweet Potato,Luzon-South,2023-08,37.79
+Sweet Potato,Visayas,2023-08,41.78
+Sweet Potato,Mindanao,2023-08,36.18
+Sweet Potato,Luzon-North,2023-09,40.84
+Sweet Potato,Luzon-Central,2023-09,37.42
+Sweet Potato,Luzon-South,2023-09,40.05
+Sweet Potato,Visayas,2023-09,41.59
+Sweet Potato,Mindanao,2023-09,33.39
+Sweet Potato,Luzon-North,2023-10,37.97
+Sweet Potato,Luzon-Central,2023-10,35.4
+Sweet Potato,Luzon-South,2023-10,40.85
+Sweet Potato,Visayas,2023-10,38.94
+Sweet Potato,Mindanao,2023-10,34.58
+Sweet Potato,Luzon-North,2023-11,34.15
+Sweet Potato,Luzon-Central,2023-11,32.63
+Sweet Potato,Luzon-South,2023-11,39.02
+Sweet Potato,Visayas,2023-11,37.87
+Sweet Potato,Mindanao,2023-11,34.13
+Sweet Potato,Luzon-North,2023-12,33.24
+Sweet Potato,Luzon-Central,2023-12,33.96
+Sweet Potato,Luzon-South,2023-12,33.84
+Sweet Potato,Visayas,2023-12,37.11
+Sweet Potato,Mindanao,2023-12,31.91
+Sweet Potato,Luzon-North,2024-01,36.24
+Sweet Potato,Luzon-Central,2024-01,34.11
+Sweet Potato,Luzon-South,2024-01,36.65
+Sweet Potato,Visayas,2024-01,39.62
+Sweet Potato,Mindanao,2024-01,33.06
+Sweet Potato,Luzon-North,2024-02,36.17
+Sweet Potato,Luzon-Central,2024-02,35.11
+Sweet Potato,Luzon-South,2024-02,36.86
+Sweet Potato,Visayas,2024-02,37.48
+Sweet Potato,Mindanao,2024-02,33.29
+Sweet Potato,Luzon-North,2024-03,33.46
+Sweet Potato,Luzon-Central,2024-03,33.44
+Sweet Potato,Luzon-South,2024-03,37.87
+Sweet Potato,Visayas,2024-03,38.48
+Sweet Potato,Mindanao,2024-03,31.17
+Sweet Potato,Luzon-North,2024-04,31.65
+Sweet Potato,Luzon-Central,2024-04,32.38
+Sweet Potato,Luzon-South,2024-04,35.3
+Sweet Potato,Visayas,2024-04,38.56
+Sweet Potato,Mindanao,2024-04,30.86
+Sweet Potato,Luzon-North,2024-05,34.18
+Sweet Potato,Luzon-Central,2024-05,34.38
+Sweet Potato,Luzon-South,2024-05,35.4
+Sweet Potato,Visayas,2024-05,37.01
+Sweet Potato,Mindanao,2024-05,34.88
+Sweet Potato,Luzon-North,2024-06,38.64
+Sweet Potato,Luzon-Central,2024-06,35.61
+Sweet Potato,Luzon-South,2024-06,38.27
+Sweet Potato,Visayas,2024-06,36.96
+Sweet Potato,Mindanao,2024-06,34.38
+Sweet Potato,Luzon-North,2024-07,37.14
+Sweet Potato,Luzon-Central,2024-07,35.94
+Sweet Potato,Luzon-South,2024-07,37.88
+Sweet Potato,Visayas,2024-07,39.97
+Sweet Potato,Mindanao,2024-07,34.12
+Sweet Potato,Luzon-North,2024-08,39.42
+Sweet Potato,Luzon-Central,2024-08,39.92
+Sweet Potato,Luzon-South,2024-08,41.49
+Sweet Potato,Visayas,2024-08,38.44
+Sweet Potato,Mindanao,2024-08,34.34
+Sweet Potato,Luzon-North,2024-09,36.4
+Sweet Potato,Luzon-Central,2024-09,36.44
+Sweet Potato,Luzon-South,2024-09,42.67
+Sweet Potato,Visayas,2024-09,43.55
+Sweet Potato,Mindanao,2024-09,35.66
+Sweet Potato,Luzon-North,2024-10,38.64
+Sweet Potato,Luzon-Central,2024-10,35.22
+Sweet Potato,Luzon-South,2024-10,37.19
+Sweet Potato,Visayas,2024-10,38.28
+Sweet Potato,Mindanao,2024-10,33.94
+Sweet Potato,Luzon-North,2024-11,38.58
+Sweet Potato,Luzon-Central,2024-11,32.26
+Sweet Potato,Luzon-South,2024-11,40.17
+Sweet Potato,Visayas,2024-11,41.49
+Sweet Potato,Mindanao,2024-11,33.19
+Sweet Potato,Luzon-North,2024-12,35.24
+Sweet Potato,Luzon-Central,2024-12,32.87
+Sweet Potato,Luzon-South,2024-12,37.05
+Sweet Potato,Visayas,2024-12,39.41
+Sweet Potato,Mindanao,2024-12,32.87
+Sweet Potato,Luzon-North,2025-01,37.1
+Sweet Potato,Luzon-Central,2025-01,35.94
+Sweet Potato,Luzon-South,2025-01,37.74
+Sweet Potato,Visayas,2025-01,38.79
+Sweet Potato,Mindanao,2025-01,32.76
+Sweet Potato,Luzon-North,2025-02,35.96
+Sweet Potato,Luzon-Central,2025-02,32.04
+Sweet Potato,Luzon-South,2025-02,37.87
+Sweet Potato,Visayas,2025-02,38.57
+Sweet Potato,Mindanao,2025-02,31.45
+Sweet Potato,Luzon-North,2025-03,37.99
+Sweet Potato,Luzon-Central,2025-03,31.32
+Sweet Potato,Luzon-South,2025-03,34.44
+Sweet Potato,Visayas,2025-03,37.55
+Sweet Potato,Mindanao,2025-03,28.8
+Sweet Potato,Luzon-North,2025-04,32.61
+Sweet Potato,Luzon-Central,2025-04,30.11
+Sweet Potato,Luzon-South,2025-04,33.93
+Sweet Potato,Visayas,2025-04,36.42
+Sweet Potato,Mindanao,2025-04,32.08
+Sweet Potato,Luzon-North,2025-05,36.59
+Sweet Potato,Luzon-Central,2025-05,34.63
+Sweet Potato,Luzon-South,2025-05,38.56
+Sweet Potato,Visayas,2025-05,38.55
+Sweet Potato,Mindanao,2025-05,31.49
+Sweet Potato,Luzon-North,2025-06,38.11
+Sweet Potato,Luzon-Central,2025-06,33.81
+Sweet Potato,Luzon-South,2025-06,36.74
+Sweet Potato,Visayas,2025-06,41.97
+Sweet Potato,Mindanao,2025-06,34.89
+Sweet Potato,Luzon-North,2025-07,37.58
+Sweet Potato,Luzon-Central,2025-07,37.03
+Sweet Potato,Luzon-South,2025-07,40.74
+Sweet Potato,Visayas,2025-07,37.4
+Sweet Potato,Mindanao,2025-07,34.4
+Sweet Potato,Luzon-North,2025-08,36.65
+Sweet Potato,Luzon-Central,2025-08,37.62
+Sweet Potato,Luzon-South,2025-08,39.52
+Sweet Potato,Visayas,2025-08,44.93
+Sweet Potato,Mindanao,2025-08,37.16
+Sweet Potato,Luzon-North,2025-09,38.06
+Sweet Potato,Luzon-Central,2025-09,38.05
+Sweet Potato,Luzon-South,2025-09,39.13
+Sweet Potato,Visayas,2025-09,42.93
+Sweet Potato,Mindanao,2025-09,37.91
+Sweet Potato,Luzon-North,2025-10,38.77
+Sweet Potato,Luzon-Central,2025-10,33.19
+Sweet Potato,Luzon-South,2025-10,39.51
+Sweet Potato,Visayas,2025-10,42.38
+Sweet Potato,Mindanao,2025-10,36.13
+Sweet Potato,Luzon-North,2025-11,38.25
+Sweet Potato,Luzon-Central,2025-11,32.47
+Sweet Potato,Luzon-South,2025-11,38.96
+Sweet Potato,Visayas,2025-11,37.77
+Sweet Potato,Mindanao,2025-11,33.95
+Sweet Potato,Luzon-North,2025-12,36.18
+Sweet Potato,Luzon-Central,2025-12,35.21
+Sweet Potato,Luzon-South,2025-12,36.15
+Sweet Potato,Visayas,2025-12,38.65
+Sweet Potato,Mindanao,2025-12,31.04
+Sweet Potato,Luzon-North,2026-01,32.96
+Sweet Potato,Luzon-Central,2026-01,34.99
+Sweet Potato,Luzon-South,2026-01,37.14
+Sweet Potato,Visayas,2026-01,35.2
+Sweet Potato,Mindanao,2026-01,31.58
+Sweet Potato,Luzon-North,2026-02,35.51
+Sweet Potato,Luzon-Central,2026-02,36.71
+Sweet Potato,Luzon-South,2026-02,39.2
+Sweet Potato,Visayas,2026-02,39.85
+Sweet Potato,Mindanao,2026-02,30.04
+Sweet Potato,Luzon-North,2026-03,34.25
+Sweet Potato,Luzon-Central,2026-03,33.84
+Sweet Potato,Luzon-South,2026-03,36.86
+Sweet Potato,Visayas,2026-03,37.95
+Sweet Potato,Mindanao,2026-03,31.64
+Sweet Potato,Luzon-North,2026-04,37.08
+Sweet Potato,Luzon-Central,2026-04,35.14
+Sweet Potato,Luzon-South,2026-04,35.61
+Sweet Potato,Visayas,2026-04,35.0
+Sweet Potato,Mindanao,2026-04,34.96
+Cassava,Luzon-North,2022-01,31.71
+Cassava,Luzon-Central,2022-01,31.46
+Cassava,Luzon-South,2022-01,29.92
+Cassava,Visayas,2022-01,32.78
+Cassava,Mindanao,2022-01,27.33
+Cassava,Luzon-North,2022-02,30.72
+Cassava,Luzon-Central,2022-02,29.22
+Cassava,Luzon-South,2022-02,34.52
+Cassava,Visayas,2022-02,33.3
+Cassava,Mindanao,2022-02,27.84
+Cassava,Luzon-North,2022-03,30.73
+Cassava,Luzon-Central,2022-03,27.54
+Cassava,Luzon-South,2022-03,29.98
+Cassava,Visayas,2022-03,34.94
+Cassava,Mindanao,2022-03,25.94
+Cassava,Luzon-North,2022-04,28.12
+Cassava,Luzon-Central,2022-04,27.73
+Cassava,Luzon-South,2022-04,28.66
+Cassava,Visayas,2022-04,27.84
+Cassava,Mindanao,2022-04,28.23
+Cassava,Luzon-North,2022-05,28.3
+Cassava,Luzon-Central,2022-05,27.52
+Cassava,Luzon-South,2022-05,30.36
+Cassava,Visayas,2022-05,30.25
+Cassava,Mindanao,2022-05,25.92
+Cassava,Luzon-North,2022-06,30.95
+Cassava,Luzon-Central,2022-06,33.02
+Cassava,Luzon-South,2022-06,33.43
+Cassava,Visayas,2022-06,34.4
+Cassava,Mindanao,2022-06,26.4
+Cassava,Luzon-North,2022-07,31.61
+Cassava,Luzon-Central,2022-07,28.58
+Cassava,Luzon-South,2022-07,34.52
+Cassava,Visayas,2022-07,33.79
+Cassava,Mindanao,2022-07,29.49
+Cassava,Luzon-North,2022-08,33.05
+Cassava,Luzon-Central,2022-08,30.94
+Cassava,Luzon-South,2022-08,32.2
+Cassava,Visayas,2022-08,36.9
+Cassava,Mindanao,2022-08,28.73
+Cassava,Luzon-North,2022-09,31.84
+Cassava,Luzon-Central,2022-09,32.01
+Cassava,Luzon-South,2022-09,34.28
+Cassava,Visayas,2022-09,37.03
+Cassava,Mindanao,2022-09,33.07
+Cassava,Luzon-North,2022-10,33.09
+Cassava,Luzon-Central,2022-10,31.68
+Cassava,Luzon-South,2022-10,34.35
+Cassava,Visayas,2022-10,36.81
+Cassava,Mindanao,2022-10,27.58
+Cassava,Luzon-North,2022-11,31.47
+Cassava,Luzon-Central,2022-11,28.28
+Cassava,Luzon-South,2022-11,30.44
+Cassava,Visayas,2022-11,33.39
+Cassava,Mindanao,2022-11,28.18
+Cassava,Luzon-North,2022-12,31.22
+Cassava,Luzon-Central,2022-12,30.73
+Cassava,Luzon-South,2022-12,28.14
+Cassava,Visayas,2022-12,32.65
+Cassava,Mindanao,2022-12,30.98
+Cassava,Luzon-North,2023-01,31.7
+Cassava,Luzon-Central,2023-01,31.28
+Cassava,Luzon-South,2023-01,32.06
+Cassava,Visayas,2023-01,30.45
+Cassava,Mindanao,2023-01,26.66
+Cassava,Luzon-North,2023-02,31.5
+Cassava,Luzon-Central,2023-02,30.6
+Cassava,Luzon-South,2023-02,30.77
+Cassava,Visayas,2023-02,32.41
+Cassava,Mindanao,2023-02,28.66
+Cassava,Luzon-North,2023-03,26.95
+Cassava,Luzon-Central,2023-03,27.86
+Cassava,Luzon-South,2023-03,33.53
+Cassava,Visayas,2023-03,35.4
+Cassava,Mindanao,2023-03,27.32
+Cassava,Luzon-North,2023-04,31.96
+Cassava,Luzon-Central,2023-04,27.36
+Cassava,Luzon-South,2023-04,29.49
+Cassava,Visayas,2023-04,28.07
+Cassava,Mindanao,2023-04,28.53
+Cassava,Luzon-North,2023-05,29.36
+Cassava,Luzon-Central,2023-05,32.1
+Cassava,Luzon-South,2023-05,31.94
+Cassava,Visayas,2023-05,32.62
+Cassava,Mindanao,2023-05,25.31
+Cassava,Luzon-North,2023-06,33.53
+Cassava,Luzon-Central,2023-06,29.39
+Cassava,Luzon-South,2023-06,32.48
+Cassava,Visayas,2023-06,29.95
+Cassava,Mindanao,2023-06,30.35
+Cassava,Luzon-North,2023-07,33.74
+Cassava,Luzon-Central,2023-07,29.92
+Cassava,Luzon-South,2023-07,33.91
+Cassava,Visayas,2023-07,35.4
+Cassava,Mindanao,2023-07,31.34
+Cassava,Luzon-North,2023-08,33.9
+Cassava,Luzon-Central,2023-08,35.17
+Cassava,Luzon-South,2023-08,34.98
+Cassava,Visayas,2023-08,35.31
+Cassava,Mindanao,2023-08,30.63
+Cassava,Luzon-North,2023-09,30.0
+Cassava,Luzon-Central,2023-09,31.67
+Cassava,Luzon-South,2023-09,37.92
+Cassava,Visayas,2023-09,37.62
+Cassava,Mindanao,2023-09,30.66
+Cassava,Luzon-North,2023-10,33.78
+Cassava,Luzon-Central,2023-10,28.64
+Cassava,Luzon-South,2023-10,34.36
+Cassava,Visayas,2023-10,36.79
+Cassava,Mindanao,2023-10,31.95
+Cassava,Luzon-North,2023-11,30.17
+Cassava,Luzon-Central,2023-11,31.52
+Cassava,Luzon-South,2023-11,36.05
+Cassava,Visayas,2023-11,33.18
+Cassava,Mindanao,2023-11,30.28
+Cassava,Luzon-North,2023-12,28.41
+Cassava,Luzon-Central,2023-12,26.67
+Cassava,Luzon-South,2023-12,33.35
+Cassava,Visayas,2023-12,33.36
+Cassava,Mindanao,2023-12,28.95
+Cassava,Luzon-North,2024-01,29.96
+Cassava,Luzon-Central,2024-01,29.19
+Cassava,Luzon-South,2024-01,33.72
+Cassava,Visayas,2024-01,36.2
+Cassava,Mindanao,2024-01,28.39
+Cassava,Luzon-North,2024-02,28.34
+Cassava,Luzon-Central,2024-02,31.56
+Cassava,Luzon-South,2024-02,33.43
+Cassava,Visayas,2024-02,34.52
+Cassava,Mindanao,2024-02,29.0
+Cassava,Luzon-North,2024-03,33.51
+Cassava,Luzon-Central,2024-03,28.92
+Cassava,Luzon-South,2024-03,32.33
+Cassava,Visayas,2024-03,29.4
+Cassava,Mindanao,2024-03,27.1
+Cassava,Luzon-North,2024-04,28.72
+Cassava,Luzon-Central,2024-04,28.51
+Cassava,Luzon-South,2024-04,31.77
+Cassava,Visayas,2024-04,30.91
+Cassava,Mindanao,2024-04,30.06
+Cassava,Luzon-North,2024-05,28.78
+Cassava,Luzon-Central,2024-05,28.52
+Cassava,Luzon-South,2024-05,32.3
+Cassava,Visayas,2024-05,30.77
+Cassava,Mindanao,2024-05,29.08
+Cassava,Luzon-North,2024-06,32.69
+Cassava,Luzon-Central,2024-06,29.97
+Cassava,Luzon-South,2024-06,36.45
+Cassava,Visayas,2024-06,34.36
+Cassava,Mindanao,2024-06,29.88
+Cassava,Luzon-North,2024-07,31.08
+Cassava,Luzon-Central,2024-07,28.72
+Cassava,Luzon-South,2024-07,33.2
+Cassava,Visayas,2024-07,34.7
+Cassava,Mindanao,2024-07,29.68
+Cassava,Luzon-North,2024-08,35.58
+Cassava,Luzon-Central,2024-08,28.95
+Cassava,Luzon-South,2024-08,33.92
+Cassava,Visayas,2024-08,33.61
+Cassava,Mindanao,2024-08,34.0
+Cassava,Luzon-North,2024-09,33.93
+Cassava,Luzon-Central,2024-09,32.66
+Cassava,Luzon-South,2024-09,34.64
+Cassava,Visayas,2024-09,39.42
+Cassava,Mindanao,2024-09,31.81
+Cassava,Luzon-North,2024-10,34.1
+Cassava,Luzon-Central,2024-10,29.07
+Cassava,Luzon-South,2024-10,37.49
+Cassava,Visayas,2024-10,37.14
+Cassava,Mindanao,2024-10,32.23
+Cassava,Luzon-North,2024-11,33.87
+Cassava,Luzon-Central,2024-11,30.32
+Cassava,Luzon-South,2024-11,33.2
+Cassava,Visayas,2024-11,35.68
+Cassava,Mindanao,2024-11,30.29
+Cassava,Luzon-North,2024-12,30.92
+Cassava,Luzon-Central,2024-12,30.12
+Cassava,Luzon-South,2024-12,32.04
+Cassava,Visayas,2024-12,35.02
+Cassava,Mindanao,2024-12,30.48
+Cassava,Luzon-North,2025-01,31.36
+Cassava,Luzon-Central,2025-01,32.93
+Cassava,Luzon-South,2025-01,30.37
+Cassava,Visayas,2025-01,33.46
+Cassava,Mindanao,2025-01,31.66
+Cassava,Luzon-North,2025-02,30.72
+Cassava,Luzon-Central,2025-02,27.71
+Cassava,Luzon-South,2025-02,35.27
+Cassava,Visayas,2025-02,34.83
+Cassava,Mindanao,2025-02,27.44
+Cassava,Luzon-North,2025-03,31.67
+Cassava,Luzon-Central,2025-03,27.76
+Cassava,Luzon-South,2025-03,29.85
+Cassava,Visayas,2025-03,32.67
+Cassava,Mindanao,2025-03,27.67
+Cassava,Luzon-North,2025-04,28.54
+Cassava,Luzon-Central,2025-04,28.47
+Cassava,Luzon-South,2025-04,30.12
+Cassava,Visayas,2025-04,32.73
+Cassava,Mindanao,2025-04,28.06
+Cassava,Luzon-North,2025-05,32.03
+Cassava,Luzon-Central,2025-05,28.97
+Cassava,Luzon-South,2025-05,30.25
+Cassava,Visayas,2025-05,31.14
+Cassava,Mindanao,2025-05,28.36
+Cassava,Luzon-North,2025-06,34.67
+Cassava,Luzon-Central,2025-06,32.21
+Cassava,Luzon-South,2025-06,32.7
+Cassava,Visayas,2025-06,36.4
+Cassava,Mindanao,2025-06,28.19
+Cassava,Luzon-North,2025-07,34.86
+Cassava,Luzon-Central,2025-07,31.23
+Cassava,Luzon-South,2025-07,36.17
+Cassava,Visayas,2025-07,36.95
+Cassava,Mindanao,2025-07,30.42
+Cassava,Luzon-North,2025-08,35.37
+Cassava,Luzon-Central,2025-08,31.61
+Cassava,Luzon-South,2025-08,36.4
+Cassava,Visayas,2025-08,39.63
+Cassava,Mindanao,2025-08,39.02
+Cassava,Luzon-North,2025-09,36.73
+Cassava,Luzon-Central,2025-09,34.21
+Cassava,Luzon-South,2025-09,35.35
+Cassava,Visayas,2025-09,40.35
+Cassava,Mindanao,2025-09,30.25
+Cassava,Luzon-North,2025-10,32.87
+Cassava,Luzon-Central,2025-10,33.47
+Cassava,Luzon-South,2025-10,33.79
+Cassava,Visayas,2025-10,39.86
+Cassava,Mindanao,2025-10,33.61
+Cassava,Luzon-North,2025-11,31.47
+Cassava,Luzon-Central,2025-11,30.23
+Cassava,Luzon-South,2025-11,31.76
+Cassava,Visayas,2025-11,32.52
+Cassava,Mindanao,2025-11,30.8
+Cassava,Luzon-North,2025-12,32.8
+Cassava,Luzon-Central,2025-12,31.07
+Cassava,Luzon-South,2025-12,33.83
+Cassava,Visayas,2025-12,33.37
+Cassava,Mindanao,2025-12,30.11
+Cassava,Luzon-North,2026-01,29.48
+Cassava,Luzon-Central,2026-01,30.58
+Cassava,Luzon-South,2026-01,35.91
+Cassava,Visayas,2026-01,36.67
+Cassava,Mindanao,2026-01,28.92
+Cassava,Luzon-North,2026-02,31.35
+Cassava,Luzon-Central,2026-02,32.73
+Cassava,Luzon-South,2026-02,36.49
+Cassava,Visayas,2026-02,31.84
+Cassava,Mindanao,2026-02,29.01
+Cassava,Luzon-North,2026-03,31.33
+Cassava,Luzon-Central,2026-03,31.55
+Cassava,Luzon-South,2026-03,31.14
+Cassava,Visayas,2026-03,34.52
+Cassava,Mindanao,2026-03,28.36
+Cassava,Luzon-North,2026-04,34.35
+Cassava,Luzon-Central,2026-04,30.09
+Cassava,Luzon-South,2026-04,32.0
+Cassava,Visayas,2026-04,32.58
+Cassava,Mindanao,2026-04,30.05
+Ginger,Luzon-North,2022-01,169.81
+Ginger,Luzon-Central,2022-01,174.29
+Ginger,Luzon-South,2022-01,175.87
+Ginger,Visayas,2022-01,186.58
+Ginger,Mindanao,2022-01,156.14
+Ginger,Luzon-North,2022-02,168.52
+Ginger,Luzon-Central,2022-02,167.35
+Ginger,Luzon-South,2022-02,180.24
+Ginger,Visayas,2022-02,200.19
+Ginger,Mindanao,2022-02,174.66
+Ginger,Luzon-North,2022-03,173.89
+Ginger,Luzon-Central,2022-03,159.45
+Ginger,Luzon-South,2022-03,192.28
+Ginger,Visayas,2022-03,170.72
+Ginger,Mindanao,2022-03,147.78
+Ginger,Luzon-North,2022-04,181.54
+Ginger,Luzon-Central,2022-04,173.67
+Ginger,Luzon-South,2022-04,192.9
+Ginger,Visayas,2022-04,187.09
+Ginger,Mindanao,2022-04,152.53
+Ginger,Luzon-North,2022-05,175.11
+Ginger,Luzon-Central,2022-05,177.45
+Ginger,Luzon-South,2022-05,181.42
+Ginger,Visayas,2022-05,187.23
+Ginger,Mindanao,2022-05,155.4
+Ginger,Luzon-North,2022-06,177.04
+Ginger,Luzon-Central,2022-06,188.2
+Ginger,Luzon-South,2022-06,201.98
+Ginger,Visayas,2022-06,191.23
+Ginger,Mindanao,2022-06,165.39
+Ginger,Luzon-North,2022-07,189.09
+Ginger,Luzon-Central,2022-07,191.97
+Ginger,Luzon-South,2022-07,192.31
+Ginger,Visayas,2022-07,208.39
+Ginger,Mindanao,2022-07,161.44
+Ginger,Luzon-North,2022-08,192.0
+Ginger,Luzon-Central,2022-08,200.94
+Ginger,Luzon-South,2022-08,224.94
+Ginger,Visayas,2022-08,208.48
+Ginger,Mindanao,2022-08,183.2
+Ginger,Luzon-North,2022-09,218.25
+Ginger,Luzon-Central,2022-09,197.47
+Ginger,Luzon-South,2022-09,214.31
+Ginger,Visayas,2022-09,232.53
+Ginger,Mindanao,2022-09,197.06
+Ginger,Luzon-North,2022-10,214.77
+Ginger,Luzon-Central,2022-10,203.06
+Ginger,Luzon-South,2022-10,207.37
+Ginger,Visayas,2022-10,218.35
+Ginger,Mindanao,2022-10,188.58
+Ginger,Luzon-North,2022-11,179.95
+Ginger,Luzon-Central,2022-11,176.33
+Ginger,Luzon-South,2022-11,212.71
+Ginger,Visayas,2022-11,191.93
+Ginger,Mindanao,2022-11,188.61
+Ginger,Luzon-North,2022-12,193.07
+Ginger,Luzon-Central,2022-12,181.45
+Ginger,Luzon-South,2022-12,205.27
+Ginger,Visayas,2022-12,210.49
+Ginger,Mindanao,2022-12,187.78
+Ginger,Luzon-North,2023-01,187.52
+Ginger,Luzon-Central,2023-01,181.61
+Ginger,Luzon-South,2023-01,198.46
+Ginger,Visayas,2023-01,226.25
+Ginger,Mindanao,2023-01,186.44
+Ginger,Luzon-North,2023-02,183.47
+Ginger,Luzon-Central,2023-02,181.62
+Ginger,Luzon-South,2023-02,194.87
+Ginger,Visayas,2023-02,207.95
+Ginger,Mindanao,2023-02,180.87
+Ginger,Luzon-North,2023-03,209.18
+Ginger,Luzon-Central,2023-03,163.53
+Ginger,Luzon-South,2023-03,207.12
+Ginger,Visayas,2023-03,207.01
+Ginger,Mindanao,2023-03,168.28
+Ginger,Luzon-North,2023-04,185.23
+Ginger,Luzon-Central,2023-04,174.71
+Ginger,Luzon-South,2023-04,196.47
+Ginger,Visayas,2023-04,211.77
+Ginger,Mindanao,2023-04,160.33
+Ginger,Luzon-North,2023-05,204.17
+Ginger,Luzon-Central,2023-05,180.42
+Ginger,Luzon-South,2023-05,216.3
+Ginger,Visayas,2023-05,211.14
+Ginger,Mindanao,2023-05,189.17
+Ginger,Luzon-North,2023-06,206.14
+Ginger,Luzon-Central,2023-06,202.92
+Ginger,Luzon-South,2023-06,211.06
+Ginger,Visayas,2023-06,207.44
+Ginger,Mindanao,2023-06,192.71
+Ginger,Luzon-North,2023-07,214.83
+Ginger,Luzon-Central,2023-07,220.13
+Ginger,Luzon-South,2023-07,195.88
+Ginger,Visayas,2023-07,221.81
+Ginger,Mindanao,2023-07,203.2
+Ginger,Luzon-North,2023-08,204.74
+Ginger,Luzon-Central,2023-08,207.36
+Ginger,Luzon-South,2023-08,253.82
+Ginger,Visayas,2023-08,252.77
+Ginger,Mindanao,2023-08,194.23
+Ginger,Luzon-North,2023-09,239.7
+Ginger,Luzon-Central,2023-09,227.5
+Ginger,Luzon-South,2023-09,244.04
+Ginger,Visayas,2023-09,246.21
+Ginger,Mindanao,2023-09,210.52
+Ginger,Luzon-North,2023-10,207.37
+Ginger,Luzon-Central,2023-10,202.77
+Ginger,Luzon-South,2023-10,236.06
+Ginger,Visayas,2023-10,235.85
+Ginger,Mindanao,2023-10,220.38
+Ginger,Luzon-North,2023-11,202.46
+Ginger,Luzon-Central,2023-11,173.87
+Ginger,Luzon-South,2023-11,212.59
+Ginger,Visayas,2023-11,225.49
+Ginger,Mindanao,2023-11,195.18
+Ginger,Luzon-North,2023-12,203.63
+Ginger,Luzon-Central,2023-12,186.79
+Ginger,Luzon-South,2023-12,229.07
+Ginger,Visayas,2023-12,211.88
+Ginger,Mindanao,2023-12,195.47
+Ginger,Luzon-North,2024-01,201.11
+Ginger,Luzon-Central,2024-01,184.13
+Ginger,Luzon-South,2024-01,229.44
+Ginger,Visayas,2024-01,192.65
+Ginger,Mindanao,2024-01,181.67
+Ginger,Luzon-North,2024-02,209.62
+Ginger,Luzon-Central,2024-02,193.44
+Ginger,Luzon-South,2024-02,223.54
+Ginger,Visayas,2024-02,220.48
+Ginger,Mindanao,2024-02,186.49
+Ginger,Luzon-North,2024-03,221.7
+Ginger,Luzon-Central,2024-03,189.92
+Ginger,Luzon-South,2024-03,208.38
+Ginger,Visayas,2024-03,204.33
+Ginger,Mindanao,2024-03,179.08
+Ginger,Luzon-North,2024-04,205.53
+Ginger,Luzon-Central,2024-04,196.5
+Ginger,Luzon-South,2024-04,209.04
+Ginger,Visayas,2024-04,207.45
+Ginger,Mindanao,2024-04,191.5
+Ginger,Luzon-North,2024-05,186.86
+Ginger,Luzon-Central,2024-05,192.76
+Ginger,Luzon-South,2024-05,211.8
+Ginger,Visayas,2024-05,211.3
+Ginger,Mindanao,2024-05,191.46
+Ginger,Luzon-North,2024-06,206.65
+Ginger,Luzon-Central,2024-06,197.0
+Ginger,Luzon-South,2024-06,244.76
+Ginger,Visayas,2024-06,239.49
+Ginger,Mindanao,2024-06,210.8
+Ginger,Luzon-North,2024-07,221.84
+Ginger,Luzon-Central,2024-07,222.68
+Ginger,Luzon-South,2024-07,241.43
+Ginger,Visayas,2024-07,253.51
+Ginger,Mindanao,2024-07,230.2
+Ginger,Luzon-North,2024-08,230.45
+Ginger,Luzon-Central,2024-08,226.68
+Ginger,Luzon-South,2024-08,244.14
+Ginger,Visayas,2024-08,207.48
+Ginger,Mindanao,2024-08,201.65
+Ginger,Luzon-North,2024-09,238.87
+Ginger,Luzon-Central,2024-09,236.37
+Ginger,Luzon-South,2024-09,243.38
+Ginger,Visayas,2024-09,272.4
+Ginger,Mindanao,2024-09,236.22
+Ginger,Luzon-North,2024-10,226.58
+Ginger,Luzon-Central,2024-10,237.93
+Ginger,Luzon-South,2024-10,264.23
+Ginger,Visayas,2024-10,255.69
+Ginger,Mindanao,2024-10,204.62
+Ginger,Luzon-North,2024-11,235.85
+Ginger,Luzon-Central,2024-11,209.2
+Ginger,Luzon-South,2024-11,226.35
+Ginger,Visayas,2024-11,238.69
+Ginger,Mindanao,2024-11,198.86
+Ginger,Luzon-North,2024-12,228.17
+Ginger,Luzon-Central,2024-12,215.98
+Ginger,Luzon-South,2024-12,241.26
+Ginger,Visayas,2024-12,240.69
+Ginger,Mindanao,2024-12,193.42
+Ginger,Luzon-North,2025-01,216.01
+Ginger,Luzon-Central,2025-01,218.19
+Ginger,Luzon-South,2025-01,223.98
+Ginger,Visayas,2025-01,269.5
+Ginger,Mindanao,2025-01,200.05
+Ginger,Luzon-North,2025-02,212.51
+Ginger,Luzon-Central,2025-02,222.24
+Ginger,Luzon-South,2025-02,238.46
+Ginger,Visayas,2025-02,236.11
+Ginger,Mindanao,2025-02,201.26
+Ginger,Luzon-North,2025-03,217.94
+Ginger,Luzon-Central,2025-03,213.41
+Ginger,Luzon-South,2025-03,232.61
+Ginger,Visayas,2025-03,226.99
+Ginger,Mindanao,2025-03,202.74
+Ginger,Luzon-North,2025-04,221.29
+Ginger,Luzon-Central,2025-04,211.64
+Ginger,Luzon-South,2025-04,188.54
+Ginger,Visayas,2025-04,219.11
+Ginger,Mindanao,2025-04,189.81
+Ginger,Luzon-North,2025-05,215.38
+Ginger,Luzon-Central,2025-05,211.05
+Ginger,Luzon-South,2025-05,239.32
+Ginger,Visayas,2025-05,242.59
+Ginger,Mindanao,2025-05,201.35
+Ginger,Luzon-North,2025-06,228.27
+Ginger,Luzon-Central,2025-06,238.14
+Ginger,Luzon-South,2025-06,232.07
+Ginger,Visayas,2025-06,250.0
+Ginger,Mindanao,2025-06,228.64
+Ginger,Luzon-North,2025-07,240.02
+Ginger,Luzon-Central,2025-07,203.36
+Ginger,Luzon-South,2025-07,252.38
+Ginger,Visayas,2025-07,249.88
+Ginger,Mindanao,2025-07,218.18
+Ginger,Luzon-North,2025-08,261.57
+Ginger,Luzon-Central,2025-08,244.17
+Ginger,Luzon-South,2025-08,257.49
+Ginger,Visayas,2025-08,280.36
+Ginger,Mindanao,2025-08,236.14
+Ginger,Luzon-North,2025-09,255.73
+Ginger,Luzon-Central,2025-09,247.89
+Ginger,Luzon-South,2025-09,270.49
+Ginger,Visayas,2025-09,270.08
+Ginger,Mindanao,2025-09,231.15
+Ginger,Luzon-North,2025-10,246.9
+Ginger,Luzon-Central,2025-10,225.43
+Ginger,Luzon-South,2025-10,242.62
+Ginger,Visayas,2025-10,283.64
+Ginger,Mindanao,2025-10,226.58
+Ginger,Luzon-North,2025-11,233.87
+Ginger,Luzon-Central,2025-11,223.26
+Ginger,Luzon-South,2025-11,246.14
+Ginger,Visayas,2025-11,253.17
+Ginger,Mindanao,2025-11,218.47
+Ginger,Luzon-North,2025-12,221.47
+Ginger,Luzon-Central,2025-12,231.85
+Ginger,Luzon-South,2025-12,233.91
+Ginger,Visayas,2025-12,262.11
+Ginger,Mindanao,2025-12,194.01
+Ginger,Luzon-North,2026-01,219.69
+Ginger,Luzon-Central,2026-01,233.77
+Ginger,Luzon-South,2026-01,241.8
+Ginger,Visayas,2026-01,242.15
+Ginger,Mindanao,2026-01,219.81
+Ginger,Luzon-North,2026-02,221.06
+Ginger,Luzon-Central,2026-02,224.78
+Ginger,Luzon-South,2026-02,217.79
+Ginger,Visayas,2026-02,246.22
+Ginger,Mindanao,2026-02,209.88
+Ginger,Luzon-North,2026-03,233.49
+Ginger,Luzon-Central,2026-03,227.82
+Ginger,Luzon-South,2026-03,228.53
+Ginger,Visayas,2026-03,265.3
+Ginger,Mindanao,2026-03,205.19
+Ginger,Luzon-North,2026-04,202.97
+Ginger,Luzon-Central,2026-04,191.34
+Ginger,Luzon-South,2026-04,255.82
+Ginger,Visayas,2026-04,243.26
+Ginger,Mindanao,2026-04,203.58
+Bitter Gourd (Ampalaya),Luzon-North,2022-01,61.45
+Bitter Gourd (Ampalaya),Luzon-Central,2022-01,66.62
+Bitter Gourd (Ampalaya),Luzon-South,2022-01,67.96
+Bitter Gourd (Ampalaya),Visayas,2022-01,76.48
+Bitter Gourd (Ampalaya),Mindanao,2022-01,59.85
+Bitter Gourd (Ampalaya),Luzon-North,2022-02,57.41
+Bitter Gourd (Ampalaya),Luzon-Central,2022-02,65.09
+Bitter Gourd (Ampalaya),Luzon-South,2022-02,67.05
+Bitter Gourd (Ampalaya),Visayas,2022-02,69.43
+Bitter Gourd (Ampalaya),Mindanao,2022-02,65.24
+Bitter Gourd (Ampalaya),Luzon-North,2022-03,62.32
+Bitter Gourd (Ampalaya),Luzon-Central,2022-03,64.15
+Bitter Gourd (Ampalaya),Luzon-South,2022-03,66.29
+Bitter Gourd (Ampalaya),Visayas,2022-03,65.64
+Bitter Gourd (Ampalaya),Mindanao,2022-03,60.22
+Bitter Gourd (Ampalaya),Luzon-North,2022-04,60.68
+Bitter Gourd (Ampalaya),Luzon-Central,2022-04,63.74
+Bitter Gourd (Ampalaya),Luzon-South,2022-04,68.83
+Bitter Gourd (Ampalaya),Visayas,2022-04,67.77
+Bitter Gourd (Ampalaya),Mindanao,2022-04,59.95
+Bitter Gourd (Ampalaya),Luzon-North,2022-05,65.71
+Bitter Gourd (Ampalaya),Luzon-Central,2022-05,60.51
+Bitter Gourd (Ampalaya),Luzon-South,2022-05,70.11
+Bitter Gourd (Ampalaya),Visayas,2022-05,68.24
+Bitter Gourd (Ampalaya),Mindanao,2022-05,61.27
+Bitter Gourd (Ampalaya),Luzon-North,2022-06,63.41
+Bitter Gourd (Ampalaya),Luzon-Central,2022-06,64.24
+Bitter Gourd (Ampalaya),Luzon-South,2022-06,71.36
+Bitter Gourd (Ampalaya),Visayas,2022-06,69.07
+Bitter Gourd (Ampalaya),Mindanao,2022-06,60.63
+Bitter Gourd (Ampalaya),Luzon-North,2022-07,66.77
+Bitter Gourd (Ampalaya),Luzon-Central,2022-07,68.25
+Bitter Gourd (Ampalaya),Luzon-South,2022-07,69.44
+Bitter Gourd (Ampalaya),Visayas,2022-07,75.71
+Bitter Gourd (Ampalaya),Mindanao,2022-07,68.67
+Bitter Gourd (Ampalaya),Luzon-North,2022-08,73.22
+Bitter Gourd (Ampalaya),Luzon-Central,2022-08,63.49
+Bitter Gourd (Ampalaya),Luzon-South,2022-08,76.01
+Bitter Gourd (Ampalaya),Visayas,2022-08,81.74
+Bitter Gourd (Ampalaya),Mindanao,2022-08,65.95
+Bitter Gourd (Ampalaya),Luzon-North,2022-09,77.38
+Bitter Gourd (Ampalaya),Luzon-Central,2022-09,72.55
+Bitter Gourd (Ampalaya),Luzon-South,2022-09,78.6
+Bitter Gourd (Ampalaya),Visayas,2022-09,78.15
+Bitter Gourd (Ampalaya),Mindanao,2022-09,66.44
+Bitter Gourd (Ampalaya),Luzon-North,2022-10,69.85
+Bitter Gourd (Ampalaya),Luzon-Central,2022-10,68.14
+Bitter Gourd (Ampalaya),Luzon-South,2022-10,76.24
+Bitter Gourd (Ampalaya),Visayas,2022-10,78.03
+Bitter Gourd (Ampalaya),Mindanao,2022-10,64.82
+Bitter Gourd (Ampalaya),Luzon-North,2022-11,67.11
+Bitter Gourd (Ampalaya),Luzon-Central,2022-11,65.46
+Bitter Gourd (Ampalaya),Luzon-South,2022-11,64.53
+Bitter Gourd (Ampalaya),Visayas,2022-11,69.47
+Bitter Gourd (Ampalaya),Mindanao,2022-11,59.73
+Bitter Gourd (Ampalaya),Luzon-North,2022-12,64.97
+Bitter Gourd (Ampalaya),Luzon-Central,2022-12,62.15
+Bitter Gourd (Ampalaya),Luzon-South,2022-12,68.03
+Bitter Gourd (Ampalaya),Visayas,2022-12,67.8
+Bitter Gourd (Ampalaya),Mindanao,2022-12,63.1
+Bitter Gourd (Ampalaya),Luzon-North,2023-01,66.61
+Bitter Gourd (Ampalaya),Luzon-Central,2023-01,57.9
+Bitter Gourd (Ampalaya),Luzon-South,2023-01,69.03
+Bitter Gourd (Ampalaya),Visayas,2023-01,66.97
+Bitter Gourd (Ampalaya),Mindanao,2023-01,66.3
+Bitter Gourd (Ampalaya),Luzon-North,2023-02,64.26
+Bitter Gourd (Ampalaya),Luzon-Central,2023-02,61.89
+Bitter Gourd (Ampalaya),Luzon-South,2023-02,69.34
+Bitter Gourd (Ampalaya),Visayas,2023-02,70.31
+Bitter Gourd (Ampalaya),Mindanao,2023-02,60.98
+Bitter Gourd (Ampalaya),Luzon-North,2023-03,68.78
+Bitter Gourd (Ampalaya),Luzon-Central,2023-03,61.98
+Bitter Gourd (Ampalaya),Luzon-South,2023-03,69.83
+Bitter Gourd (Ampalaya),Visayas,2023-03,72.83
+Bitter Gourd (Ampalaya),Mindanao,2023-03,56.48
+Bitter Gourd (Ampalaya),Luzon-North,2023-04,68.58
+Bitter Gourd (Ampalaya),Luzon-Central,2023-04,62.8
+Bitter Gourd (Ampalaya),Luzon-South,2023-04,69.58
+Bitter Gourd (Ampalaya),Visayas,2023-04,65.35
+Bitter Gourd (Ampalaya),Mindanao,2023-04,61.22
+Bitter Gourd (Ampalaya),Luzon-North,2023-05,65.95
+Bitter Gourd (Ampalaya),Luzon-Central,2023-05,60.36
+Bitter Gourd (Ampalaya),Luzon-South,2023-05,75.58
+Bitter Gourd (Ampalaya),Visayas,2023-05,71.76
+Bitter Gourd (Ampalaya),Mindanao,2023-05,59.37
+Bitter Gourd (Ampalaya),Luzon-North,2023-06,67.96
+Bitter Gourd (Ampalaya),Luzon-Central,2023-06,67.56
+Bitter Gourd (Ampalaya),Luzon-South,2023-06,74.67
+Bitter Gourd (Ampalaya),Visayas,2023-06,74.81
+Bitter Gourd (Ampalaya),Mindanao,2023-06,66.41
+Bitter Gourd (Ampalaya),Luzon-North,2023-07,74.44
+Bitter Gourd (Ampalaya),Luzon-Central,2023-07,62.47
+Bitter Gourd (Ampalaya),Luzon-South,2023-07,71.05
+Bitter Gourd (Ampalaya),Visayas,2023-07,71.38
+Bitter Gourd (Ampalaya),Mindanao,2023-07,64.81
+Bitter Gourd (Ampalaya),Luzon-North,2023-08,77.96
+Bitter Gourd (Ampalaya),Luzon-Central,2023-08,72.08
+Bitter Gourd (Ampalaya),Luzon-South,2023-08,72.36
+Bitter Gourd (Ampalaya),Visayas,2023-08,77.38
+Bitter Gourd (Ampalaya),Mindanao,2023-08,71.1
+Bitter Gourd (Ampalaya),Luzon-North,2023-09,72.13
+Bitter Gourd (Ampalaya),Luzon-Central,2023-09,70.79
+Bitter Gourd (Ampalaya),Luzon-South,2023-09,78.99
+Bitter Gourd (Ampalaya),Visayas,2023-09,72.75
+Bitter Gourd (Ampalaya),Mindanao,2023-09,71.6
+Bitter Gourd (Ampalaya),Luzon-North,2023-10,72.74
+Bitter Gourd (Ampalaya),Luzon-Central,2023-10,70.6
+Bitter Gourd (Ampalaya),Luzon-South,2023-10,71.42
+Bitter Gourd (Ampalaya),Visayas,2023-10,74.27
+Bitter Gourd (Ampalaya),Mindanao,2023-10,64.52
+Bitter Gourd (Ampalaya),Luzon-North,2023-11,68.44
+Bitter Gourd (Ampalaya),Luzon-Central,2023-11,65.12
+Bitter Gourd (Ampalaya),Luzon-South,2023-11,71.43
+Bitter Gourd (Ampalaya),Visayas,2023-11,79.54
+Bitter Gourd (Ampalaya),Mindanao,2023-11,66.97
+Bitter Gourd (Ampalaya),Luzon-North,2023-12,63.95
+Bitter Gourd (Ampalaya),Luzon-Central,2023-12,61.6
+Bitter Gourd (Ampalaya),Luzon-South,2023-12,75.61
+Bitter Gourd (Ampalaya),Visayas,2023-12,70.5
+Bitter Gourd (Ampalaya),Mindanao,2023-12,65.93
+Bitter Gourd (Ampalaya),Luzon-North,2024-01,71.68
+Bitter Gourd (Ampalaya),Luzon-Central,2024-01,62.0
+Bitter Gourd (Ampalaya),Luzon-South,2024-01,68.76
+Bitter Gourd (Ampalaya),Visayas,2024-01,71.99
+Bitter Gourd (Ampalaya),Mindanao,2024-01,59.07
+Bitter Gourd (Ampalaya),Luzon-North,2024-02,63.2
+Bitter Gourd (Ampalaya),Luzon-Central,2024-02,62.5
+Bitter Gourd (Ampalaya),Luzon-South,2024-02,72.73
+Bitter Gourd (Ampalaya),Visayas,2024-02,70.15
+Bitter Gourd (Ampalaya),Mindanao,2024-02,61.15
+Bitter Gourd (Ampalaya),Luzon-North,2024-03,63.0
+Bitter Gourd (Ampalaya),Luzon-Central,2024-03,57.7
+Bitter Gourd (Ampalaya),Luzon-South,2024-03,72.74
+Bitter Gourd (Ampalaya),Visayas,2024-03,61.51
+Bitter Gourd (Ampalaya),Mindanao,2024-03,58.02
+Bitter Gourd (Ampalaya),Luzon-North,2024-04,65.67
+Bitter Gourd (Ampalaya),Luzon-Central,2024-04,57.06
+Bitter Gourd (Ampalaya),Luzon-South,2024-04,69.11
+Bitter Gourd (Ampalaya),Visayas,2024-04,73.32
+Bitter Gourd (Ampalaya),Mindanao,2024-04,56.86
+Bitter Gourd (Ampalaya),Luzon-North,2024-05,65.95
+Bitter Gourd (Ampalaya),Luzon-Central,2024-05,59.19
+Bitter Gourd (Ampalaya),Luzon-South,2024-05,70.27
+Bitter Gourd (Ampalaya),Visayas,2024-05,70.8
+Bitter Gourd (Ampalaya),Mindanao,2024-05,61.36
+Bitter Gourd (Ampalaya),Luzon-North,2024-06,72.63
+Bitter Gourd (Ampalaya),Luzon-Central,2024-06,66.81
+Bitter Gourd (Ampalaya),Luzon-South,2024-06,76.19
+Bitter Gourd (Ampalaya),Visayas,2024-06,75.76
+Bitter Gourd (Ampalaya),Mindanao,2024-06,59.44
+Bitter Gourd (Ampalaya),Luzon-North,2024-07,70.97
+Bitter Gourd (Ampalaya),Luzon-Central,2024-07,68.89
+Bitter Gourd (Ampalaya),Luzon-South,2024-07,68.24
+Bitter Gourd (Ampalaya),Visayas,2024-07,80.69
+Bitter Gourd (Ampalaya),Mindanao,2024-07,65.37
+Bitter Gourd (Ampalaya),Luzon-North,2024-08,74.8
+Bitter Gourd (Ampalaya),Luzon-Central,2024-08,67.35
+Bitter Gourd (Ampalaya),Luzon-South,2024-08,77.4
+Bitter Gourd (Ampalaya),Visayas,2024-08,80.51
+Bitter Gourd (Ampalaya),Mindanao,2024-08,67.19
+Bitter Gourd (Ampalaya),Luzon-North,2024-09,75.15
+Bitter Gourd (Ampalaya),Luzon-Central,2024-09,64.25
+Bitter Gourd (Ampalaya),Luzon-South,2024-09,83.94
+Bitter Gourd (Ampalaya),Visayas,2024-09,76.34
+Bitter Gourd (Ampalaya),Mindanao,2024-09,62.02
+Bitter Gourd (Ampalaya),Luzon-North,2024-10,68.77
+Bitter Gourd (Ampalaya),Luzon-Central,2024-10,66.45
+Bitter Gourd (Ampalaya),Luzon-South,2024-10,77.9
+Bitter Gourd (Ampalaya),Visayas,2024-10,74.45
+Bitter Gourd (Ampalaya),Mindanao,2024-10,68.13
+Bitter Gourd (Ampalaya),Luzon-North,2024-11,65.0
+Bitter Gourd (Ampalaya),Luzon-Central,2024-11,72.77
+Bitter Gourd (Ampalaya),Luzon-South,2024-11,73.64
+Bitter Gourd (Ampalaya),Visayas,2024-11,80.94
+Bitter Gourd (Ampalaya),Mindanao,2024-11,60.28
+Bitter Gourd (Ampalaya),Luzon-North,2024-12,69.21
+Bitter Gourd (Ampalaya),Luzon-Central,2024-12,61.24
+Bitter Gourd (Ampalaya),Luzon-South,2024-12,72.37
+Bitter Gourd (Ampalaya),Visayas,2024-12,74.8
+Bitter Gourd (Ampalaya),Mindanao,2024-12,57.34
+Bitter Gourd (Ampalaya),Luzon-North,2025-01,63.24
+Bitter Gourd (Ampalaya),Luzon-Central,2025-01,60.61
+Bitter Gourd (Ampalaya),Luzon-South,2025-01,65.11
+Bitter Gourd (Ampalaya),Visayas,2025-01,69.76
+Bitter Gourd (Ampalaya),Mindanao,2025-01,59.36
+Bitter Gourd (Ampalaya),Luzon-North,2025-02,62.25
+Bitter Gourd (Ampalaya),Luzon-Central,2025-02,64.73
+Bitter Gourd (Ampalaya),Luzon-South,2025-02,72.37
+Bitter Gourd (Ampalaya),Visayas,2025-02,67.7
+Bitter Gourd (Ampalaya),Mindanao,2025-02,60.66
+Bitter Gourd (Ampalaya),Luzon-North,2025-03,65.16
+Bitter Gourd (Ampalaya),Luzon-Central,2025-03,61.8
+Bitter Gourd (Ampalaya),Luzon-South,2025-03,65.99
+Bitter Gourd (Ampalaya),Visayas,2025-03,73.19
+Bitter Gourd (Ampalaya),Mindanao,2025-03,63.13
+Bitter Gourd (Ampalaya),Luzon-North,2025-04,66.7
+Bitter Gourd (Ampalaya),Luzon-Central,2025-04,61.28
+Bitter Gourd (Ampalaya),Luzon-South,2025-04,74.46
+Bitter Gourd (Ampalaya),Visayas,2025-04,75.73
+Bitter Gourd (Ampalaya),Mindanao,2025-04,58.79
+Bitter Gourd (Ampalaya),Luzon-North,2025-05,65.51
+Bitter Gourd (Ampalaya),Luzon-Central,2025-05,67.02
+Bitter Gourd (Ampalaya),Luzon-South,2025-05,66.43
+Bitter Gourd (Ampalaya),Visayas,2025-05,72.59
+Bitter Gourd (Ampalaya),Mindanao,2025-05,61.43
+Bitter Gourd (Ampalaya),Luzon-North,2025-06,66.24
+Bitter Gourd (Ampalaya),Luzon-Central,2025-06,65.14
+Bitter Gourd (Ampalaya),Luzon-South,2025-06,66.42
+Bitter Gourd (Ampalaya),Visayas,2025-06,72.13
+Bitter Gourd (Ampalaya),Mindanao,2025-06,57.48
+Bitter Gourd (Ampalaya),Luzon-North,2025-07,78.78
+Bitter Gourd (Ampalaya),Luzon-Central,2025-07,73.0
+Bitter Gourd (Ampalaya),Luzon-South,2025-07,78.82
+Bitter Gourd (Ampalaya),Visayas,2025-07,77.53
+Bitter Gourd (Ampalaya),Mindanao,2025-07,69.05
+Bitter Gourd (Ampalaya),Luzon-North,2025-08,78.86
+Bitter Gourd (Ampalaya),Luzon-Central,2025-08,74.8
+Bitter Gourd (Ampalaya),Luzon-South,2025-08,81.43
+Bitter Gourd (Ampalaya),Visayas,2025-08,76.43
+Bitter Gourd (Ampalaya),Mindanao,2025-08,70.43
+Bitter Gourd (Ampalaya),Luzon-North,2025-09,73.54
+Bitter Gourd (Ampalaya),Luzon-Central,2025-09,68.25
+Bitter Gourd (Ampalaya),Luzon-South,2025-09,74.81
+Bitter Gourd (Ampalaya),Visayas,2025-09,83.34
+Bitter Gourd (Ampalaya),Mindanao,2025-09,73.96
+Bitter Gourd (Ampalaya),Luzon-North,2025-10,67.93
+Bitter Gourd (Ampalaya),Luzon-Central,2025-10,76.1
+Bitter Gourd (Ampalaya),Luzon-South,2025-10,82.18
+Bitter Gourd (Ampalaya),Visayas,2025-10,77.24
+Bitter Gourd (Ampalaya),Mindanao,2025-10,66.23
+Bitter Gourd (Ampalaya),Luzon-North,2025-11,68.66
+Bitter Gourd (Ampalaya),Luzon-Central,2025-11,69.4
+Bitter Gourd (Ampalaya),Luzon-South,2025-11,70.97
+Bitter Gourd (Ampalaya),Visayas,2025-11,70.31
+Bitter Gourd (Ampalaya),Mindanao,2025-11,65.19
+Bitter Gourd (Ampalaya),Luzon-North,2025-12,60.63
+Bitter Gourd (Ampalaya),Luzon-Central,2025-12,65.37
+Bitter Gourd (Ampalaya),Luzon-South,2025-12,75.11
+Bitter Gourd (Ampalaya),Visayas,2025-12,74.14
+Bitter Gourd (Ampalaya),Mindanao,2025-12,65.33
+Bitter Gourd (Ampalaya),Luzon-North,2026-01,69.34
+Bitter Gourd (Ampalaya),Luzon-Central,2026-01,67.32
+Bitter Gourd (Ampalaya),Luzon-South,2026-01,71.56
+Bitter Gourd (Ampalaya),Visayas,2026-01,70.05
+Bitter Gourd (Ampalaya),Mindanao,2026-01,62.22
+Bitter Gourd (Ampalaya),Luzon-North,2026-02,67.47
+Bitter Gourd (Ampalaya),Luzon-Central,2026-02,69.1
+Bitter Gourd (Ampalaya),Luzon-South,2026-02,76.89
+Bitter Gourd (Ampalaya),Visayas,2026-02,74.68
+Bitter Gourd (Ampalaya),Mindanao,2026-02,60.61
+Bitter Gourd (Ampalaya),Luzon-North,2026-03,63.34
+Bitter Gourd (Ampalaya),Luzon-Central,2026-03,62.52
+Bitter Gourd (Ampalaya),Luzon-South,2026-03,73.82
+Bitter Gourd (Ampalaya),Visayas,2026-03,72.19
+Bitter Gourd (Ampalaya),Mindanao,2026-03,60.97
+Bitter Gourd (Ampalaya),Luzon-North,2026-04,62.63
+Bitter Gourd (Ampalaya),Luzon-Central,2026-04,65.27
+Bitter Gourd (Ampalaya),Luzon-South,2026-04,69.36
+Bitter Gourd (Ampalaya),Visayas,2026-04,70.15
+Bitter Gourd (Ampalaya),Mindanao,2026-04,60.87

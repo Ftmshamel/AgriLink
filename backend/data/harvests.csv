@@ -1,0 +1,1201 @@
+crop,region,date_planted,date_harvested,growth_days,yield_kg,month_planted
+Tomato,Visayas,2022-05-19,2022-07-27,69,1702.6,5
+Tomato,Visayas,2022-05-14,2022-07-19,66,1148.4,5
+Tomato,Visayas,2025-02-15,2025-05-03,77,1495.5,2
+Tomato,Luzon-South,2025-07-26,2025-10-14,80,1710.0,7
+Tomato,Visayas,2025-04-27,2025-07-10,74,1626.2,4
+Tomato,Luzon-Central,2023-11-30,2024-02-18,80,1241.1,11
+Tomato,Mindanao,2025-08-24,2025-11-07,75,1450.1,8
+Tomato,Luzon-Central,2024-12-22,2025-03-15,83,1458.3,12
+Tomato,Visayas,2024-11-17,2025-02-02,77,1643.7,11
+Tomato,Luzon-North,2024-02-12,2024-05-05,83,1616.3,2
+Tomato,Visayas,2025-12-01,2026-02-16,77,1361.7,12
+Tomato,Luzon-Central,2025-11-05,2026-01-25,81,1804.8,11
+Tomato,Luzon-North,2023-12-20,2024-03-09,80,1277.4,12
+Tomato,Visayas,2024-05-25,2024-08-07,74,1646.7,5
+Tomato,Mindanao,2025-04-05,2025-06-13,69,1531.5,4
+Tomato,Luzon-Central,2025-10-24,2026-01-12,80,1560.4,10
+Tomato,Luzon-North,2025-07-15,2025-10-04,81,1578.1,7
+Tomato,Visayas,2025-04-25,2025-06-30,66,1413.7,4
+Tomato,Luzon-South,2024-05-11,2024-07-21,71,1425.7,5
+Tomato,Luzon-North,2023-01-16,2023-04-05,79,1761.4,1
+Tomato,Luzon-South,2025-08-19,2025-11-04,77,1543.9,8
+Tomato,Luzon-South,2024-05-26,2024-08-09,75,1714.2,5
+Tomato,Luzon-North,2024-07-24,2024-10-11,79,1731.7,7
+Tomato,Luzon-South,2023-03-05,2023-05-13,69,1194.0,3
+Tomato,Luzon-North,2025-06-28,2025-09-17,81,1538.5,6
+Tomato,Visayas,2023-11-05,2024-01-21,77,1542.8,11
+Tomato,Visayas,2026-03-25,2026-06-04,71,1623.3,3
+Tomato,Luzon-North,2023-05-14,2023-07-28,75,1396.9,5
+Tomato,Visayas,2025-04-11,2025-06-22,72,1373.3,4
+Tomato,Luzon-South,2025-10-28,2026-01-15,79,1620.6,10
+Tomato,Luzon-South,2024-02-08,2024-04-26,78,1385.7,2
+Tomato,Visayas,2024-11-26,2025-02-07,73,1109.3,11
+Tomato,Luzon-North,2023-06-16,2023-09-01,77,1607.9,6
+Tomato,Visayas,2024-02-07,2024-04-24,77,1850.8,2
+Tomato,Visayas,2023-02-13,2023-05-04,80,1247.9,2
+Tomato,Luzon-Central,2025-02-16,2025-05-03,76,1408.5,2
+Tomato,Luzon-South,2022-07-17,2022-09-27,72,1617.3,7
+Tomato,Luzon-South,2025-06-08,2025-08-22,75,1109.6,6
+Tomato,Visayas,2022-01-31,2022-04-17,76,1562.8,1
+Tomato,Visayas,2023-04-24,2023-07-08,75,1435.4,4
+Tomato,Luzon-North,2024-09-02,2024-11-23,82,1559.4,9
+Tomato,Luzon-South,2022-10-06,2022-12-25,80,1596.4,10
+Tomato,Luzon-North,2024-11-17,2025-02-03,78,1327.3,11
+Tomato,Mindanao,2023-04-11,2023-06-17,67,1128.3,4
+Tomato,Luzon-South,2024-08-07,2024-10-23,77,1102.9,8
+Tomato,Luzon-South,2023-10-11,2023-12-28,78,1726.3,10
+Tomato,Luzon-South,2023-03-04,2023-05-24,81,1611.9,3
+Tomato,Luzon-South,2022-09-07,2022-11-18,72,1572.3,9
+Tomato,Luzon-Central,2026-01-19,2026-04-07,78,1334.7,1
+Tomato,Luzon-North,2023-03-18,2023-06-05,79,1542.4,3
+Tomato,Luzon-North,2024-04-21,2024-07-01,71,1047.8,4
+Tomato,Visayas,2024-10-29,2025-01-13,76,1977.3,10
+Tomato,Visayas,2025-12-27,2026-03-19,82,1365.2,12
+Tomato,Luzon-Central,2026-02-21,2026-05-08,76,1304.2,2
+Tomato,Luzon-Central,2024-04-28,2024-07-06,69,1726.4,4
+Tomato,Luzon-Central,2026-02-02,2026-04-25,82,1603.9,2
+Tomato,Luzon-South,2024-08-22,2024-11-08,78,1323.2,8
+Tomato,Luzon-North,2022-10-08,2022-12-26,79,1169.1,10
+Tomato,Mindanao,2026-02-12,2026-04-29,76,1926.4,2
+Tomato,Mindanao,2025-08-04,2025-10-18,75,1577.2,8
+Eggplant,Luzon-Central,2023-12-30,2024-04-04,96,1018.6,12
+Eggplant,Luzon-Central,2023-09-29,2024-01-02,95,1404.1,9
+Eggplant,Luzon-Central,2023-08-13,2023-11-10,89,829.1,8
+Eggplant,Luzon-North,2022-02-19,2022-06-03,104,1064.5,2
+Eggplant,Luzon-North,2025-03-04,2025-06-08,96,880.8,3
+Eggplant,Luzon-Central,2023-03-12,2023-06-10,90,1021.9,3
+Eggplant,Luzon-South,2024-02-14,2024-05-18,94,1166.8,2
+Eggplant,Luzon-Central,2022-09-28,2022-12-31,94,1227.5,9
+Eggplant,Luzon-North,2026-02-12,2026-05-21,98,933.0,2
+Eggplant,Luzon-South,2025-04-03,2025-06-24,82,1033.8,4
+Eggplant,Visayas,2022-02-08,2022-05-08,89,1106.1,2
+Eggplant,Luzon-North,2023-11-04,2024-02-12,100,1004.1,11
+Eggplant,Luzon-Central,2026-02-18,2026-05-27,98,1206.5,2
+Eggplant,Mindanao,2023-05-02,2023-07-24,83,962.2,5
+Eggplant,Luzon-North,2024-02-14,2024-05-23,99,1135.0,2
+Eggplant,Luzon-North,2025-07-28,2025-11-02,97,1145.2,7
+Eggplant,Mindanao,2022-01-11,2022-04-18,97,931.1,1
+Eggplant,Mindanao,2025-02-19,2025-05-15,85,983.0,2
+Eggplant,Luzon-North,2025-08-06,2025-11-16,102,955.6,8
+Eggplant,Visayas,2023-01-24,2023-04-20,86,1067.8,1
+Eggplant,Visayas,2025-04-01,2025-06-23,83,926.4,4
+Eggplant,Visayas,2022-06-26,2022-09-19,85,809.5,6
+Eggplant,Luzon-Central,2024-04-03,2024-06-23,81,882.8,4
+Eggplant,Mindanao,2025-07-28,2025-11-04,99,868.0,7
+Eggplant,Luzon-South,2024-01-08,2024-04-13,96,1442.3,1
+Eggplant,Luzon-Central,2023-05-10,2023-08-04,86,1253.9,5
+Eggplant,Luzon-North,2024-07-17,2024-10-20,95,1073.5,7
+Eggplant,Luzon-North,2023-12-08,2024-03-15,98,1047.3,12
+Eggplant,Luzon-North,2022-10-30,2023-02-01,94,1193.4,10
+Eggplant,Visayas,2024-03-11,2024-06-06,87,1169.6,3
+Eggplant,Luzon-South,2026-03-07,2026-06-02,87,957.1,3
+Eggplant,Luzon-North,2024-04-12,2024-07-10,89,1514.4,4
+Eggplant,Luzon-South,2024-09-23,2024-12-27,95,948.9,9
+Eggplant,Luzon-Central,2022-01-11,2022-04-16,95,879.7,1
+Eggplant,Mindanao,2022-05-25,2022-08-18,85,1195.1,5
+Eggplant,Luzon-North,2024-12-05,2025-03-18,103,1190.0,12
+Eggplant,Mindanao,2023-01-08,2023-04-07,89,1152.2,1
+Eggplant,Visayas,2024-08-31,2024-12-01,92,1079.5,8
+Eggplant,Luzon-South,2025-07-05,2025-10-06,93,1391.4,7
+Eggplant,Luzon-South,2025-07-17,2025-10-17,92,1134.9,7
+Eggplant,Luzon-Central,2023-01-23,2023-04-26,93,752.2,1
+Eggplant,Luzon-South,2022-09-14,2022-12-23,100,796.3,9
+Eggplant,Luzon-Central,2024-02-23,2024-05-26,93,1087.9,2
+Eggplant,Visayas,2022-10-11,2023-01-10,91,1357.4,10
+Eggplant,Mindanao,2024-11-06,2025-02-11,97,1333.1,11
+Eggplant,Luzon-South,2023-12-16,2024-03-27,102,1186.9,12
+Eggplant,Mindanao,2022-11-10,2023-02-08,90,1113.2,11
+Eggplant,Luzon-Central,2022-04-23,2022-07-21,89,866.7,4
+Eggplant,Visayas,2024-07-15,2024-10-14,91,1331.9,7
+Eggplant,Luzon-North,2024-09-13,2024-12-26,104,1244.7,9
+Eggplant,Mindanao,2024-03-22,2024-06-14,84,867.9,3
+Eggplant,Mindanao,2022-09-20,2022-12-24,95,1226.2,9
+Eggplant,Visayas,2026-03-26,2026-06-17,83,1106.5,3
+Eggplant,Luzon-South,2025-01-24,2025-04-26,92,1161.8,1
+Eggplant,Luzon-South,2022-07-20,2022-10-23,95,646.3,7
+Eggplant,Luzon-South,2024-11-19,2025-02-22,95,1182.0,11
+Eggplant,Luzon-South,2024-03-13,2024-06-01,80,983.0,3
+Eggplant,Luzon-North,2025-08-03,2025-11-03,92,1392.2,8
+Eggplant,Visayas,2024-01-28,2024-05-04,97,987.0,1
+Eggplant,Visayas,2022-11-20,2023-02-25,97,1146.1,11
+Lettuce,Visayas,2025-06-21,2025-08-06,46,506.8,6
+Lettuce,Luzon-Central,2024-04-05,2024-05-17,42,641.4,4
+Lettuce,Mindanao,2022-05-14,2022-06-23,40,586.5,5
+Lettuce,Visayas,2022-07-18,2022-08-31,44,511.2,7
+Lettuce,Visayas,2023-07-14,2023-08-31,48,601.2,7
+Lettuce,Mindanao,2024-10-08,2024-11-23,46,690.9,10
+Lettuce,Luzon-North,2023-10-20,2023-12-12,53,577.8,10
+Lettuce,Luzon-North,2022-07-10,2022-08-30,51,550.6,7
+Lettuce,Luzon-North,2024-04-24,2024-06-10,47,427.0,4
+Lettuce,Luzon-Central,2023-10-31,2023-12-13,43,514.2,10
+Lettuce,Luzon-Central,2022-01-19,2022-03-08,48,629.8,1
+Lettuce,Luzon-North,2024-04-25,2024-06-04,40,605.9,4
+Lettuce,Luzon-Central,2024-11-27,2025-01-14,48,675.8,11
+Lettuce,Mindanao,2024-10-29,2024-12-11,43,614.9,10
+Lettuce,Luzon-North,2024-08-24,2024-10-12,49,657.2,8
+Lettuce,Luzon-Central,2023-01-17,2023-03-05,47,621.3,1
+Lettuce,Luzon-North,2025-06-07,2025-07-24,47,656.3,6
+Lettuce,Luzon-North,2025-11-11,2025-12-30,49,689.6,11
+Lettuce,Visayas,2025-06-25,2025-08-07,43,439.9,6
+Lettuce,Mindanao,2023-03-23,2023-05-03,41,680.9,3
+Lettuce,Mindanao,2026-02-10,2026-03-28,46,717.6,2
+Lettuce,Mindanao,2025-06-25,2025-08-08,44,746.2,6
+Lettuce,Visayas,2024-04-30,2024-06-10,41,535.8,4
+Lettuce,Visayas,2025-06-15,2025-07-29,44,561.3,6
+Lettuce,Visayas,2022-06-05,2022-07-24,49,450.7,6
+Lettuce,Luzon-North,2024-02-29,2024-04-16,47,651.3,2
+Lettuce,Mindanao,2022-12-06,2023-01-17,42,700.3,12
+Lettuce,Luzon-North,2023-07-30,2023-09-15,47,484.5,7
+Lettuce,Luzon-South,2024-07-07,2024-08-23,47,579.6,7
+Lettuce,Luzon-South,2025-09-15,2025-11-02,48,742.6,9
+Lettuce,Luzon-Central,2024-04-19,2024-05-29,40,715.3,4
+Lettuce,Visayas,2023-02-04,2023-03-25,49,641.4,2
+Lettuce,Luzon-South,2023-12-18,2024-02-04,48,810.7,12
+Lettuce,Luzon-North,2022-07-20,2022-09-06,48,617.3,7
+Lettuce,Luzon-Central,2022-05-25,2022-07-06,42,636.0,5
+Lettuce,Visayas,2023-09-14,2023-10-31,47,510.0,9
+Lettuce,Luzon-Central,2025-07-27,2025-09-07,42,479.3,7
+Lettuce,Luzon-North,2025-11-28,2026-01-16,49,809.2,11
+Lettuce,Luzon-Central,2022-08-18,2022-10-02,45,637.6,8
+Lettuce,Visayas,2024-07-03,2024-08-17,45,620.0,7
+Lettuce,Luzon-Central,2024-08-14,2024-09-29,46,714.9,8
+Lettuce,Luzon-South,2022-11-02,2022-12-19,47,880.5,11
+Lettuce,Luzon-South,2026-01-31,2026-03-22,50,609.9,1
+Lettuce,Mindanao,2022-07-18,2022-08-31,44,581.6,7
+Lettuce,Visayas,2023-02-21,2023-04-10,48,508.0,2
+Lettuce,Luzon-South,2023-08-19,2023-10-06,48,671.9,8
+Lettuce,Mindanao,2025-09-09,2025-10-25,46,569.1,9
+Lettuce,Luzon-Central,2024-05-26,2024-07-08,43,701.0,5
+Lettuce,Visayas,2022-04-14,2022-05-26,42,385.0,4
+Lettuce,Mindanao,2024-12-31,2025-02-18,49,696.7,12
+Lettuce,Visayas,2023-01-07,2023-02-20,44,279.8,1
+Lettuce,Mindanao,2024-02-18,2024-04-08,50,647.0,2
+Lettuce,Luzon-Central,2023-10-21,2023-12-07,47,431.4,10
+Lettuce,Luzon-Central,2025-03-14,2025-04-27,44,590.7,3
+Lettuce,Luzon-Central,2024-11-12,2024-12-30,48,672.2,11
+Lettuce,Luzon-North,2025-01-08,2025-02-28,51,775.9,1
+Lettuce,Luzon-South,2026-01-25,2026-03-11,45,744.3,1
+Lettuce,Luzon-North,2024-10-06,2024-11-26,51,552.2,10
+Lettuce,Luzon-North,2023-05-25,2023-07-10,46,627.9,5
+Lettuce,Luzon-South,2024-01-15,2024-03-02,47,498.4,1
+Bell Pepper,Mindanao,2023-01-14,2023-04-06,82,574.5,1
+Bell Pepper,Luzon-Central,2022-10-26,2023-01-15,81,965.3,10
+Bell Pepper,Luzon-South,2025-01-26,2025-04-17,81,557.1,1
+Bell Pepper,Mindanao,2025-07-27,2025-10-15,80,774.2,7
+Bell Pepper,Visayas,2023-09-23,2023-12-14,82,829.3,9
+Bell Pepper,Luzon-Central,2025-01-29,2025-04-25,86,895.4,1
+Bell Pepper,Mindanao,2025-12-15,2026-03-08,83,842.7,12
+Bell Pepper,Mindanao,2024-12-04,2025-02-23,81,755.8,12
+Bell Pepper,Luzon-South,2023-04-19,2023-07-01,73,620.8,4
+Bell Pepper,Luzon-South,2024-06-23,2024-09-11,80,672.0,6
+Bell Pepper,Luzon-Central,2022-02-04,2022-04-30,85,807.4,2
+Bell Pepper,Luzon-North,2023-08-31,2023-11-28,89,906.5,8
+Bell Pepper,Luzon-North,2023-02-06,2023-05-02,85,879.0,2
+Bell Pepper,Luzon-Central,2023-10-14,2023-12-31,78,790.2,10
+Bell Pepper,Luzon-Central,2023-10-07,2023-12-26,80,827.3,10
+Bell Pepper,Mindanao,2025-01-11,2025-04-06,85,979.7,1
+Bell Pepper,Visayas,2026-03-08,2026-05-25,78,453.0,3
+Bell Pepper,Mindanao,2023-03-18,2023-05-31,74,645.6,3
+Bell Pepper,Luzon-North,2022-04-26,2022-07-20,85,630.6,4
+Bell Pepper,Luzon-South,2024-10-04,2024-12-26,83,1032.0,10
+Bell Pepper,Mindanao,2022-06-16,2022-09-03,79,1062.3,6
+Bell Pepper,Visayas,2026-02-14,2026-05-07,82,562.1,2
+Bell Pepper,Luzon-North,2023-04-07,2023-06-24,78,725.0,4
+Bell Pepper,Mindanao,2025-09-19,2025-12-09,81,544.4,9
+Bell Pepper,Luzon-South,2023-01-11,2023-04-03,82,983.5,1
+Bell Pepper,Luzon-South,2022-12-11,2023-03-04,83,877.9,12
+Bell Pepper,Mindanao,2023-11-21,2024-02-11,82,557.3,11
+Bell Pepper,Luzon-North,2026-01-18,2026-04-12,84,833.9,1
+Bell Pepper,Visayas,2025-03-28,2025-06-14,78,683.8,3
+Bell Pepper,Visayas,2025-02-21,2025-05-17,85,834.8,2
+Bell Pepper,Luzon-Central,2025-11-09,2026-02-06,89,736.5,11
+Bell Pepper,Luzon-North,2023-11-20,2024-02-16,88,710.8,11
+Bell Pepper,Luzon-North,2024-04-02,2024-06-18,77,740.7,4
+Bell Pepper,Visayas,2024-08-05,2024-10-23,79,452.6,8
+Bell Pepper,Luzon-Central,2024-03-24,2024-06-18,86,741.6,3
+Bell Pepper,Luzon-South,2025-01-05,2025-03-29,83,758.8,1
+Bell Pepper,Mindanao,2024-05-02,2024-07-12,71,883.5,5
+Bell Pepper,Luzon-Central,2024-11-12,2025-01-30,79,900.7,11
+Bell Pepper,Mindanao,2024-04-07,2024-06-20,74,751.4,4
+Bell Pepper,Luzon-North,2024-04-08,2024-06-28,81,550.8,4
+Bell Pepper,Luzon-Central,2022-04-04,2022-06-18,75,1066.1,4
+Bell Pepper,Luzon-North,2023-06-18,2023-09-16,90,641.1,6
+Bell Pepper,Luzon-Central,2023-06-29,2023-09-20,83,674.9,6
+Bell Pepper,Visayas,2026-02-02,2026-04-30,87,753.4,2
+Bell Pepper,Mindanao,2025-10-08,2025-12-26,79,670.1,10
+Bell Pepper,Luzon-Central,2026-03-01,2026-05-17,77,554.4,3
+Bell Pepper,Luzon-Central,2024-05-19,2024-08-06,79,724.7,5
+Bell Pepper,Visayas,2026-03-07,2026-05-25,79,839.2,3
+Bell Pepper,Luzon-Central,2022-02-08,2022-04-29,80,920.4,2
+Bell Pepper,Luzon-North,2022-10-03,2023-01-04,93,860.5,10
+Bell Pepper,Visayas,2023-01-24,2023-04-17,83,917.6,1
+Bell Pepper,Luzon-South,2025-08-28,2025-11-23,87,724.9,8
+Bell Pepper,Mindanao,2023-02-01,2023-04-21,79,737.3,2
+Bell Pepper,Luzon-North,2023-12-31,2024-03-31,91,1015.8,12
+Bell Pepper,Visayas,2023-10-25,2024-01-13,80,845.2,10
+Bell Pepper,Luzon-South,2025-12-20,2026-03-18,88,475.7,12
+Bell Pepper,Luzon-North,2025-02-20,2025-05-16,85,465.9,2
+Bell Pepper,Luzon-North,2024-06-06,2024-08-27,82,771.0,6
+Bell Pepper,Luzon-Central,2025-05-10,2025-07-26,77,651.6,5
+Bell Pepper,Luzon-Central,2024-09-12,2024-12-08,87,659.5,9
+Cabbage,Luzon-Central,2023-11-28,2024-02-11,75,1152.1,11
+Cabbage,Luzon-South,2022-12-24,2023-03-08,74,1351.6,12
+Cabbage,Mindanao,2023-10-06,2023-12-14,69,1154.5,10
+Cabbage,Luzon-South,2023-03-03,2023-05-06,64,1348.1,3
+Cabbage,Visayas,2024-05-04,2024-07-07,64,1179.2,5
+Cabbage,Luzon-Central,2022-12-22,2023-02-28,68,876.7,12
+Cabbage,Visayas,2025-08-31,2025-11-15,76,1261.0,8
+Cabbage,Mindanao,2023-01-18,2023-03-26,67,958.2,1
+Cabbage,Visayas,2025-09-02,2025-11-13,72,1318.5,9
+Cabbage,Luzon-North,2023-05-10,2023-07-20,71,1234.2,5
+Cabbage,Luzon-North,2025-12-17,2026-03-06,79,850.1,12
+Cabbage,Visayas,2024-12-31,2025-03-17,76,1456.5,12
+Cabbage,Luzon-South,2022-12-24,2023-03-03,69,1221.4,12
+Cabbage,Mindanao,2023-03-12,2023-05-21,70,1311.5,3
+Cabbage,Visayas,2025-10-22,2025-12-30,69,1202.5,10
+Cabbage,Mindanao,2023-01-21,2023-03-30,68,1642.5,1
+Cabbage,Mindanao,2025-11-11,2026-01-24,74,1001.1,11
+Cabbage,Luzon-Central,2022-08-19,2022-11-02,75,1295.6,8
+Cabbage,Luzon-Central,2023-04-05,2023-06-12,68,1359.8,4
+Cabbage,Luzon-North,2025-06-30,2025-09-13,75,814.7,6
+Cabbage,Luzon-North,2023-08-18,2023-10-31,74,923.6,8
+Cabbage,Visayas,2025-08-03,2025-10-19,77,1493.6,8
+Cabbage,Mindanao,2022-07-12,2022-09-23,73,1202.6,7
+Cabbage,Luzon-North,2025-04-19,2025-06-24,66,1285.8,4
+Cabbage,Luzon-South,2025-05-17,2025-07-20,64,1188.9,5
+Cabbage,Luzon-North,2025-12-04,2026-02-24,82,1393.2,12
+Cabbage,Luzon-North,2023-08-26,2023-11-10,76,1209.5,8
+Cabbage,Luzon-South,2023-10-06,2023-12-14,69,1167.4,10
+Cabbage,Luzon-North,2025-01-24,2025-04-07,73,1310.4,1
+Cabbage,Visayas,2023-06-17,2023-08-22,66,1173.5,6
+Cabbage,Luzon-South,2022-03-22,2022-06-01,71,1421.6,3
+Cabbage,Luzon-Central,2025-07-25,2025-10-03,70,965.9,7
+Cabbage,Luzon-Central,2024-03-25,2024-06-02,69,1478.1,3
+Cabbage,Luzon-South,2025-03-29,2025-06-05,68,931.3,3
+Cabbage,Luzon-South,2022-08-21,2022-11-02,73,1156.4,8
+Cabbage,Visayas,2022-02-24,2022-05-08,73,1091.1,2
+Cabbage,Luzon-North,2025-12-28,2026-03-16,78,1113.2,12
+Cabbage,Visayas,2022-09-06,2022-11-18,73,953.9,9
+Cabbage,Luzon-North,2023-02-16,2023-05-07,80,949.0,2
+Cabbage,Luzon-South,2023-06-16,2023-08-21,66,1206.3,6
+Cabbage,Luzon-Central,2024-09-28,2024-12-09,72,1462.3,9
+Cabbage,Visayas,2024-10-09,2024-12-20,72,1537.3,10
+Cabbage,Luzon-North,2023-11-21,2024-02-04,75,1037.4,11
+Cabbage,Visayas,2025-08-28,2025-11-07,71,1508.3,8
+Cabbage,Visayas,2023-10-31,2024-01-09,70,1611.5,10
+Cabbage,Luzon-Central,2026-03-13,2026-05-25,73,1179.8,3
+Cabbage,Luzon-Central,2024-09-02,2024-11-15,74,1886.6,9
+Cabbage,Luzon-South,2024-06-05,2024-08-13,69,1409.3,6
+Cabbage,Mindanao,2024-06-12,2024-08-18,67,1396.3,6
+Cabbage,Luzon-Central,2023-06-09,2023-08-20,72,1203.0,6
+Cabbage,Luzon-North,2023-05-31,2023-08-11,72,781.6,5
+Cabbage,Mindanao,2022-02-06,2022-04-15,68,888.5,2
+Cabbage,Visayas,2024-01-04,2024-03-17,73,1050.2,1
+Cabbage,Luzon-Central,2024-01-12,2024-03-22,70,1112.1,1
+Cabbage,Luzon-South,2022-03-30,2022-06-06,68,1260.2,3
+Cabbage,Luzon-South,2022-01-14,2022-03-31,76,1213.6,1
+Cabbage,Luzon-South,2024-11-10,2025-01-17,68,1197.3,11
+Cabbage,Luzon-Central,2022-07-30,2022-10-10,72,1194.0,7
+Cabbage,Mindanao,2025-04-13,2025-06-18,66,960.0,4
+Cabbage,Mindanao,2023-07-05,2023-09-09,66,1262.4,7
+Carrot,Luzon-Central,2025-12-30,2026-04-03,94,494.7,12
+Carrot,Mindanao,2025-06-20,2025-09-13,85,809.6,6
+Carrot,Luzon-North,2024-03-19,2024-06-18,91,849.5,3
+Carrot,Mindanao,2022-06-15,2022-09-09,86,760.3,6
+Carrot,Luzon-Central,2025-02-21,2025-05-21,89,963.1,2
+Carrot,Visayas,2022-06-22,2022-09-20,90,1157.3,6
+Carrot,Mindanao,2024-07-24,2024-10-28,96,863.5,7
+Carrot,Luzon-North,2025-02-01,2025-05-11,99,725.6,2
+Carrot,Luzon-North,2024-08-16,2024-11-23,99,990.0,8
+Carrot,Luzon-Central,2022-10-15,2023-01-19,96,1087.5,10
+Carrot,Mindanao,2024-06-09,2024-09-02,85,985.8,6
+Carrot,Luzon-Central,2025-01-21,2025-04-19,88,848.5,1
+Carrot,Mindanao,2022-02-26,2022-05-28,91,807.4,2
+Carrot,Luzon-South,2023-05-25,2023-08-27,94,872.5,5
+Carrot,Luzon-South,2023-09-02,2023-12-04,93,912.3,9
+Carrot,Luzon-North,2023-07-12,2023-10-18,98,1088.8,7
+Carrot,Mindanao,2025-07-17,2025-10-15,90,995.5,7
+Carrot,Luzon-Central,2026-01-28,2026-05-02,94,1052.3,1
+Carrot,Luzon-North,2023-08-13,2023-11-19,98,1043.6,8
+Carrot,Visayas,2025-11-20,2026-02-26,98,946.9,11
+Carrot,Luzon-South,2024-03-30,2024-06-27,89,425.2,3
+Carrot,Mindanao,2022-08-10,2022-10-26,77,620.8,8
+Carrot,Luzon-North,2025-07-25,2025-10-31,98,711.7,7
+Carrot,Luzon-North,2024-05-17,2024-08-21,96,821.6,5
+Carrot,Visayas,2024-10-16,2025-01-16,92,966.1,10
+Carrot,Luzon-Central,2025-07-07,2025-10-08,93,737.6,7
+Carrot,Visayas,2023-03-22,2023-06-16,86,678.9,3
+Carrot,Luzon-Central,2023-03-12,2023-06-05,85,1049.7,3
+Carrot,Luzon-North,2025-05-22,2025-08-20,90,882.8,5
+Carrot,Luzon-Central,2024-02-10,2024-05-17,97,738.0,2
+Carrot,Visayas,2023-10-05,2024-01-09,96,833.2,10
+Carrot,Luzon-South,2024-10-17,2025-01-19,94,975.1,10
+Carrot,Luzon-Central,2024-03-26,2024-06-22,88,1019.2,3
+Carrot,Mindanao,2026-03-10,2026-06-04,86,672.5,3
+Carrot,Mindanao,2023-03-26,2023-06-17,83,821.8,3
+Carrot,Luzon-Central,2022-09-25,2023-01-02,99,1190.7,9
+Carrot,Visayas,2025-02-13,2025-05-17,93,957.1,2
+Carrot,Visayas,2022-08-20,2022-11-21,93,921.2,8
+Carrot,Luzon-South,2023-05-28,2023-08-23,87,781.9,5
+Carrot,Luzon-South,2024-12-16,2025-03-24,98,900.5,12
+Carrot,Luzon-North,2025-07-07,2025-10-14,99,839.3,7
+Carrot,Visayas,2025-02-10,2025-05-16,95,700.0,2
+Carrot,Luzon-North,2025-06-02,2025-09-04,94,631.9,6
+Carrot,Luzon-Central,2025-03-11,2025-06-03,84,908.5,3
+Carrot,Luzon-Central,2025-09-13,2025-12-14,92,1000.4,9
+Carrot,Visayas,2023-03-12,2023-06-08,88,966.4,3
+Carrot,Luzon-South,2026-01-29,2026-04-26,87,841.0,1
+Carrot,Visayas,2024-06-22,2024-09-21,91,899.2,6
+Carrot,Luzon-Central,2022-04-10,2022-07-09,90,932.8,4
+Carrot,Visayas,2023-11-15,2024-02-18,95,814.5,11
+Carrot,Mindanao,2024-12-22,2025-03-27,95,809.6,12
+Carrot,Mindanao,2022-10-01,2022-12-31,91,745.3,10
+Carrot,Luzon-South,2025-08-21,2025-11-25,96,916.5,8
+Carrot,Luzon-Central,2025-06-14,2025-09-11,89,812.9,6
+Carrot,Mindanao,2026-01-20,2026-04-17,87,970.9,1
+Carrot,Visayas,2022-02-02,2022-05-06,93,917.8,2
+Carrot,Luzon-South,2022-06-13,2022-09-08,87,1138.5,6
+Carrot,Visayas,2024-07-29,2024-10-30,93,919.2,7
+Carrot,Luzon-South,2023-12-18,2024-03-22,95,1135.6,12
+Carrot,Mindanao,2024-10-16,2025-01-17,93,795.6,10
+Cucumber,Luzon-North,2023-07-22,2023-09-17,57,757.3,7
+Cucumber,Mindanao,2022-07-28,2022-09-20,54,675.2,7
+Cucumber,Luzon-North,2024-07-27,2024-09-23,58,499.3,7
+Cucumber,Luzon-North,2023-03-21,2023-05-16,56,866.2,3
+Cucumber,Visayas,2023-09-15,2023-11-09,55,880.8,9
+Cucumber,Luzon-North,2024-09-08,2024-11-06,59,754.5,9
+Cucumber,Luzon-Central,2023-01-22,2023-03-21,58,648.6,1
+Cucumber,Luzon-North,2023-12-03,2024-01-29,57,782.3,12
+Cucumber,Luzon-South,2022-08-30,2022-10-25,56,701.1,8
+Cucumber,Visayas,2023-04-03,2023-05-25,52,617.3,4
+Cucumber,Mindanao,2022-02-06,2022-04-02,55,899.0,2
+Cucumber,Visayas,2024-11-25,2025-01-23,59,856.5,11
+Cucumber,Luzon-South,2023-04-06,2023-05-30,54,775.4,4
+Cucumber,Visayas,2023-07-26,2023-09-18,54,788.3,7
+Cucumber,Mindanao,2024-11-22,2025-01-15,54,864.2,11
+Cucumber,Luzon-Central,2023-09-05,2023-11-04,60,665.8,9
+Cucumber,Luzon-South,2022-09-17,2022-11-13,57,712.9,9
+Cucumber,Mindanao,2024-06-02,2024-07-28,56,654.5,6
+Cucumber,Luzon-South,2023-04-23,2023-06-12,50,756.7,4
+Cucumber,Luzon-North,2022-12-18,2023-02-15,59,670.3,12
+Cucumber,Luzon-North,2022-06-03,2022-07-31,58,923.2,6
+Cucumber,Luzon-North,2023-06-15,2023-08-12,58,435.7,6
+Cucumber,Mindanao,2023-02-21,2023-04-17,55,613.6,2
+Cucumber,Luzon-North,2022-03-09,2022-05-03,55,862.3,3
+Cucumber,Luzon-Central,2024-06-30,2024-08-25,56,688.8,6
+Cucumber,Visayas,2024-04-15,2024-06-10,56,407.7,4
+Cucumber,Luzon-Central,2023-10-01,2023-11-25,55,701.8,10
+Cucumber,Luzon-North,2026-01-31,2026-04-02,61,651.6,1
+Cucumber,Luzon-North,2022-09-09,2022-11-10,62,723.2,9
+Cucumber,Mindanao,2024-12-20,2025-02-15,57,629.3,12
+Cucumber,Luzon-South,2022-10-06,2022-12-02,57,700.2,10
+Cucumber,Mindanao,2026-01-18,2026-03-09,50,521.4,1
+Cucumber,Luzon-Central,2024-08-15,2024-10-10,56,667.9,8
+Cucumber,Visayas,2023-01-26,2023-03-22,55,591.5,1
+Cucumber,Mindanao,2023-08-19,2023-10-17,59,648.1,8
+Cucumber,Luzon-North,2024-04-02,2024-05-24,52,459.6,4
+Cucumber,Luzon-Central,2024-08-18,2024-10-12,55,689.3,8
+Cucumber,Mindanao,2022-06-11,2022-08-02,52,718.7,6
+Cucumber,Luzon-Central,2025-03-16,2025-05-09,54,533.6,3
+Cucumber,Luzon-South,2023-11-30,2024-01-25,56,779.7,11
+Cucumber,Luzon-North,2023-07-16,2023-09-10,56,660.2,7
+Cucumber,Visayas,2025-04-14,2025-06-06,53,682.2,4
+Cucumber,Luzon-South,2022-05-28,2022-07-23,56,667.7,5
+Cucumber,Luzon-North,2024-01-07,2024-03-11,64,947.0,1
+Cucumber,Luzon-North,2023-12-21,2024-02-18,59,887.1,12
+Cucumber,Luzon-North,2025-10-16,2025-12-11,56,638.7,10
+Cucumber,Luzon-North,2024-03-19,2024-05-13,55,618.0,3
+Cucumber,Luzon-Central,2022-10-07,2022-12-01,55,589.2,10
+Cucumber,Luzon-Central,2024-03-25,2024-05-18,54,811.7,3
+Cucumber,Luzon-Central,2023-10-12,2023-12-07,56,610.1,10
+Cucumber,Luzon-North,2024-12-20,2025-02-16,58,471.9,12
+Cucumber,Visayas,2023-12-15,2024-02-08,55,866.9,12
+Cucumber,Visayas,2026-02-02,2026-04-03,60,751.8,2
+Cucumber,Mindanao,2022-08-11,2022-10-03,53,766.0,8
+Cucumber,Luzon-Central,2022-04-07,2022-05-28,51,770.5,4
+Cucumber,Mindanao,2025-11-21,2026-01-14,54,558.5,11
+Cucumber,Luzon-South,2023-05-21,2023-07-14,54,741.2,5
+Cucumber,Luzon-South,2025-05-17,2025-07-09,53,771.9,5
+Cucumber,Luzon-North,2022-12-03,2023-02-05,64,860.9,12
+Cucumber,Luzon-South,2022-02-18,2022-04-20,61,633.1,2
+Onion,Luzon-South,2023-11-13,2024-03-18,126,925.8,11
+Onion,Mindanao,2025-05-28,2025-09-16,111,719.3,5
+Onion,Luzon-South,2023-02-25,2023-07-08,133,856.6,2
+Onion,Visayas,2023-03-28,2023-07-18,112,886.9,3
+Onion,Luzon-Central,2026-02-13,2026-06-19,126,1313.1,2
+Onion,Luzon-North,2023-04-20,2023-08-21,123,1017.5,4
+Onion,Luzon-Central,2025-08-31,2026-01-01,123,991.1,8
+Onion,Luzon-Central,2024-04-05,2024-07-24,110,1119.2,4
+Onion,Luzon-South,2022-10-09,2023-02-12,126,1276.7,10
+Onion,Mindanao,2024-10-15,2025-02-09,117,1067.1,10
+Onion,Luzon-South,2025-11-29,2026-04-04,126,892.0,11
+Onion,Visayas,2025-12-22,2026-04-29,128,960.8,12
+Onion,Visayas,2023-06-05,2023-09-24,111,637.5,6
+Onion,Luzon-South,2022-11-11,2023-03-17,126,1045.1,11
+Onion,Luzon-Central,2025-12-23,2026-04-29,127,1360.6,12
+Onion,Luzon-South,2025-08-12,2025-12-16,126,921.0,8
+Onion,Visayas,2023-11-06,2024-02-29,115,1046.4,11
+Onion,Mindanao,2023-01-09,2023-05-02,113,880.9,1
+Onion,Luzon-North,2025-08-13,2025-12-16,125,1009.6,8
+Onion,Luzon-Central,2024-06-17,2024-10-05,110,1110.6,6
+Onion,Luzon-South,2024-02-23,2024-06-27,125,553.5,2
+Onion,Visayas,2025-02-05,2025-06-16,131,500.0,2
+Onion,Luzon-South,2022-07-18,2022-11-13,118,1144.8,7
+Onion,Mindanao,2022-12-10,2023-04-13,124,1101.8,12
+Onion,Mindanao,2025-02-07,2025-06-07,120,1067.7,2
+Onion,Luzon-South,2024-02-25,2024-07-06,132,863.1,2
+Onion,Visayas,2024-08-29,2024-12-30,123,718.7,8
+Onion,Luzon-North,2022-07-31,2022-12-11,133,1052.7,7
+Onion,Luzon-Central,2025-12-15,2026-04-21,127,1133.6,12
+Onion,Luzon-Central,2024-02-03,2024-06-03,121,1157.8,2
+Onion,Luzon-South,2022-11-05,2023-03-13,128,1334.7,11
+Onion,Luzon-North,2023-01-16,2023-05-30,134,1487.9,1
+Onion,Visayas,2025-10-03,2026-01-30,119,1077.0,10
+Onion,Luzon-North,2023-07-20,2023-11-23,126,814.2,7
+Onion,Mindanao,2024-01-13,2024-05-15,123,868.2,1
+Onion,Luzon-Central,2024-04-25,2024-08-16,113,954.5,4
+Onion,Mindanao,2023-04-28,2023-08-09,103,1063.5,4
+Onion,Mindanao,2022-01-08,2022-05-11,123,932.3,1
+Onion,Mindanao,2022-04-18,2022-08-03,107,954.3,4
+Onion,Luzon-South,2025-05-14,2025-09-12,121,688.0,5
+Onion,Luzon-Central,2023-03-24,2023-07-17,115,1067.9,3
+Onion,Mindanao,2022-11-03,2023-03-10,127,1224.2,11
+Onion,Visayas,2022-07-17,2022-11-09,115,1149.2,7
+Onion,Mindanao,2024-08-18,2024-12-08,112,995.6,8
+Onion,Visayas,2025-12-02,2026-04-10,129,1031.9,12
+Onion,Mindanao,2026-02-06,2026-06-14,128,1220.7,2
+Onion,Luzon-South,2025-03-31,2025-07-24,115,970.4,3
+Onion,Luzon-Central,2023-03-11,2023-07-06,117,1224.8,3
+Onion,Luzon-North,2025-01-27,2025-06-09,133,835.2,1
+Onion,Mindanao,2022-10-28,2023-03-03,126,902.3,10
+Onion,Luzon-North,2023-05-04,2023-08-24,112,1335.2,5
+Onion,Luzon-Central,2025-06-23,2025-10-23,122,1103.6,6
+Onion,Mindanao,2025-09-13,2026-01-16,125,941.7,9
+Onion,Luzon-North,2023-07-06,2023-11-09,126,895.5,7
+Onion,Luzon-South,2022-08-19,2022-12-23,126,1117.3,8
+Onion,Visayas,2024-10-20,2025-02-22,125,924.6,10
+Onion,Visayas,2025-08-31,2025-12-25,116,1227.0,8
+Onion,Luzon-Central,2022-07-17,2022-11-14,120,1401.3,7
+Onion,Luzon-South,2023-09-24,2024-01-31,129,1005.0,9
+Onion,Visayas,2023-05-20,2023-09-11,114,1070.3,5
+Garlic,Luzon-Central,2024-08-14,2025-01-18,157,585.2,8
+Garlic,Luzon-South,2022-09-09,2023-02-18,162,782.5,9
+Garlic,Luzon-North,2025-11-01,2026-04-12,162,582.9,11
+Garlic,Luzon-North,2025-06-29,2025-11-25,149,729.9,6
+Garlic,Luzon-South,2022-02-18,2022-07-23,155,327.6,2
+Garlic,Luzon-South,2022-06-03,2022-11-10,160,616.3,6
+Garlic,Luzon-North,2026-02-18,2026-07-23,155,881.3,2
+Garlic,Visayas,2025-01-21,2025-06-28,158,993.0,1
+Garlic,Luzon-South,2022-01-27,2022-07-02,156,625.3,1
+Garlic,Luzon-North,2025-01-17,2025-07-03,167,686.7,1
+Garlic,Visayas,2025-03-05,2025-08-05,153,685.6,3
+Garlic,Mindanao,2022-10-27,2023-03-25,149,925.0,10
+Garlic,Visayas,2023-11-06,2024-04-16,162,608.7,11
+Garlic,Luzon-Central,2024-12-29,2025-06-09,162,824.6,12
+Garlic,Luzon-South,2023-07-27,2023-12-21,147,528.6,7
+Garlic,Luzon-Central,2024-04-05,2024-08-15,132,713.8,4
+Garlic,Luzon-North,2023-08-23,2024-02-01,162,415.2,8
+Garlic,Mindanao,2022-12-15,2023-05-16,152,964.1,12
+Garlic,Mindanao,2022-06-04,2022-10-27,145,914.9,6
+Garlic,Luzon-Central,2023-09-05,2024-02-11,159,714.4,9
+Garlic,Visayas,2025-02-02,2025-07-13,161,598.0,2
+Garlic,Luzon-Central,2025-03-11,2025-07-26,137,741.4,3
+Garlic,Luzon-Central,2023-08-27,2024-01-26,152,697.1,8
+Garlic,Luzon-South,2025-01-01,2025-06-01,151,655.4,1
+Garlic,Luzon-South,2023-10-18,2024-03-22,156,555.1,10
+Garlic,Mindanao,2022-06-19,2022-11-06,140,628.6,6
+Garlic,Luzon-Central,2023-03-06,2023-08-06,153,741.6,3
+Garlic,Luzon-South,2022-12-25,2023-06-05,162,434.5,12
+Garlic,Visayas,2025-11-12,2026-04-29,168,716.7,11
+Garlic,Luzon-North,2023-07-21,2024-01-01,164,812.8,7
+Garlic,Luzon-Central,2025-08-27,2026-01-20,146,726.5,8
+Garlic,Mindanao,2022-04-02,2022-08-25,145,660.3,4
+Garlic,Mindanao,2022-02-06,2022-06-30,144,353.5,2
+Garlic,Mindanao,2023-11-16,2024-04-14,150,646.5,11
+Garlic,Luzon-South,2023-07-11,2023-12-20,162,678.5,7
+Garlic,Luzon-South,2024-06-19,2024-11-23,157,770.0,6
+Garlic,Luzon-South,2023-12-02,2024-05-15,165,553.2,12
+Garlic,Luzon-North,2026-03-15,2026-08-08,146,794.4,3
+Garlic,Mindanao,2022-04-17,2022-08-26,131,891.1,4
+Garlic,Mindanao,2022-07-03,2022-12-03,153,729.9,7
+Garlic,Luzon-Central,2025-03-07,2025-08-08,154,670.2,3
+Garlic,Luzon-Central,2023-11-01,2024-04-02,153,769.5,11
+Garlic,Luzon-North,2022-12-01,2023-05-06,156,608.7,12
+Garlic,Mindanao,2024-09-03,2025-01-29,148,526.6,9
+Garlic,Visayas,2022-01-05,2022-06-06,152,797.2,1
+Garlic,Mindanao,2022-12-16,2023-05-17,152,650.6,12
+Garlic,Luzon-North,2025-04-08,2025-08-29,143,555.5,4
+Garlic,Luzon-Central,2023-10-14,2024-03-13,151,553.4,10
+Garlic,Luzon-Central,2024-05-21,2024-10-18,150,500.0,5
+Garlic,Luzon-Central,2024-12-20,2025-05-27,158,743.0,12
+Garlic,Luzon-Central,2024-06-16,2024-11-07,144,540.9,6
+Garlic,Luzon-North,2024-11-15,2025-05-04,170,421.0,11
+Garlic,Luzon-North,2025-10-01,2026-03-18,168,680.7,10
+Garlic,Mindanao,2025-02-04,2025-07-01,147,685.0,2
+Garlic,Visayas,2023-06-09,2023-10-24,137,818.8,6
+Garlic,Luzon-North,2022-09-26,2023-03-05,160,525.3,9
+Garlic,Mindanao,2025-02-23,2025-07-23,150,608.1,2
+Garlic,Mindanao,2022-07-28,2022-12-26,151,740.4,7
+Garlic,Mindanao,2023-01-13,2023-06-23,161,565.5,1
+Garlic,Visayas,2022-05-15,2022-10-13,151,859.3,5
+Corn,Luzon-Central,2022-07-23,2022-10-23,92,4977.8,7
+Corn,Luzon-Central,2023-01-05,2023-04-10,95,3843.3,1
+Corn,Mindanao,2024-04-15,2024-07-07,83,3818.3,4
+Corn,Luzon-Central,2022-07-03,2022-10-04,93,3511.8,7
+Corn,Luzon-South,2024-03-07,2024-06-13,98,2720.6,3
+Corn,Luzon-Central,2024-09-07,2024-12-07,91,4415.7,9
+Corn,Visayas,2025-05-05,2025-08-02,89,4846.4,5
+Corn,Mindanao,2023-09-02,2023-12-05,94,2312.1,9
+Corn,Luzon-Central,2022-04-23,2022-07-19,87,4776.0,4
+Corn,Luzon-Central,2024-04-19,2024-07-11,83,4105.1,4
+Corn,Luzon-North,2024-07-23,2024-10-28,97,4780.9,7
+Corn,Visayas,2022-06-14,2022-09-16,94,4006.0,6
+Corn,Luzon-South,2022-10-18,2023-01-13,87,4362.2,10
+Corn,Visayas,2022-09-08,2022-12-08,91,4466.8,9
+Corn,Luzon-Central,2026-03-11,2026-06-06,87,3914.2,3
+Corn,Luzon-South,2024-02-23,2024-05-27,94,3500.2,2
+Corn,Mindanao,2026-01-30,2026-05-05,95,4386.1,1
+Corn,Visayas,2023-03-26,2023-06-20,86,2871.6,3
+Corn,Visayas,2023-06-07,2023-08-31,85,4541.3,6
+Corn,Mindanao,2025-06-16,2025-09-21,97,3207.9,6
+Corn,Visayas,2023-07-06,2023-10-12,98,4857.8,7
+Corn,Luzon-North,2022-12-11,2023-03-21,100,4001.4,12
+Corn,Luzon-Central,2022-05-31,2022-08-24,85,3935.7,5
+Corn,Mindanao,2024-08-04,2024-11-02,90,4324.0,8
+Corn,Visayas,2023-01-22,2023-04-20,88,4711.7,1
+Corn,Visayas,2023-04-02,2023-06-23,82,3798.0,4
+Corn,Luzon-Central,2023-12-08,2024-03-09,92,3612.8,12
+Corn,Luzon-South,2024-07-28,2024-10-26,90,4461.0,7
+Corn,Mindanao,2025-06-23,2025-09-20,89,3898.2,6
+Corn,Mindanao,2023-10-08,2024-01-03,87,2867.8,10
+Corn,Mindanao,2024-03-24,2024-06-14,82,3100.7,3
+Corn,Luzon-South,2024-04-29,2024-07-22,84,5709.7,4
+Corn,Luzon-Central,2025-05-18,2025-08-14,88,3187.9,5
+Corn,Visayas,2023-11-18,2024-02-20,94,2325.7,11
+Corn,Luzon-South,2025-12-10,2026-03-22,102,3673.5,12
+Corn,Visayas,2022-04-05,2022-07-02,88,3882.0,4
+Corn,Mindanao,2025-07-22,2025-10-11,81,4461.5,7
+Corn,Luzon-North,2022-07-19,2022-10-20,93,4091.1,7
+Corn,Mindanao,2024-11-17,2025-02-14,89,4436.5,11
+Corn,Luzon-Central,2023-03-28,2023-06-27,91,2993.7,3
+Corn,Luzon-North,2023-08-14,2023-11-26,104,4811.7,8
+Corn,Luzon-North,2022-02-16,2022-05-22,95,3618.9,2
+Corn,Visayas,2022-05-12,2022-08-07,87,3934.6,5
+Corn,Visayas,2023-04-22,2023-07-15,84,2961.8,4
+Corn,Luzon-South,2023-10-05,2024-01-09,96,3014.8,10
+Corn,Luzon-North,2022-04-16,2022-07-11,86,4080.2,4
+Corn,Luzon-North,2023-10-17,2024-01-27,102,4364.7,10
+Corn,Luzon-Central,2024-12-04,2025-03-12,98,3442.3,12
+Corn,Luzon-North,2025-09-29,2026-01-05,98,3645.9,9
+Corn,Luzon-Central,2025-03-13,2025-06-06,85,3554.4,3
+Corn,Luzon-Central,2022-06-22,2022-09-20,90,4791.4,6
+Corn,Luzon-South,2023-06-11,2023-09-17,98,5632.7,6
+Corn,Visayas,2022-08-29,2022-11-30,93,3153.1,8
+Corn,Visayas,2024-08-15,2024-11-13,90,3238.8,8
+Corn,Luzon-South,2025-03-11,2025-06-06,87,3124.0,3
+Corn,Luzon-Central,2026-03-25,2026-06-17,84,6022.9,3
+Corn,Luzon-Central,2025-04-10,2025-07-03,84,3675.0,4
+Corn,Visayas,2022-02-27,2022-05-27,89,5228.4,2
+Corn,Visayas,2022-05-09,2022-08-04,87,3030.3,5
+Corn,Luzon-South,2026-01-27,2026-04-27,90,5052.9,1
+Rice,Luzon-North,2022-07-06,2022-11-12,129,2526.5,7
+Rice,Mindanao,2024-03-09,2024-07-02,115,5482.4,3
+Rice,Mindanao,2026-02-10,2026-06-03,113,4744.3,2
+Rice,Luzon-Central,2023-10-23,2024-02-16,116,4493.6,10
+Rice,Luzon-South,2024-09-29,2025-01-30,123,2999.7,9
+Rice,Luzon-North,2025-01-05,2025-05-14,129,4380.1,1
+Rice,Mindanao,2022-06-13,2022-10-06,115,4467.8,6
+Rice,Luzon-Central,2022-10-30,2023-03-01,122,4168.2,10
+Rice,Visayas,2023-03-26,2023-07-10,106,4886.4,3
+Rice,Luzon-South,2026-01-04,2026-05-10,126,5278.2,1
+Rice,Mindanao,2023-07-13,2023-10-30,109,4721.8,7
+Rice,Luzon-Central,2023-06-27,2023-10-28,123,4125.7,6
+Rice,Mindanao,2025-03-10,2025-07-04,116,4892.0,3
+Rice,Visayas,2023-06-13,2023-10-02,111,5123.1,6
+Rice,Luzon-Central,2023-05-16,2023-09-12,119,3787.5,5
+Rice,Luzon-Central,2022-12-15,2023-04-25,131,5762.6,12
+Rice,Mindanao,2023-11-28,2024-03-27,120,5105.3,11
+Rice,Luzon-Central,2026-01-29,2026-05-30,121,4835.8,1
+Rice,Luzon-South,2022-05-05,2022-08-30,117,4677.9,5
+Rice,Luzon-South,2023-10-02,2024-02-10,131,3770.4,10
+Rice,Luzon-Central,2023-10-20,2024-02-21,124,5212.0,10
+Rice,Mindanao,2024-04-05,2024-07-17,103,2849.4,4
+Rice,Visayas,2022-06-12,2022-10-06,116,4188.5,6
+Rice,Luzon-Central,2026-02-22,2026-06-25,123,4687.3,2
+Rice,Luzon-Central,2025-10-15,2026-02-19,127,4884.9,10
+Rice,Luzon-South,2025-12-02,2026-04-07,126,5345.4,12
+Rice,Luzon-North,2022-06-09,2022-10-08,121,5031.1,6
+Rice,Luzon-South,2024-11-12,2025-03-25,133,5329.5,11
+Rice,Mindanao,2024-08-30,2024-12-29,121,4330.7,8
+Rice,Mindanao,2024-07-10,2024-11-04,117,4690.8,7
+Rice,Luzon-Central,2025-10-23,2026-02-21,121,4000.9,10
+Rice,Luzon-South,2022-11-01,2023-03-02,121,3019.0,11
+Rice,Luzon-Central,2024-05-17,2024-09-19,125,5654.5,5
+Rice,Luzon-Central,2025-02-22,2025-07-01,129,5651.9,2
+Rice,Visayas,2024-01-18,2024-05-22,125,2873.6,1
+Rice,Visayas,2024-04-23,2024-08-09,108,4661.7,4
+Rice,Mindanao,2024-03-20,2024-07-12,114,5329.9,3
+Rice,Luzon-South,2025-09-03,2025-12-31,119,2753.6,9
+Rice,Luzon-North,2022-10-04,2023-02-07,126,3243.7,10
+Rice,Luzon-South,2022-09-09,2023-01-10,123,3628.7,9
+Rice,Mindanao,2024-05-30,2024-09-24,117,4988.4,5
+Rice,Luzon-North,2024-04-06,2024-08-06,122,3559.7,4
+Rice,Luzon-North,2024-02-29,2024-07-10,132,4119.4,2
+Rice,Mindanao,2022-11-01,2023-02-26,117,4913.0,11
+Rice,Luzon-North,2025-05-09,2025-08-24,107,5464.1,5
+Rice,Visayas,2025-12-26,2026-04-28,123,5330.5,12
+Rice,Luzon-North,2024-02-18,2024-06-21,124,3614.1,2
+Rice,Visayas,2024-12-26,2025-04-22,117,5414.5,12
+Rice,Luzon-South,2025-01-25,2025-05-25,120,4027.7,1
+Rice,Visayas,2022-07-22,2022-11-26,127,5093.3,7
+Rice,Luzon-Central,2023-08-08,2023-12-09,123,3800.8,8
+Rice,Visayas,2024-03-19,2024-07-06,109,5799.4,3
+Rice,Luzon-Central,2024-10-15,2025-02-10,118,3951.4,10
+Rice,Visayas,2024-07-03,2024-10-27,116,4576.8,7
+Rice,Visayas,2022-05-28,2022-09-10,105,4192.5,5
+Rice,Luzon-North,2023-12-01,2024-04-08,129,3763.6,12
+Rice,Luzon-North,2023-04-26,2023-09-01,128,4545.7,4
+Rice,Luzon-Central,2022-08-06,2022-11-30,116,3970.3,8
+Rice,Luzon-South,2025-02-08,2025-06-09,121,5235.5,2
+Rice,Mindanao,2025-05-27,2025-09-14,110,4025.3,5
+Squash,Mindanao,2023-07-02,2023-10-06,96,1426.9,7
+Squash,Luzon-North,2023-02-24,2023-06-10,106,1631.0,2
+Squash,Luzon-Central,2024-04-21,2024-07-25,95,1383.8,4
+Squash,Luzon-South,2024-12-06,2025-03-21,105,1417.2,12
+Squash,Luzon-North,2023-10-23,2024-02-14,114,1138.1,10
+Squash,Visayas,2023-05-25,2023-08-21,88,1558.7,5
+Squash,Luzon-Central,2023-12-03,2024-03-20,108,1546.1,12
+Squash,Mindanao,2025-04-01,2025-07-01,91,1431.9,4
+Squash,Luzon-South,2022-11-15,2023-02-27,104,1553.6,11
+Squash,Luzon-Central,2025-03-19,2025-06-21,94,1132.7,3
+Squash,Visayas,2022-05-31,2022-09-06,98,1562.5,5
+Squash,Visayas,2026-02-28,2026-06-12,104,1605.8,2
+Squash,Visayas,2025-04-08,2025-07-11,94,1356.7,4
+Squash,Mindanao,2026-03-05,2026-06-04,91,1320.2,3
+Squash,Luzon-South,2026-01-28,2026-05-14,106,1120.7,1
+Squash,Mindanao,2022-05-23,2022-08-24,93,1200.0,5
+Squash,Mindanao,2022-06-09,2022-09-17,100,1158.6,6
+Squash,Mindanao,2022-08-23,2022-12-03,102,1497.2,8
+Squash,Mindanao,2025-01-31,2025-05-12,101,1492.4,1
+Squash,Luzon-North,2022-03-13,2022-06-24,103,1628.7,3
+Squash,Luzon-South,2025-02-06,2025-05-19,102,1535.1,2
+Squash,Luzon-South,2025-09-28,2026-01-05,99,1102.6,9
+Squash,Luzon-Central,2022-07-19,2022-10-20,93,1555.5,7
+Squash,Luzon-South,2023-05-26,2023-09-05,102,1366.8,5
+Squash,Luzon-Central,2025-01-01,2025-04-14,103,1530.7,1
+Squash,Luzon-Central,2024-05-23,2024-08-26,95,1769.1,5
+Squash,Visayas,2024-02-26,2024-06-10,105,1749.1,2
+Squash,Luzon-Central,2023-09-14,2024-01-04,112,1293.9,9
+Squash,Luzon-Central,2024-10-09,2025-01-16,99,1678.3,10
+Squash,Luzon-Central,2023-02-17,2023-06-02,105,1196.8,2
+Squash,Luzon-North,2025-02-23,2025-06-07,104,1812.9,2
+Squash,Luzon-Central,2026-01-17,2026-05-03,106,1657.4,1
+Squash,Mindanao,2025-11-06,2026-02-08,94,1337.3,11
+Squash,Visayas,2023-10-08,2024-01-12,96,1965.0,10
+Squash,Luzon-North,2024-03-27,2024-07-07,102,1416.6,3
+Squash,Luzon-North,2025-04-27,2025-08-08,103,1491.3,4
+Squash,Mindanao,2022-04-24,2022-07-23,90,1407.6,4
+Squash,Luzon-North,2026-01-05,2026-04-16,101,1429.4,1
+Squash,Luzon-North,2025-07-02,2025-10-15,105,1152.7,7
+Squash,Luzon-Central,2025-11-16,2026-03-01,105,917.9,11
+Squash,Luzon-Central,2023-06-14,2023-09-26,104,1604.5,6
+Squash,Luzon-Central,2022-12-17,2023-04-03,107,1776.0,12
+Squash,Mindanao,2023-06-29,2023-10-05,98,1373.6,6
+Squash,Luzon-Central,2025-12-18,2026-04-05,108,1552.7,12
+Squash,Mindanao,2025-02-11,2025-05-23,101,1721.1,2
+Squash,Visayas,2022-07-08,2022-10-21,105,1735.1,7
+Squash,Mindanao,2022-04-16,2022-07-09,84,1916.7,4
+Squash,Visayas,2023-11-22,2024-02-27,97,1307.3,11
+Squash,Luzon-North,2022-07-26,2022-11-09,106,1361.7,7
+Squash,Visayas,2025-05-30,2025-08-30,92,1284.5,5
+Squash,Luzon-Central,2025-03-12,2025-06-19,99,1634.0,3
+Squash,Luzon-South,2024-10-19,2025-01-31,104,1632.1,10
+Squash,Luzon-South,2025-08-12,2025-11-24,104,1529.0,8
+Squash,Mindanao,2025-08-28,2025-12-09,103,1649.9,8
+Squash,Luzon-South,2025-02-22,2025-06-04,102,1518.3,2
+Squash,Luzon-South,2023-08-04,2023-11-17,105,2095.8,8
+Squash,Luzon-South,2024-08-01,2024-11-15,106,1788.5,8
+Squash,Luzon-Central,2026-02-05,2026-05-30,114,1397.9,2
+Squash,Mindanao,2024-02-10,2024-05-18,98,1405.1,2
+Squash,Luzon-South,2025-12-08,2026-03-27,109,1586.2,12
+Okra,Luzon-South,2023-04-16,2023-06-07,52,564.1,4
+Okra,Luzon-North,2025-12-29,2026-02-28,61,522.3,12
+Okra,Luzon-North,2023-02-08,2023-04-07,58,701.1,2
+Okra,Luzon-North,2022-01-19,2022-03-20,60,593.1,1
+Okra,Visayas,2022-04-19,2022-06-08,50,483.8,4
+Okra,Mindanao,2023-02-10,2023-04-08,57,635.9,2
+Okra,Luzon-South,2022-07-07,2022-09-03,58,519.7,7
+Okra,Luzon-North,2024-01-01,2024-02-28,58,740.5,1
+Okra,Luzon-South,2023-02-03,2023-04-03,59,734.7,2
+Okra,Luzon-North,2025-10-25,2025-12-19,55,520.3,10
+Okra,Luzon-Central,2023-06-19,2023-08-12,54,483.6,6
+Okra,Luzon-South,2025-02-17,2025-04-13,55,636.2,2
+Okra,Luzon-Central,2025-08-25,2025-10-22,58,654.8,8
+Okra,Luzon-North,2024-07-05,2024-09-01,58,829.1,7
+Okra,Visayas,2024-07-01,2024-08-22,52,491.7,7
+Okra,Visayas,2025-10-10,2025-12-05,56,586.8,10
+Okra,Luzon-Central,2025-08-12,2025-10-13,62,659.3,8
+Okra,Luzon-Central,2023-12-26,2024-02-20,56,492.1,12
+Okra,Luzon-Central,2024-04-22,2024-06-14,53,399.5,4
+Okra,Luzon-Central,2024-12-16,2025-02-12,58,576.8,12
+Okra,Luzon-Central,2023-01-15,2023-03-13,57,580.9,1
+Okra,Luzon-Central,2022-01-27,2022-03-27,59,716.7,1
+Okra,Luzon-South,2023-04-10,2023-05-31,51,647.3,4
+Okra,Luzon-North,2023-06-30,2023-08-26,57,685.4,6
+Okra,Mindanao,2024-04-15,2024-06-07,53,792.1,4
+Okra,Luzon-South,2023-11-20,2024-01-17,58,601.2,11
+Okra,Luzon-South,2022-02-16,2022-04-13,56,439.6,2
+Okra,Visayas,2024-07-16,2024-09-08,54,609.3,7
+Okra,Mindanao,2024-07-05,2024-08-26,52,625.3,7
+Okra,Luzon-South,2022-06-03,2022-07-30,57,836.1,6
+Okra,Visayas,2025-03-10,2025-05-03,54,483.6,3
+Okra,Luzon-Central,2025-10-23,2025-12-22,60,500.3,10
+Okra,Luzon-North,2024-12-08,2025-02-07,61,590.3,12
+Okra,Luzon-North,2022-05-10,2022-07-04,55,732.8,5
+Okra,Visayas,2022-09-13,2022-11-06,54,701.8,9
+Okra,Luzon-Central,2024-07-29,2024-09-22,55,429.1,7
+Okra,Luzon-North,2024-08-14,2024-10-12,59,725.9,8
+Okra,Mindanao,2026-03-13,2026-05-03,51,672.9,3
+Okra,Luzon-South,2023-01-08,2023-03-09,60,472.3,1
+Okra,Luzon-South,2025-05-04,2025-06-27,54,717.1,5
+Okra,Mindanao,2024-09-08,2024-10-28,50,515.2,9
+Okra,Luzon-Central,2023-09-01,2023-10-28,57,651.6,9
+Okra,Luzon-Central,2022-08-18,2022-10-16,59,576.9,8
+Okra,Luzon-South,2025-07-02,2025-08-27,56,645.0,7
+Okra,Luzon-North,2026-01-18,2026-03-20,61,698.1,1
+Okra,Luzon-Central,2023-03-31,2023-05-17,47,462.0,3
+Okra,Luzon-North,2022-07-09,2022-09-05,58,385.7,7
+Okra,Luzon-South,2025-07-14,2025-09-09,57,719.3,7
+Okra,Luzon-North,2023-04-22,2023-06-16,55,639.2,4
+Okra,Mindanao,2022-11-23,2023-01-22,60,704.9,11
+Okra,Luzon-North,2024-10-10,2024-12-09,60,723.3,10
+Okra,Visayas,2024-03-12,2024-05-03,52,725.8,3
+Okra,Luzon-North,2022-01-03,2022-03-10,66,519.0,1
+Okra,Luzon-North,2022-04-27,2022-06-20,54,547.1,4
+Okra,Mindanao,2024-04-23,2024-06-06,44,553.1,4
+Okra,Luzon-South,2025-04-06,2025-05-27,51,809.0,4
+Okra,Luzon-South,2022-02-13,2022-04-15,61,628.2,2
+Okra,Mindanao,2024-06-06,2024-07-30,54,747.8,6
+Okra,Mindanao,2022-06-02,2022-07-27,55,639.6,6
+Okra,Luzon-Central,2025-03-29,2025-05-22,54,841.3,3
+String Beans,Luzon-South,2023-06-27,2023-08-28,62,858.5,6
+String Beans,Luzon-Central,2024-12-15,2025-02-17,64,399.7,12
+String Beans,Luzon-North,2022-03-05,2022-04-29,55,885.2,3
+String Beans,Luzon-North,2024-06-09,2024-08-14,66,586.3,6
+String Beans,Luzon-Central,2022-06-01,2022-08-02,62,695.8,6
+String Beans,Luzon-North,2022-06-26,2022-08-29,64,1048.7,6
+String Beans,Luzon-North,2023-02-23,2023-05-02,68,806.3,2
+String Beans,Luzon-South,2025-08-10,2025-10-11,62,441.1,8
+String Beans,Luzon-North,2024-05-20,2024-07-21,62,577.8,5
+String Beans,Luzon-Central,2026-02-15,2026-04-17,61,889.3,2
+String Beans,Luzon-South,2023-08-30,2023-11-02,64,778.3,8
+String Beans,Visayas,2024-12-08,2025-02-09,63,550.7,12
+String Beans,Luzon-Central,2022-11-12,2023-01-14,63,740.8,11
+String Beans,Luzon-Central,2025-09-15,2025-11-20,66,897.8,9
+String Beans,Mindanao,2025-11-10,2026-01-09,60,760.5,11
+String Beans,Luzon-South,2025-11-25,2026-01-31,67,841.0,11
+String Beans,Luzon-South,2026-02-23,2026-04-25,61,799.4,2
+String Beans,Luzon-North,2025-03-29,2025-05-28,60,685.5,3
+String Beans,Luzon-North,2025-07-23,2025-09-24,63,392.7,7
+String Beans,Luzon-North,2022-06-14,2022-08-15,62,705.4,6
+String Beans,Visayas,2023-02-11,2023-04-14,62,799.6,2
+String Beans,Luzon-South,2025-09-25,2025-11-25,61,786.2,9
+String Beans,Mindanao,2022-10-23,2022-12-17,55,784.2,10
+String Beans,Luzon-South,2023-10-03,2023-12-04,62,452.9,10
+String Beans,Luzon-North,2024-02-13,2024-04-15,62,738.9,2
+String Beans,Luzon-South,2023-06-08,2023-08-05,58,644.3,6
+String Beans,Luzon-South,2024-01-18,2024-03-19,61,774.2,1
+String Beans,Visayas,2023-06-20,2023-08-22,63,735.4,6
+String Beans,Visayas,2023-03-19,2023-05-14,56,492.4,3
+String Beans,Luzon-Central,2022-06-12,2022-08-11,60,401.1,6
+String Beans,Visayas,2024-05-10,2024-07-04,55,898.5,5
+String Beans,Luzon-Central,2022-10-10,2022-12-07,58,839.9,10
+String Beans,Luzon-South,2023-08-13,2023-10-13,61,620.4,8
+String Beans,Luzon-South,2025-02-01,2025-03-30,57,465.5,2
+String Beans,Luzon-South,2023-07-28,2023-10-02,66,645.1,7
+String Beans,Luzon-North,2025-04-29,2025-06-30,62,965.5,4
+String Beans,Mindanao,2025-11-26,2026-01-25,60,929.6,11
+String Beans,Luzon-North,2026-01-05,2026-03-14,68,571.7,1
+String Beans,Luzon-Central,2025-08-19,2025-10-20,62,579.3,8
+String Beans,Luzon-North,2024-06-08,2024-08-07,60,576.1,6
+String Beans,Luzon-South,2022-10-18,2022-12-21,64,683.7,10
+String Beans,Mindanao,2025-12-16,2026-02-16,62,577.6,12
+String Beans,Luzon-Central,2024-09-23,2024-11-26,64,1028.1,9
+String Beans,Luzon-North,2022-11-03,2023-01-06,64,796.9,11
+String Beans,Mindanao,2024-02-11,2024-04-10,59,649.2,2
+String Beans,Mindanao,2024-07-17,2024-09-12,57,648.3,7
+String Beans,Visayas,2025-04-25,2025-06-23,59,623.8,4
+String Beans,Luzon-North,2025-09-14,2025-11-13,60,541.3,9
+String Beans,Mindanao,2023-05-07,2023-07-02,56,550.2,5
+String Beans,Luzon-South,2025-11-19,2026-01-19,61,644.5,11
+String Beans,Luzon-South,2023-09-10,2023-11-13,64,702.0,9
+String Beans,Mindanao,2023-03-29,2023-05-23,55,741.3,3
+String Beans,Mindanao,2022-03-18,2022-05-11,54,704.6,3
+String Beans,Visayas,2024-04-14,2024-06-10,57,796.0,4
+String Beans,Luzon-North,2024-03-27,2024-05-31,65,589.0,3
+String Beans,Visayas,2022-09-28,2022-11-29,62,687.4,9
+String Beans,Luzon-South,2025-06-05,2025-08-05,61,806.8,6
+String Beans,Luzon-Central,2024-03-16,2024-05-13,58,802.7,3
+String Beans,Luzon-North,2023-11-21,2024-01-27,67,604.0,11
+String Beans,Luzon-South,2024-05-03,2024-07-06,64,684.6,5
+Spinach,Mindanao,2025-03-22,2025-04-27,36,427.6,3
+Spinach,Luzon-North,2026-03-20,2026-04-30,41,413.5,3
+Spinach,Luzon-North,2025-09-15,2025-10-31,46,407.9,9
+Spinach,Visayas,2022-06-28,2022-08-08,41,407.0,6
+Spinach,Luzon-Central,2023-05-17,2023-06-24,38,457.5,5
+Spinach,Visayas,2023-12-13,2024-01-26,44,357.8,12
+Spinach,Luzon-South,2024-10-18,2024-11-28,41,440.5,10
+Spinach,Luzon-South,2023-07-29,2023-09-05,38,336.4,7
+Spinach,Mindanao,2025-05-27,2025-07-03,37,236.6,5
+Spinach,Luzon-North,2023-07-05,2023-08-18,44,345.6,7
+Spinach,Luzon-South,2024-07-22,2024-09-03,43,315.9,7
+Spinach,Luzon-South,2022-11-07,2022-12-20,43,365.4,11
+Spinach,Mindanao,2024-09-15,2024-10-25,40,415.9,9
+Spinach,Mindanao,2025-02-10,2025-03-19,37,388.7,2
+Spinach,Mindanao,2025-12-23,2026-02-03,42,375.7,12
+Spinach,Visayas,2025-07-21,2025-09-01,42,347.1,7
+Spinach,Luzon-North,2024-01-31,2024-03-14,43,477.3,1
+Spinach,Luzon-Central,2025-05-31,2025-07-10,40,244.2,5
+Spinach,Mindanao,2023-04-15,2023-05-21,36,218.6,4
+Spinach,Visayas,2023-04-29,2023-06-05,37,217.8,4
+Spinach,Luzon-North,2023-04-10,2023-05-22,42,443.9,4
+Spinach,Mindanao,2025-11-18,2025-12-28,40,433.7,11
+Spinach,Luzon-Central,2023-06-29,2023-08-11,43,290.7,6
+Spinach,Luzon-South,2022-08-20,2022-10-01,42,236.0,8
+Spinach,Luzon-Central,2022-04-03,2022-05-16,43,390.3,4
+Spinach,Luzon-South,2024-07-02,2024-08-13,42,345.4,7
+Spinach,Luzon-South,2024-12-20,2025-01-30,41,289.3,12
+Spinach,Luzon-Central,2024-08-12,2024-09-25,44,287.6,8
+Spinach,Visayas,2025-01-11,2025-02-21,41,371.4,1
+Spinach,Mindanao,2023-03-21,2023-04-29,39,355.2,3
+Spinach,Visayas,2023-06-11,2023-07-22,41,389.3,6
+Spinach,Mindanao,2022-09-21,2022-11-04,44,379.6,9
+Spinach,Mindanao,2022-12-30,2023-02-05,37,298.2,12
+Spinach,Mindanao,2025-11-14,2025-12-25,41,229.4,11
+Spinach,Luzon-North,2024-04-13,2024-05-21,38,438.9,4
+Spinach,Luzon-Central,2024-12-05,2025-01-17,43,424.3,12
+Spinach,Luzon-South,2022-10-12,2022-11-20,39,337.6,10
+Spinach,Luzon-North,2024-07-31,2024-09-09,40,244.9,7
+Spinach,Visayas,2023-04-14,2023-05-20,36,325.3,4
+Spinach,Luzon-South,2024-02-12,2024-03-24,41,349.5,2
+Spinach,Luzon-South,2022-07-08,2022-08-17,40,454.4,7
+Spinach,Luzon-Central,2022-04-13,2022-05-20,37,446.9,4
+Spinach,Luzon-North,2023-02-28,2023-04-12,43,340.2,2
+Spinach,Visayas,2025-04-30,2025-06-10,41,298.5,4
+Spinach,Luzon-Central,2022-09-22,2022-11-03,42,287.9,9
+Spinach,Luzon-Central,2023-08-26,2023-10-07,42,421.8,8
+Spinach,Mindanao,2024-02-09,2024-03-22,42,426.1,2
+Spinach,Luzon-North,2024-04-22,2024-05-31,39,391.9,4
+Spinach,Visayas,2025-08-13,2025-09-24,42,344.5,8
+Spinach,Mindanao,2025-02-07,2025-03-17,38,441.2,2
+Spinach,Mindanao,2024-02-27,2024-04-11,44,317.6,2
+Spinach,Visayas,2024-05-16,2024-06-28,43,283.4,5
+Spinach,Luzon-Central,2023-04-12,2023-05-20,38,431.1,4
+Spinach,Luzon-Central,2026-01-31,2026-03-14,42,313.1,1
+Spinach,Luzon-North,2023-09-19,2023-10-30,41,338.7,9
+Spinach,Mindanao,2025-12-01,2026-01-09,39,305.9,12
+Spinach,Luzon-North,2023-10-27,2023-12-06,40,323.4,10
+Spinach,Luzon-North,2023-04-23,2023-06-01,39,332.9,4
+Spinach,Luzon-North,2025-10-26,2025-12-07,42,393.5,10
+Spinach,Luzon-Central,2022-02-22,2022-04-04,41,380.6,2
+Pechay,Luzon-North,2025-05-24,2025-06-24,31,512.7,5
+Pechay,Luzon-South,2022-05-25,2022-06-20,26,432.7,5
+Pechay,Luzon-North,2024-04-07,2024-05-06,29,471.7,4
+Pechay,Visayas,2024-01-05,2024-02-02,28,410.2,1
+Pechay,Luzon-South,2025-04-10,2025-05-08,28,492.7,4
+Pechay,Visayas,2022-02-24,2022-03-25,29,325.7,2
+Pechay,Mindanao,2024-05-29,2024-06-25,27,500.7,5
+Pechay,Visayas,2024-02-28,2024-03-31,32,410.5,2
+Pechay,Visayas,2023-11-09,2023-12-08,29,461.7,11
+Pechay,Luzon-Central,2024-06-30,2024-08-01,32,485.4,6
+Pechay,Luzon-South,2024-02-24,2024-03-26,31,428.8,2
+Pechay,Mindanao,2025-06-20,2025-07-20,30,391.8,6
+Pechay,Mindanao,2022-12-06,2023-01-07,32,394.6,12
+Pechay,Luzon-Central,2024-07-23,2024-08-23,31,404.9,7
+Pechay,Luzon-Central,2022-06-07,2022-07-08,31,474.8,6
+Pechay,Luzon-North,2025-05-05,2025-06-05,31,492.9,5
+Pechay,Luzon-Central,2023-05-03,2023-06-01,29,357.9,5
+Pechay,Luzon-South,2025-01-11,2025-02-10,30,387.8,1
+Pechay,Mindanao,2024-04-15,2024-05-10,25,315.8,4
+Pechay,Mindanao,2022-12-14,2023-01-17,34,366.7,12
+Pechay,Visayas,2024-03-29,2024-04-26,28,332.0,3
+Pechay,Visayas,2025-03-14,2025-04-17,34,500.2,3
+Pechay,Luzon-North,2024-08-02,2024-09-05,34,340.1,8
+Pechay,Luzon-Central,2023-03-07,2023-04-07,31,483.5,3
+Pechay,Luzon-North,2025-05-21,2025-06-19,29,388.0,5
+Pechay,Mindanao,2022-11-08,2022-12-06,28,428.2,11
+Pechay,Luzon-North,2023-11-20,2023-12-20,30,408.2,11
+Pechay,Luzon-South,2025-04-03,2025-04-29,26,446.0,4
+Pechay,Luzon-Central,2025-03-13,2025-04-13,31,462.8,3
+Pechay,Mindanao,2025-09-24,2025-10-21,27,361.6,9
+Pechay,Luzon-South,2022-03-30,2022-04-27,28,350.0,3
+Pechay,Visayas,2024-03-20,2024-04-21,32,459.5,3
+Pechay,Luzon-South,2024-04-27,2024-05-27,30,441.5,4
+Pechay,Visayas,2023-07-02,2023-08-01,30,369.2,7
+Pechay,Luzon-Central,2024-03-21,2024-04-20,30,366.6,3
+Pechay,Luzon-South,2023-08-14,2023-09-12,29,508.3,8
+Pechay,Luzon-Central,2025-03-22,2025-04-21,30,476.8,3
+Pechay,Luzon-North,2024-06-30,2024-08-01,32,400.8,6
+Pechay,Luzon-Central,2024-08-24,2024-09-23,30,367.6,8
+Pechay,Luzon-Central,2023-10-01,2023-11-01,31,343.4,10
+Pechay,Visayas,2023-12-20,2024-01-23,34,448.6,12
+Pechay,Luzon-South,2026-02-28,2026-03-31,31,441.3,2
+Pechay,Luzon-North,2024-03-22,2024-04-21,30,469.8,3
+Pechay,Luzon-South,2025-07-31,2025-08-29,29,338.4,7
+Pechay,Luzon-North,2022-12-15,2023-01-21,37,262.1,12
+Pechay,Luzon-North,2022-01-27,2022-02-26,30,354.3,1
+Pechay,Luzon-Central,2022-07-05,2022-08-04,30,361.6,7
+Pechay,Luzon-North,2024-04-12,2024-05-11,29,294.7,4
+Pechay,Luzon-South,2023-05-03,2023-06-03,31,460.7,5
+Pechay,Luzon-Central,2023-05-29,2023-06-28,30,448.7,5
+Pechay,Luzon-North,2023-09-10,2023-10-12,32,391.6,9
+Pechay,Mindanao,2025-10-02,2025-11-05,34,280.2,10
+Pechay,Mindanao,2024-04-23,2024-05-19,26,470.6,4
+Pechay,Luzon-Central,2023-09-19,2023-10-18,29,435.5,9
+Pechay,Luzon-Central,2022-07-12,2022-08-13,32,416.6,7
+Pechay,Mindanao,2023-10-26,2023-11-25,30,387.9,10
+Pechay,Mindanao,2023-04-10,2023-05-09,29,452.7,4
+Pechay,Luzon-South,2023-09-03,2023-10-02,29,359.1,9
+Pechay,Luzon-South,2024-03-12,2024-04-12,31,470.3,3
+Pechay,Luzon-North,2023-05-28,2023-06-30,33,498.5,5
+Sweet Potato,Luzon-North,2025-09-22,2026-01-15,115,1925.4,9
+Sweet Potato,Luzon-North,2024-05-10,2024-08-30,112,1408.3,5
+Sweet Potato,Luzon-North,2024-07-25,2024-11-13,111,1670.9,7
+Sweet Potato,Luzon-South,2023-10-01,2024-02-05,127,1206.8,10
+Sweet Potato,Luzon-South,2024-03-08,2024-06-25,109,1912.9,3
+Sweet Potato,Mindanao,2025-01-18,2025-05-11,113,1002.2,1
+Sweet Potato,Luzon-Central,2025-02-18,2025-06-09,111,988.3,2
+Sweet Potato,Luzon-North,2024-10-15,2025-01-31,108,1143.0,10
+Sweet Potato,Mindanao,2022-07-22,2022-11-04,105,1607.0,7
+Sweet Potato,Luzon-South,2025-02-28,2025-06-27,119,1703.1,2
+Sweet Potato,Mindanao,2022-02-02,2022-05-24,111,1581.9,2
+Sweet Potato,Visayas,2022-05-26,2022-09-09,106,1392.8,5
+Sweet Potato,Luzon-South,2025-05-18,2025-08-29,103,1613.8,5
+Sweet Potato,Luzon-North,2024-03-24,2024-07-10,108,1321.2,3
+Sweet Potato,Luzon-North,2025-11-14,2026-03-18,124,1521.2,11
+Sweet Potato,Luzon-South,2025-12-08,2026-04-07,120,1348.7,12
+Sweet Potato,Luzon-South,2022-09-04,2023-01-01,119,1355.0,9
+Sweet Potato,Visayas,2022-11-06,2023-03-01,115,1808.5,11
+Sweet Potato,Luzon-South,2025-12-21,2026-04-11,111,1646.8,12
+Sweet Potato,Visayas,2024-11-20,2025-03-23,123,1499.7,11
+Sweet Potato,Visayas,2022-09-28,2023-01-21,115,2025.0,9
+Sweet Potato,Visayas,2025-01-18,2025-05-20,122,1224.7,1
+Sweet Potato,Luzon-North,2024-02-11,2024-06-07,117,1560.6,2
+Sweet Potato,Visayas,2022-11-16,2023-03-08,112,1317.4,11
+Sweet Potato,Luzon-Central,2022-08-06,2022-12-02,118,1574.7,8
+Sweet Potato,Luzon-South,2022-03-19,2022-07-02,105,1298.5,3
+Sweet Potato,Mindanao,2025-08-18,2025-12-11,115,1785.2,8
+Sweet Potato,Luzon-South,2024-09-19,2024-12-30,102,1022.9,9
+Sweet Potato,Luzon-North,2022-04-19,2022-08-04,107,1297.3,4
+Sweet Potato,Luzon-North,2024-04-08,2024-07-31,114,1506.6,4
+Sweet Potato,Luzon-Central,2023-02-05,2023-05-31,115,1561.3,2
+Sweet Potato,Visayas,2023-11-28,2024-03-23,116,1696.0,11
+Sweet Potato,Mindanao,2025-04-08,2025-07-12,95,1703.8,4
+Sweet Potato,Luzon-Central,2023-11-07,2024-02-29,114,820.7,11
+Sweet Potato,Luzon-South,2024-07-08,2024-10-25,109,1643.4,7
+Sweet Potato,Luzon-North,2023-10-06,2024-02-02,119,2026.8,10
+Sweet Potato,Visayas,2022-01-08,2022-05-02,114,1582.2,1
+Sweet Potato,Luzon-North,2023-08-10,2023-12-07,119,1068.0,8
+Sweet Potato,Mindanao,2022-08-21,2022-12-06,107,2048.5,8
+Sweet Potato,Luzon-North,2025-11-14,2026-03-19,125,1485.6,11
+Sweet Potato,Luzon-Central,2025-10-24,2026-02-12,111,1532.2,10
+Sweet Potato,Luzon-South,2023-11-22,2024-03-13,112,1466.2,11
+Sweet Potato,Mindanao,2024-11-21,2025-03-22,121,1475.8,11
+Sweet Potato,Luzon-North,2024-01-27,2024-05-25,119,1570.0,1
+Sweet Potato,Visayas,2024-07-31,2024-11-18,110,1556.8,7
+Sweet Potato,Luzon-Central,2025-08-01,2025-11-24,115,1873.6,8
+Sweet Potato,Luzon-South,2025-05-29,2025-09-20,114,1484.1,5
+Sweet Potato,Luzon-Central,2023-05-11,2023-08-24,105,1293.1,5
+Sweet Potato,Luzon-North,2024-10-07,2025-02-12,128,1721.3,10
+Sweet Potato,Luzon-North,2023-05-07,2023-08-31,116,1685.7,5
+Sweet Potato,Visayas,2024-04-16,2024-07-22,97,1428.4,4
+Sweet Potato,Luzon-Central,2024-10-17,2025-01-30,105,1786.3,10
+Sweet Potato,Luzon-Central,2025-04-14,2025-07-31,108,2137.1,4
+Sweet Potato,Visayas,2023-01-23,2023-05-15,112,1532.0,1
+Sweet Potato,Luzon-Central,2024-04-16,2024-07-27,102,1329.6,4
+Sweet Potato,Luzon-South,2025-03-02,2025-06-18,108,947.9,3
+Sweet Potato,Mindanao,2023-08-29,2023-12-23,116,1608.5,8
+Sweet Potato,Luzon-North,2023-02-16,2023-06-15,119,1503.6,2
+Sweet Potato,Mindanao,2025-12-26,2026-04-11,106,1272.9,12
+Sweet Potato,Visayas,2024-12-31,2025-04-25,115,1654.4,12
+Cassava,Luzon-Central,2024-06-18,2025-03-24,279,4187.7,6
+Cassava,Mindanao,2022-02-06,2022-11-07,274,3439.6,2
+Cassava,Visayas,2023-08-06,2024-05-09,277,4293.6,8
+Cassava,Visayas,2024-01-08,2024-10-05,271,3189.9,1
+Cassava,Luzon-Central,2025-06-12,2026-03-10,271,3805.7,6
+Cassava,Luzon-Central,2025-11-25,2026-09-14,293,4396.8,11
+Cassava,Luzon-North,2022-04-07,2022-12-20,257,2930.8,4
+Cassava,Luzon-North,2023-01-28,2023-11-14,290,2782.9,1
+Cassava,Luzon-South,2022-07-13,2023-04-12,273,3076.7,7
+Cassava,Luzon-North,2024-12-09,2025-10-15,310,3625.5,12
+Cassava,Mindanao,2024-06-04,2025-02-25,266,3317.3,6
+Cassava,Luzon-Central,2022-03-01,2022-11-21,265,3774.2,3
+Cassava,Mindanao,2023-12-24,2024-09-15,266,4041.2,12
+Cassava,Visayas,2023-09-22,2024-06-09,261,3985.5,9
+Cassava,Mindanao,2022-08-18,2023-05-05,260,3494.4,8
+Cassava,Luzon-South,2022-09-14,2023-06-08,267,4160.3,9
+Cassava,Luzon-North,2023-09-07,2024-06-13,280,3644.6,9
+Cassava,Luzon-North,2025-08-14,2026-05-28,287,3965.8,8
+Cassava,Mindanao,2025-04-19,2025-12-11,236,3597.1,4
+Cassava,Visayas,2022-03-26,2022-12-24,273,3081.0,3
+Cassava,Luzon-North,2022-12-26,2023-10-11,289,4650.5,12
+Cassava,Visayas,2025-05-29,2026-02-27,274,3086.4,5
+Cassava,Visayas,2022-09-27,2023-07-08,284,2859.9,9
+Cassava,Luzon-North,2023-06-14,2024-04-04,295,4163.2,6
+Cassava,Luzon-North,2024-12-18,2025-10-12,298,3977.8,12
+Cassava,Luzon-Central,2025-03-24,2025-11-27,248,2987.8,3
+Cassava,Luzon-North,2022-02-10,2022-12-15,308,4518.1,2
+Cassava,Mindanao,2022-08-15,2023-05-15,273,3971.8,8
+Cassava,Luzon-North,2023-03-28,2023-12-24,271,2980.8,3
+Cassava,Visayas,2024-01-25,2024-11-04,284,3616.9,1
+Cassava,Luzon-South,2023-02-03,2023-11-19,289,3652.9,2
+Cassava,Mindanao,2024-06-01,2025-02-20,264,3760.1,6
+Cassava,Mindanao,2025-06-14,2026-03-09,268,3921.1,6
+Cassava,Luzon-South,2025-08-08,2026-05-16,281,3107.1,8
+Cassava,Luzon-North,2022-11-25,2023-09-04,283,4297.4,11
+Cassava,Visayas,2022-09-28,2023-07-09,284,4742.5,9
+Cassava,Luzon-North,2024-11-10,2025-10-04,328,3356.7,11
+Cassava,Luzon-Central,2025-06-22,2026-03-20,271,3734.6,6
+Cassava,Mindanao,2024-04-16,2024-12-17,245,4619.3,4
+Cassava,Luzon-North,2022-10-19,2023-08-07,292,2927.3,10
+Cassava,Luzon-North,2023-12-24,2024-10-15,296,3116.8,12
+Cassava,Luzon-South,2022-09-18,2023-07-25,310,3334.0,9
+Cassava,Luzon-North,2023-07-23,2024-04-30,282,3467.5,7
+Cassava,Mindanao,2023-11-27,2024-08-31,278,3926.3,11
+Cassava,Luzon-Central,2025-01-17,2025-10-31,287,2948.1,1
+Cassava,Mindanao,2025-01-11,2025-09-30,262,2751.3,1
+Cassava,Luzon-South,2025-09-30,2026-07-15,288,4115.3,9
+Cassava,Mindanao,2024-08-07,2025-05-12,278,2390.4,8
+Cassava,Luzon-South,2024-03-04,2024-11-23,264,3895.1,3
+Cassava,Luzon-North,2024-11-12,2025-08-23,284,2556.2,11
+Cassava,Luzon-Central,2025-06-10,2026-03-19,282,3934.8,6
+Cassava,Luzon-North,2022-01-07,2022-10-18,284,3044.4,1
+Cassava,Luzon-South,2022-01-23,2022-10-19,269,2604.1,1
+Cassava,Luzon-North,2024-02-14,2024-12-06,296,2756.2,2
+Cassava,Luzon-North,2023-05-20,2024-02-28,284,2679.9,5
+Cassava,Visayas,2022-09-26,2023-07-12,289,3236.5,9
+Cassava,Mindanao,2024-05-10,2025-01-29,264,3307.1,5
+Cassava,Luzon-Central,2022-08-09,2023-05-21,285,3284.0,8
+Cassava,Luzon-North,2024-01-06,2024-10-30,298,4143.2,1
+Cassava,Luzon-North,2022-09-06,2023-06-25,292,3461.2,9
+Ginger,Luzon-South,2022-08-01,2023-03-29,240,709.8,8
+Ginger,Luzon-Central,2023-12-20,2024-08-18,242,730.5,12
+Ginger,Luzon-South,2024-04-26,2024-12-20,238,754.1,4
+Ginger,Visayas,2023-07-29,2024-03-14,229,400.8,7
+Ginger,Luzon-North,2022-07-25,2023-04-02,251,501.2,7
+Ginger,Luzon-Central,2023-11-23,2024-08-07,258,443.1,11
+Ginger,Luzon-North,2022-11-16,2023-08-20,277,483.9,11
+Ginger,Mindanao,2022-06-30,2023-02-15,230,658.9,6
+Ginger,Visayas,2025-05-04,2025-12-28,238,698.2,5
+Ginger,Visayas,2022-10-26,2023-07-08,255,507.9,10
+Ginger,Luzon-Central,2025-05-12,2026-01-02,235,652.4,5
+Ginger,Visayas,2025-05-21,2025-12-29,222,454.2,5
+Ginger,Mindanao,2022-11-07,2023-07-09,244,724.1,11
+Ginger,Luzon-South,2025-10-08,2026-05-30,234,704.3,10
+Ginger,Luzon-Central,2024-01-20,2024-10-01,255,530.1,1
+Ginger,Luzon-Central,2023-11-30,2024-07-31,244,563.6,11
+Ginger,Mindanao,2024-05-22,2024-12-21,213,635.7,5
+Ginger,Luzon-Central,2022-10-19,2023-06-18,242,642.7,10
+Ginger,Luzon-North,2022-10-25,2023-07-09,257,566.2,10
+Ginger,Visayas,2025-07-09,2026-03-21,255,564.8,7
+Ginger,Luzon-Central,2023-05-26,2024-01-10,229,393.0,5
+Ginger,Luzon-North,2025-10-19,2026-07-12,266,372.1,10
+Ginger,Luzon-Central,2023-04-10,2023-11-20,224,788.3,4
+Ginger,Visayas,2024-05-25,2025-01-05,225,740.9,5
+Ginger,Luzon-Central,2022-10-04,2023-06-18,257,453.2,10
+Ginger,Luzon-Central,2022-07-14,2023-03-14,243,488.9,7
+Ginger,Visayas,2023-05-26,2024-01-14,233,546.6,5
+Ginger,Mindanao,2022-01-04,2022-08-28,236,667.0,1
+Ginger,Luzon-North,2022-01-19,2022-10-07,261,552.3,1
+Ginger,Luzon-North,2024-08-06,2025-04-28,265,822.7,8
+Ginger,Mindanao,2023-04-06,2023-11-20,228,933.6,4
+Ginger,Mindanao,2024-01-19,2024-09-22,247,676.0,1
+Ginger,Visayas,2024-05-21,2025-01-02,226,545.3,5
+Ginger,Luzon-South,2024-03-21,2024-11-07,231,614.9,3
+Ginger,Visayas,2023-09-08,2024-05-20,255,582.5,9
+Ginger,Visayas,2023-01-19,2023-10-06,260,683.6,1
+Ginger,Luzon-North,2025-02-05,2025-10-22,259,617.9,2
+Ginger,Luzon-North,2025-08-13,2026-05-08,268,630.7,8
+Ginger,Mindanao,2024-02-12,2024-10-12,243,527.2,2
+Ginger,Luzon-South,2023-10-02,2024-06-05,247,596.3,10
+Ginger,Luzon-North,2025-01-26,2025-10-11,258,606.1,1
+Ginger,Luzon-South,2024-04-17,2024-11-29,226,652.7,4
+Ginger,Luzon-Central,2024-08-15,2025-04-06,234,562.4,8
+Ginger,Luzon-North,2025-01-15,2025-10-20,278,684.5,1
+Ginger,Luzon-Central,2024-02-14,2024-10-21,250,627.7,2
+Ginger,Luzon-North,2023-06-21,2024-03-07,260,501.0,6
+Ginger,Mindanao,2025-09-15,2026-05-17,244,689.2,9
+Ginger,Luzon-South,2025-02-01,2025-10-08,249,308.0,2
+Ginger,Luzon-Central,2023-11-26,2024-08-16,264,543.4,11
+Ginger,Luzon-Central,2026-03-16,2026-11-05,234,594.0,3
+Ginger,Luzon-South,2024-07-11,2025-03-17,249,499.7,7
+Ginger,Luzon-North,2022-03-15,2022-10-31,230,603.2,3
+Ginger,Luzon-Central,2022-08-19,2023-04-29,253,613.5,8
+Ginger,Luzon-Central,2023-02-12,2023-10-07,237,440.5,2
+Ginger,Luzon-South,2025-06-14,2026-02-14,245,534.3,6
+Ginger,Mindanao,2022-09-04,2023-04-29,237,495.8,9
+Ginger,Mindanao,2022-11-05,2023-07-07,244,635.1,11
+Ginger,Luzon-South,2023-02-04,2023-10-08,246,592.1,2
+Ginger,Luzon-Central,2023-08-23,2024-04-28,249,545.9,8
+Ginger,Visayas,2022-04-20,2022-11-27,221,484.0,4
+Bitter Gourd (Ampalaya),Mindanao,2025-05-16,2025-07-18,63,649.2,5
+Bitter Gourd (Ampalaya),Luzon-South,2025-05-15,2025-07-24,70,669.8,5
+Bitter Gourd (Ampalaya),Luzon-South,2024-12-04,2025-02-11,69,728.8,12
+Bitter Gourd (Ampalaya),Mindanao,2022-09-26,2022-12-07,72,697.3,9
+Bitter Gourd (Ampalaya),Visayas,2023-06-12,2023-08-17,66,620.3,6
+Bitter Gourd (Ampalaya),Visayas,2024-04-28,2024-07-08,71,871.1,4
+Bitter Gourd (Ampalaya),Luzon-South,2024-08-15,2024-10-22,68,794.2,8
+Bitter Gourd (Ampalaya),Mindanao,2026-01-24,2026-03-30,65,818.6,1
+Bitter Gourd (Ampalaya),Mindanao,2024-06-05,2024-08-09,65,809.4,6
+Bitter Gourd (Ampalaya),Luzon-Central,2023-06-12,2023-08-25,74,819.7,6
+Bitter Gourd (Ampalaya),Luzon-South,2026-02-13,2026-04-28,74,783.4,2
+Bitter Gourd (Ampalaya),Visayas,2026-02-10,2026-04-21,70,1205.3,2
+Bitter Gourd (Ampalaya),Mindanao,2023-10-28,2024-01-06,70,875.6,10
+Bitter Gourd (Ampalaya),Mindanao,2024-03-16,2024-05-22,67,568.9,3
+Bitter Gourd (Ampalaya),Mindanao,2023-01-15,2023-03-26,70,815.4,1
+Bitter Gourd (Ampalaya),Visayas,2025-11-22,2026-02-04,74,706.2,11
+Bitter Gourd (Ampalaya),Visayas,2025-06-10,2025-08-19,70,1077.2,6
+Bitter Gourd (Ampalaya),Luzon-North,2025-07-29,2025-10-12,75,809.2,7
+Bitter Gourd (Ampalaya),Luzon-South,2026-03-18,2026-05-28,71,752.6,3
+Bitter Gourd (Ampalaya),Mindanao,2023-08-10,2023-10-22,73,722.5,8
+Bitter Gourd (Ampalaya),Luzon-North,2026-02-27,2026-05-10,72,901.4,2
+Bitter Gourd (Ampalaya),Visayas,2024-08-31,2024-11-13,74,1010.5,8
+Bitter Gourd (Ampalaya),Luzon-South,2025-01-09,2025-03-24,74,664.2,1
+Bitter Gourd (Ampalaya),Mindanao,2023-06-14,2023-08-24,71,814.7,6
+Bitter Gourd (Ampalaya),Luzon-Central,2023-11-24,2024-02-02,70,601.1,11
+Bitter Gourd (Ampalaya),Luzon-South,2023-10-17,2024-01-03,78,996.2,10
+Bitter Gourd (Ampalaya),Mindanao,2023-01-14,2023-03-30,75,934.8,1
+Bitter Gourd (Ampalaya),Luzon-Central,2023-03-13,2023-05-19,67,957.8,3
+Bitter Gourd (Ampalaya),Visayas,2022-03-03,2022-05-06,64,887.9,3
+Bitter Gourd (Ampalaya),Visayas,2024-03-04,2024-05-10,67,963.9,3
+Bitter Gourd (Ampalaya),Luzon-South,2024-07-26,2024-10-05,71,928.1,7
+Bitter Gourd (Ampalaya),Mindanao,2023-03-31,2023-06-08,69,925.9,3
+Bitter Gourd (Ampalaya),Luzon-South,2022-01-25,2022-04-11,76,838.2,1
+Bitter Gourd (Ampalaya),Visayas,2022-10-07,2022-12-17,71,625.4,10
+Bitter Gourd (Ampalaya),Luzon-South,2025-10-10,2025-12-20,71,834.8,10
+Bitter Gourd (Ampalaya),Mindanao,2022-08-06,2022-10-15,70,944.5,8
+Bitter Gourd (Ampalaya),Luzon-North,2022-08-29,2022-11-12,75,885.6,8
+Bitter Gourd (Ampalaya),Luzon-South,2024-08-29,2024-11-14,77,891.6,8
+Bitter Gourd (Ampalaya),Mindanao,2025-10-27,2026-01-05,70,1037.3,10
+Bitter Gourd (Ampalaya),Visayas,2025-03-02,2025-05-09,68,878.6,3
+Bitter Gourd (Ampalaya),Luzon-Central,2022-04-04,2022-06-11,68,599.3,4
+Bitter Gourd (Ampalaya),Luzon-North,2023-02-11,2023-05-01,79,851.4,2
+Bitter Gourd (Ampalaya),Luzon-South,2023-01-06,2023-03-22,75,791.3,1
+Bitter Gourd (Ampalaya),Luzon-South,2022-01-07,2022-03-23,75,695.3,1
+Bitter Gourd (Ampalaya),Luzon-North,2025-04-12,2025-06-19,68,571.7,4
+Bitter Gourd (Ampalaya),Luzon-North,2024-08-07,2024-10-26,80,855.4,8
+Bitter Gourd (Ampalaya),Luzon-Central,2023-09-13,2023-11-20,68,783.8,9
+Bitter Gourd (Ampalaya),Visayas,2025-11-22,2026-02-02,72,988.2,11
+Bitter Gourd (Ampalaya),Luzon-North,2023-07-02,2023-09-16,76,607.7,7
+Bitter Gourd (Ampalaya),Visayas,2024-02-25,2024-05-07,72,924.3,2
+Bitter Gourd (Ampalaya),Mindanao,2022-08-18,2022-10-27,70,850.7,8
+Bitter Gourd (Ampalaya),Mindanao,2025-04-18,2025-06-22,65,761.6,4
+Bitter Gourd (Ampalaya),Luzon-North,2022-08-10,2022-10-29,80,951.0,8
+Bitter Gourd (Ampalaya),Luzon-South,2024-03-12,2024-05-20,69,693.1,3
+Bitter Gourd (Ampalaya),Luzon-North,2023-04-18,2023-06-29,72,554.6,4
+Bitter Gourd (Ampalaya),Mindanao,2023-02-12,2023-04-23,70,769.5,2
+Bitter Gourd (Ampalaya),Luzon-North,2025-01-11,2025-03-30,78,681.0,1
+Bitter Gourd (Ampalaya),Luzon-North,2023-11-12,2024-01-28,77,619.1,11
+Bitter Gourd (Ampalaya),Luzon-Central,2023-01-03,2023-03-21,77,1041.4,1
+Bitter Gourd (Ampalaya),Luzon-Central,2025-03-29,2025-06-02,65,870.6,3
