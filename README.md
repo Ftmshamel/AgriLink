@@ -1,5 +1,14 @@
 # AgriLink — AI-Powered Agricultural Supply Chain
 
+## Mobile app
+
+The [`mobile`](mobile/) Flutter project contains the Consumer and Rider
+experiences, including account creation and persistent sign-in. Farmer and
+Superadmin remain in the existing web frontend.
+
+Marketplace and delivery content currently uses seed data while the shared
+cloud backend is being configured.
+
 AgriLink connects Filipino farmers directly with bulk buyers (restaurants,
 wholesalers, hotels). It cuts out middlemen with three pillars:
 

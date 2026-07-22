@@ -1,0 +1,19 @@
+# Flutter/Dart generated files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+coverage/
+
+# Platform generated tooling
+android/.gradle/
+android/local.properties
+ios/Pods/
+
+# IDE
+.idea/
+*.iml
+
+# Local emulator QA captures
+*_screen.png

@@ -34,3 +34,5 @@ pip-log.txt
 
 backend/_uv/uv
 
+# Local Flutter SDK managed outside the app source
+/flutter/
