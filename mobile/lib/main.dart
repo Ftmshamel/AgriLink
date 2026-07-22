@@ -388,7 +388,7 @@ class AuthWelcomePage extends StatelessWidget {
                             ),
                           ),
                           label: const Text(
-                            'Sign in to AgriLink',
+                            'Log in to AgriLink',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
@@ -533,7 +533,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 5),
             const Text(
-              'Sign in to your AgriLink account.',
+              'Log in to your AgriLink account.',
               style: TextStyle(color: muted, fontSize: 15),
             ),
             const SizedBox(height: 24),
@@ -610,7 +610,7 @@ class _LoginPageState extends State<LoginPage> {
                   : const Icon(Icons.login),
               label: Padding(
                 padding: const EdgeInsets.all(15),
-                child: Text(_loading ? 'Signing in…' : 'Sign in'),
+                child: Text(_loading ? 'Logging in…' : 'Log in'),
               ),
             ),
             const SizedBox(height: 18),
@@ -853,7 +853,7 @@ class _SignupPageState extends State<SignupPage> {
                     context,
                     MaterialPageRoute(builder: (_) => const LoginPage()),
                   ),
-                  child: const Text('Sign in'),
+                  child: const Text('Log in'),
                 ),
               ],
             ),
@@ -1988,7 +1988,7 @@ class ConsumerProfile extends StatelessWidget {
             );
           },
           icon: const Icon(Icons.logout),
-          label: const Text('Sign out'),
+          label: const Text('Log out'),
         ),
       ],
     );
@@ -2760,7 +2760,7 @@ class RiderProfile extends StatelessWidget {
             );
           },
           icon: const Icon(Icons.logout),
-          label: const Text('Sign out'),
+          label: const Text('Log out'),
         ),
       ],
     );

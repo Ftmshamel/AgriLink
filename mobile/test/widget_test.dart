@@ -11,7 +11,7 @@ void main() {
     );
 
     expect(find.text('Fresh harvests.\nSmarter deliveries.'), findsOneWidget);
-    expect(find.text('Sign in to AgriLink'), findsOneWidget);
+    expect(find.text('Log in to AgriLink'), findsOneWidget);
     expect(find.text('Create an account'), findsOneWidget);
   });
 }
