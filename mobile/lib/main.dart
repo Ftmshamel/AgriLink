@@ -213,6 +213,7 @@ class _CloudRoleShellState extends State<CloudRoleShell> {
           _CloudSettingsPage(user: widget.user),
         ],
       MobileRole.farmer => [
+          _LiveFarmerDashboard(user: widget.user),
           _CloudFarmerPage(
             user: widget.user,
             refresh: _refresh,
@@ -222,6 +223,7 @@ class _CloudRoleShellState extends State<CloudRoleShell> {
           _CloudSettingsPage(user: widget.user),
         ],
       MobileRole.rider => [
+          _LiveRiderDashboard(user: widget.user),
           _CloudRiderPool(
             user: widget.user,
             refresh: _refresh,
@@ -245,6 +247,10 @@ class _CloudRoleShellState extends State<CloudRoleShell> {
               icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       MobileRole.farmer => const [
+          NavigationDestination(
+              icon: Icon(Icons.dashboard_outlined),
+              selectedIcon: Icon(Icons.dashboard),
+              label: 'Home'),
           NavigationDestination(icon: Icon(Icons.eco_outlined), label: 'Crops'),
           NavigationDestination(
               icon: Icon(Icons.receipt_long_outlined), label: 'Orders'),
@@ -253,9 +259,17 @@ class _CloudRoleShellState extends State<CloudRoleShell> {
         ],
       MobileRole.rider => const [
           NavigationDestination(
-              icon: Icon(Icons.route_outlined), label: 'Order pool'),
+              icon: Icon(Icons.dashboard_outlined),
+              selectedIcon: Icon(Icons.dashboard),
+              label: 'Home'),
           NavigationDestination(
-              icon: Icon(Icons.local_shipping_outlined), label: 'Trips'),
+              icon: Icon(Icons.inventory_2_outlined),
+              selectedIcon: Icon(Icons.inventory_2),
+              label: 'Pool'),
+          NavigationDestination(
+              icon: Icon(Icons.route_outlined),
+              selectedIcon: Icon(Icons.route),
+              label: 'Trips'),
           NavigationDestination(
               icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
@@ -269,12 +283,7 @@ class _CloudRoleShellState extends State<CloudRoleShell> {
     };
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            _MobileWorkspaceHeader(user: widget.user),
-            Expanded(child: IndexedStack(index: _index, children: pages)),
-          ],
-        ),
+        child: IndexedStack(index: _index, children: pages),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -283,6 +292,196 @@ class _CloudRoleShellState extends State<CloudRoleShell> {
       ),
     );
   }
+}
+
+class _LiveFarmerDashboard extends StatelessWidget {
+  const _LiveFarmerDashboard({required this.user});
+  final MobileUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<List<Map<String, dynamic>>>>(
+      future: Future.wait([
+        authService.database.listCrops(farmerId: user.id),
+        authService.database.listOrders(farmerId: user.id),
+      ]),
+      builder: (context, snapshot) {
+        final crops = snapshot.data?[0] ?? const <Map<String, dynamic>>[];
+        final orders = snapshot.data?[1] ?? const <Map<String, dynamic>>[];
+        final stock = crops.fold<num>(
+            0, (total, crop) => total + ((crop['quantityKg'] as num?) ?? 0));
+        final newOrders =
+            orders.where((order) => order['status'] == 'paid_preparing').length;
+        return ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            _PageHeader(
+              eyebrow: 'FARMER DASHBOARD',
+              title: 'Good day, ${user.name}',
+              subtitle: 'Manage today’s harvest and incoming bulk orders.',
+            ),
+            const SizedBox(height: 20),
+            Row(children: [
+              Expanded(
+                  child: _MetricCard(
+                      icon: Icons.grass,
+                      value: '${crops.length}',
+                      label: 'Active crops')),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _MetricCard(
+                      icon: Icons.shopping_bag_outlined,
+                      value: '$newOrders',
+                      label: 'New orders')),
+            ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              Expanded(
+                  child: _MetricCard(
+                      icon: Icons.inventory,
+                      value: '${stock.toStringAsFixed(0)} kg',
+                      label: 'Available stock')),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _MetricCard(
+                      icon: Icons.local_shipping_outlined,
+                      value:
+                          '${orders.where((o) => o['status'] == 'in_transit').length}',
+                      label: 'In transit')),
+            ]),
+            const SizedBox(height: 24),
+            const _SectionTitle(title: 'Incoming orders', action: 'LIVE'),
+            const SizedBox(height: 10),
+            if (snapshot.connectionState == ConnectionState.waiting)
+              const Center(child: CircularProgressIndicator())
+            else if (orders.isEmpty)
+              const _CloudEmptyState(
+                icon: Icons.receipt_long_outlined,
+                title: 'No incoming orders',
+                message: 'New consumer orders will appear here.',
+              )
+            else
+              ...orders.take(3).map(
+                    (order) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _ActionCard(
+                        icon: Icons.restaurant,
+                        title:
+                            '${order['buyerName'] ?? 'Consumer'} • ${order['quantityKg'] ?? 0} kg',
+                        subtitle: '${order['cropName'] ?? 'Crop'}',
+                        badge: '${order['status'] ?? 'NEW'}'.toUpperCase(),
+                      ),
+                    ),
+                  ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _LiveRiderDashboard extends StatelessWidget {
+  const _LiveRiderDashboard({required this.user});
+  final MobileUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: authService.database.listOrders(),
+      builder: (context, snapshot) {
+        final all = snapshot.data ?? const <Map<String, dynamic>>[];
+        final pool = all
+            .where((order) =>
+                order['status'] == 'ready_for_pickup' &&
+                (order['riderId'] == null || order['riderId'] == ''))
+            .toList();
+        final trips =
+            all.where((order) => order['riderId'] == user.id).toList();
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          children: [
+            Row(children: [
+              const CircleAvatar(
+                backgroundColor: Color(0xFFFFE7C2),
+                child: Icon(Icons.person, color: orange),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Ready to ride?',
+                        style: TextStyle(color: muted)),
+                    Text(user.name,
+                        style: const TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w900)),
+                  ],
+                ),
+              ),
+              const _Pill(icon: Icons.circle, text: 'ONLINE', color: green),
+            ]),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [darkGreen, green]),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(children: [
+                Expanded(
+                    child: _DashboardNumber(
+                        value: '${pool.length}', label: 'Available routes')),
+                Container(width: 1, height: 48, color: Colors.white24),
+                Expanded(
+                    child: _DashboardNumber(
+                        value: '${trips.length}', label: 'My bookings')),
+              ]),
+            ),
+            const SizedBox(height: 24),
+            const _SectionTitle(title: 'Next accepted trip', action: 'LIVE'),
+            const SizedBox(height: 10),
+            if (snapshot.connectionState == ConnectionState.waiting)
+              const Center(child: CircularProgressIndicator())
+            else if (trips.isEmpty)
+              const _CloudEmptyState(
+                icon: Icons.route_outlined,
+                title: 'No accepted trip',
+                message: 'Open the Pool tab to accept a packed delivery.',
+              )
+            else
+              _ActionCard(
+                icon: Icons.local_shipping,
+                title:
+                    '${trips.first['cropName'] ?? 'Crop'} • ${trips.first['quantityKg'] ?? 0} kg',
+                subtitle: '${trips.first['deliveryAddress'] ?? ''}',
+                badge: '${trips.first['status'] ?? ''}'.toUpperCase(),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _DashboardNumber extends StatelessWidget {
+  const _DashboardNumber({required this.value, required this.label});
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900)),
+          const SizedBox(height: 3),
+          Text(label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70, fontSize: 11)),
+        ],
+      );
 }
 
 class _MobileWorkspaceHeader extends StatelessWidget {
@@ -572,18 +771,56 @@ class _CloudCropsPageState extends State<_CloudCropsPage> {
 
   @override
   Widget build(BuildContext context) => _CloudListScaffold(
-        title: 'Fresh crop marketplace',
-        subtitle: 'Reserve upcoming harvests from verified Filipino farmers.',
-        headerContent: Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: TextField(
-            controller: _search,
-            onChanged: (_) => setState(() {}),
-            decoration: _fieldDecoration(
-              hint: 'Search crop, farm, or farmer…',
-              icon: Icons.search,
+        title: 'Good morning, ${widget.user.name}',
+        subtitle: 'Fresh harvests direct from verified local farms.',
+        headerContent: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 18),
+              child: TextField(
+                controller: _search,
+                onChanged: (_) => setState(() {}),
+                decoration: _fieldDecoration(
+                  hint: 'Search crops or farms',
+                  icon: Icons.search,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [darkGreen, green]),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: const Row(children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('FARM-TO-TABLE',
+                          style: TextStyle(
+                              color: Color(0xFFBDE7A9),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.3)),
+                      SizedBox(height: 8),
+                      Text('Save more when\nyou buy in bulk.',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 23,
+                              fontWeight: FontWeight.w900,
+                              height: 1.15)),
+                      SizedBox(height: 10),
+                      Text('Direct prices from verified farms',
+                          style: TextStyle(color: Color(0xFFD8EAD1))),
+                    ],
+                  ),
+                ),
+                Icon(Icons.shopping_basket, size: 66, color: Color(0xFFBDE7A9)),
+              ]),
+            ),
+          ],
         ),
         future: authService.database.listCrops().then((items) {
           final query = _search.text.trim().toLowerCase();
@@ -1525,7 +1762,7 @@ class _CloudListScaffold extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _PageHeader(
-                      eyebrow: 'LIVE FIRESTORE',
+                      eyebrow: 'AGRILINK',
                       title: title,
                       subtitle: subtitle,
                     ),
