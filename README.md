@@ -2,9 +2,12 @@
 
 ## Mobile app
 
-The [`mobile`](mobile/) Flutter project contains the Consumer and Rider
-experiences, including account creation and persistent sign-in. Farmer and
-Superadmin remain in the existing web frontend.
+The [`mobile`](mobile/) Flutter project contains dedicated Consumer, Farmer,
+Rider, and Superadmin experiences. Consumers, Farmers, and Riders use public
+registration with role-specific verification, while Superadmins use a separate
+staff-only login. The app also includes persistent sign-in, role-based
+navigation, crop and stock management, pooled delivery workflows, and platform
+operations.
 
 Marketplace and delivery content currently uses seed data while the shared
 cloud backend is being configured.
@@ -154,7 +157,7 @@ service cloud.firestore {
 - Pay remaining balance later from order details
 - Map view of every farm location
 
-### Admin (Moderator)
+### Superadmin (Platform Manager)
 
 - Verify farmers and buyers (with farm photos visible)
 - Add / manage market price entries that drive AI trends
