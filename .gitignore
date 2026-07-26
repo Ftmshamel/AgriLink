@@ -1,38 +1,29 @@
-# Node / Vite
-node_modules/
-dist/
-dist-ssr/
-*.local
-.vite/
+# Flutter and Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+coverage/
 
-# Env
+# Android
+android/.gradle/
+android/local.properties
+*.jks
+*.keystore
+
+# Environment files
 .env
 .env.local
 .env.*.local
 !.env.example
 
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-.env
-*.egg-info/
-
-# IDE
+# IDE and operating-system files
 .vscode/
 .idea/
+*.iml
 .DS_Store
 Thumbs.db
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pip-log.txt
-.vercel
-
-backend/_uv/uv
-
-# Local Flutter SDK managed outside the app source
+# Local Flutter SDK managed outside the application source
 /flutter/
