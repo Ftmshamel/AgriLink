@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'screens/agrilink_app.dart';
+import 'app.dart';
 
-export 'screens/agrilink_app.dart';
+export 'app.dart';
+export 'screens/auth_screens.dart';
 
 void main() {
   runApp(const AgriLinkApp());

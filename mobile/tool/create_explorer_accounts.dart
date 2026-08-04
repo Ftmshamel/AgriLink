@@ -1,4 +1,6 @@
-import '../lib/cloud_database.dart';
+// ignore_for_file: avoid_print
+
+import 'package:agrilink_mobile/services/cloud_database.dart';
 
 Future<void> main() async {
   final database = CloudDatabase();
@@ -56,16 +58,14 @@ Future<void> main() async {
   for (final account in accounts) {
     final email = account['email']! as String;
     var saved = await database.findAccountByEmail(email);
-    if (saved == null) {
-      saved = await database.createAccount(
-        name: account['name']! as String,
-        email: email,
-        password: account['password']! as String,
-        phone: account['phone']! as String,
-        role: account['role']! as String,
-        profile: Map<String, dynamic>.from(account['profile']! as Map),
-      );
-    }
+    saved ??= await database.createAccount(
+      name: account['name']! as String,
+      email: email,
+      password: account['password']! as String,
+      phone: account['phone']! as String,
+      role: account['role']! as String,
+      profile: Map<String, dynamic>.from(account['profile']! as Map),
+    );
     await database.updateDocument(
       'mobileUsers',
       saved['id']! as String,

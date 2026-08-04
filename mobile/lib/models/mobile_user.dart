@@ -1,3 +1,5 @@
+import 'package:latlong2/latlong.dart';
+
 enum MobileRole { consumer, farmer, rider, superadmin }
 
 class MobileUser {
@@ -18,6 +20,46 @@ class MobileUser {
   final String phone;
   final MobileRole role;
   final Map<String, String> verification;
+
+  /// Address the account pinned during signup, shown as the default
+  /// delivery/pickup point.
+  String get location => verification['location'] ?? '';
+
+  double? get latitude => double.tryParse(verification['latitude'] ?? '');
+  double? get longitude => double.tryParse(verification['longitude'] ?? '');
+
+  LatLng? get point => latitude != null && longitude != null
+      ? LatLng(latitude!, longitude!)
+      : null;
+
+  String get vehicle =>
+      verification['vehicle'] ?? verification['vehicleType'] ?? '';
+
+  String get payoutNumber => verification['payoutNumber'] ?? '';
+
+  String get businessName =>
+      verification['establishmentName'] ?? verification['farmName'] ?? name;
+
+  String get verificationStatus => verification['status'] ?? 'active';
+
+  /// Only fully approved accounts reach a role shell — pending, rejected, and
+  /// suspended accounts are all held at the review screen.
+  bool get isApproved => verificationStatus == 'active';
+
+  MobileUser copyWith({
+    String? name,
+    String? phone,
+    Map<String, String>? verification,
+  }) =>
+      MobileUser(
+        id: id,
+        name: name ?? this.name,
+        email: email,
+        password: password,
+        phone: phone ?? this.phone,
+        role: role,
+        verification: verification ?? this.verification,
+      );
 
   Map<String, dynamic> toJson() => {
         'id': id,
