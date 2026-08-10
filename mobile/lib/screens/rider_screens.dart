@@ -12,6 +12,7 @@ import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
 import '../widgets/live_map.dart';
 import '../widgets/ui_kit.dart';
+import '../widgets/weather_card.dart';
 import 'shared_screens.dart';
 
 /// How riders can sort the open job pool.
@@ -461,6 +462,13 @@ class RiderDashboard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 26),
+              const SectionTitle(title: 'Delivery conditions', action: ''),
+              const SizedBox(height: 12),
+              WeatherPanel(
+                session: session,
+                audience: WeatherAudience.rider,
               ),
               const SizedBox(height: 26),
               const SectionTitle(title: 'Active delivery', action: ''),

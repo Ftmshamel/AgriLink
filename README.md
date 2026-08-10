@@ -12,7 +12,17 @@ riders, and superadministrators in one agricultural marketplace.
 - Role-based registration, authentication, and navigation
 - Password recovery through an emailed one-time code
 - Farmer and rider requirement uploads held for superadmin approval
+- Live weather from Open-Meteo for harvest planning and delivery safety
 - Cloud-backed account and marketplace data
+
+## Weather integration
+
+The Farmer and Rider dashboards show live conditions for the location the
+account pinned at signup, using the free [Open-Meteo](https://open-meteo.com)
+API — no API key or account is needed, so it runs straight from source. The
+outlook page adds a 7-day forecast and a town search. See
+[docs/API_INTEGRATION.md](docs/API_INTEGRATION.md) for endpoints, sample
+responses, and error handling.
 
 ## Account verification
 
