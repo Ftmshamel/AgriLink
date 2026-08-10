@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,6 +10,8 @@ import 'package:latlong2/latlong.dart';
 
 import '../app.dart';
 import '../models/mobile_user.dart';
+import '../services/cloud_database.dart';
+import '../services/local_auth_service.dart';
 import '../utils/app_colors.dart';
 
 class VerificationPendingPage extends StatelessWidget {
@@ -18,6 +21,25 @@ class VerificationPendingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRider = user.role == MobileRole.rider;
+    final status = user.verificationStatus;
+    final (title, message) = switch (status) {
+      'rejected' => (
+          'Application not approved',
+          'A superadmin reviewed your requirements and could not approve them. '
+              'Contact AgriLink support to resubmit clearer documents.',
+        ),
+      'suspended' => (
+          'Account suspended',
+          'Your access is paused while AgriLink reviews recent activity. '
+              'Contact support to have your account restored.',
+        ),
+      _ => (
+          'Application under review',
+          isRider
+              ? 'We are checking your professional license, vehicle OR/CR, clearance, and public-service authorization.'
+              : 'We are checking your farm location and Barangay Certificate. Your RSBSA number remains optional.',
+        ),
+    };
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -39,16 +61,15 @@ class VerificationPendingPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 22),
-              const Text(
-                'Application under review',
+              Text(
+                title,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+                style:
+                    const TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 10),
               Text(
-                isRider
-                    ? 'We are checking your professional license, vehicle OR/CR, clearance, and public-service authorization.'
-                    : 'We are checking your farm location and Barangay Certificate. Your RSBSA number remains optional.',
+                message,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: muted, height: 1.5),
               ),
@@ -63,7 +84,9 @@ class VerificationPendingPage extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'We will notify ${user.phone} when your account is approved.',
+                          status == 'pending_review'
+                              ? 'We will notify ${user.phone} when your account is approved.'
+                              : 'AgriLink support will reach you at ${user.phone}.',
                           style: const TextStyle(
                               fontSize: 13, fontWeight: FontWeight.w700),
                         ),
@@ -490,12 +513,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => const AlertDialog(
-                      title: Text('Password reset'),
-                      content: Text(
-                        'Password recovery will be enabled with the cloud authentication service.',
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ForgotPasswordPage(
+                        initialEmail: _email.text.trim(),
                       ),
                     ),
                   ),
@@ -568,6 +590,338 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Email → emailed code → new password, all on one page.
+class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key, this.initialEmail = ''});
+
+  final String initialEmail;
+
+  @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+enum _ResetStep { email, code, password }
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final _emailKey = GlobalKey<FormState>();
+  final _codeKey = GlobalKey<FormState>();
+  final _passwordKey = GlobalKey<FormState>();
+  late final _email = TextEditingController(text: widget.initialEmail);
+  final _code = TextEditingController();
+  final _password = TextEditingController();
+  final _confirm = TextEditingController();
+
+  _ResetStep _step = _ResetStep.email;
+  PasswordResetTicket? _ticket;
+  String? _ticketId;
+  bool _showPassword = false;
+  bool _loading = false;
+  String? _error;
+  String? _notice;
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _code.dispose();
+    _password.dispose();
+    _confirm.dispose();
+    super.dispose();
+  }
+
+  Future<void> _run(Future<void> Function() action) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await action();
+    } catch (error) {
+      if (mounted) {
+        setState(
+            () => _error = error.toString().replaceFirst('Exception: ', ''));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _sendCode({bool resend = false}) async {
+    if (!resend && !_emailKey.currentState!.validate()) return;
+    await _run(() async {
+      final ticket = await authService.requestPasswordReset(_email.text.trim());
+      if (!mounted) return;
+      setState(() {
+        _ticket = ticket;
+        _step = _ResetStep.code;
+        _code.clear();
+        _notice = ticket.delivered
+            ? 'We sent a 6-digit code to ${ticket.email}.'
+            : null;
+      });
+    });
+  }
+
+  Future<void> _verifyCode() async {
+    if (!_codeKey.currentState!.validate()) return;
+    await _run(() async {
+      final ticketId = await authService.verifyPasswordResetCode(
+        _email.text.trim(),
+        _code.text.trim(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _ticketId = ticketId;
+        _step = _ResetStep.password;
+        _notice = null;
+      });
+    });
+  }
+
+  Future<void> _savePassword() async {
+    if (!_passwordKey.currentState!.validate()) return;
+    await _run(() async {
+      await authService.completePasswordReset(
+        emailAddress: _email.text.trim(),
+        ticketId: _ticketId!,
+        newPassword: _password.text,
+      );
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+        (route) => route.isFirst,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password updated. Log in with your new password.'),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _AuthScaffold(
+      child: switch (_step) {
+        _ResetStep.email => _buildEmailStep(),
+        _ResetStep.code => _buildCodeStep(),
+        _ResetStep.password => _buildPasswordStep(),
+      },
+    );
+  }
+
+  Widget _buildEmailStep() {
+    return Form(
+      key: _emailKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        children: [
+          const _AuthIcon(icon: Icons.lock_reset),
+          const SizedBox(height: 16),
+          const Text(
+            'Forgot password',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'Enter your email and we will send a verification code.',
+            style: TextStyle(color: muted, fontSize: 15, height: 1.4),
+          ),
+          const SizedBox(height: 24),
+          if (_error != null) ...[
+            _AuthError(message: _error!),
+            const SizedBox(height: 16),
+          ],
+          _AuthField(
+            controller: _email,
+            label: 'Email address',
+            hint: 'you@example.com',
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) => value == null || !value.contains('@')
+                ? 'Enter a valid email address.'
+                : null,
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: _loading ? null : () => _sendCode(),
+            icon: _loading ? const _ButtonSpinner() : const Icon(Icons.send),
+            label: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(_loading ? 'Sending code…' : 'Send reset code'),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Remembered it?', style: TextStyle(color: muted)),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Back to log in'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCodeStep() {
+    final ticket = _ticket;
+    return Form(
+      key: _codeKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        children: [
+          const _AuthIcon(icon: Icons.mark_email_read_outlined),
+          const SizedBox(height: 16),
+          const Text(
+            'Check your email',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            'We sent a 6-digit code to ${_email.text.trim()}. It expires in '
+            '${CloudDatabase.resetCodeLifetime.inMinutes} minutes.',
+            style: const TextStyle(color: muted, fontSize: 15, height: 1.4),
+          ),
+          const SizedBox(height: 20),
+          if (_error != null) ...[
+            _AuthError(message: _error!),
+            const SizedBox(height: 16),
+          ],
+          if (_notice != null) ...[
+            _AuthNotice(message: _notice!),
+            const SizedBox(height: 16),
+          ],
+          if (ticket != null && ticket.previewCode != null) ...[
+            _AuthNotice(
+              icon: Icons.construction_outlined,
+              message: 'Email delivery is not configured in this build, so the '
+                  'code was not sent. Development code: '
+                  '${ticket.previewCode}',
+            ),
+            const SizedBox(height: 16),
+          ],
+          _AuthField(
+            controller: _code,
+            label: 'Verification code',
+            hint: '6-digit code',
+            icon: Icons.pin_outlined,
+            keyboardType: TextInputType.number,
+            validator: (value) => value == null || value.trim().length != 6
+                ? 'Enter the 6-digit code.'
+                : null,
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: _loading ? null : _verifyCode,
+            icon: _loading
+                ? const _ButtonSpinner()
+                : const Icon(Icons.verified_outlined),
+            label: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(_loading ? 'Verifying…' : 'Verify code'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Didn't get it?", style: TextStyle(color: muted)),
+              TextButton(
+                onPressed: _loading ? null : () => _sendCode(resend: true),
+                child: const Text('Resend code'),
+              ),
+            ],
+          ),
+          Center(
+            child: TextButton(
+              onPressed: _loading
+                  ? null
+                  : () => setState(() {
+                        _step = _ResetStep.email;
+                        _error = null;
+                        _notice = null;
+                      }),
+              child: const Text('Use a different email'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordStep() {
+    return Form(
+      key: _passwordKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        children: [
+          const _AuthIcon(icon: Icons.password_outlined),
+          const SizedBox(height: 16),
+          const Text(
+            'Set a new password',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'Choose a password you have not used on AgriLink before.',
+            style: TextStyle(color: muted, fontSize: 15, height: 1.4),
+          ),
+          const SizedBox(height: 24),
+          if (_error != null) ...[
+            _AuthError(message: _error!),
+            const SizedBox(height: 16),
+          ],
+          const Text(
+            'New password',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 7),
+          TextFormField(
+            controller: _password,
+            obscureText: !_showPassword,
+            validator: (value) => value == null || value.length < 6
+                ? 'Use at least 6 characters.'
+                : null,
+            decoration: _fieldDecoration(
+              hint: 'Minimum 6 characters',
+              icon: Icons.lock_outline,
+              suffix: IconButton(
+                onPressed: () => setState(() => _showPassword = !_showPassword),
+                icon: Icon(
+                  _showPassword ? Icons.visibility_off : Icons.visibility,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          _AuthField(
+            controller: _confirm,
+            label: 'Confirm password',
+            hint: 'Repeat your password',
+            icon: Icons.lock_reset,
+            obscureText: !_showPassword,
+            validator: (value) =>
+                value != _password.text ? 'Passwords do not match.' : null,
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: _loading ? null : _savePassword,
+            icon: _loading ? const _ButtonSpinner() : const Icon(Icons.check),
+            label: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(_loading ? 'Saving…' : 'Save new password'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -712,6 +1066,24 @@ class _SuperadminLoginPageState extends State<SuperadminLoginPage> {
   }
 }
 
+/// Firestore keeps documents inline as base64, so attachments stay small.
+const _maxDocumentBytes = 750000;
+
+/// One requirement on the signup form, and the file picked for it.
+class _DocumentSlot {
+  const _DocumentSlot({
+    required this.type,
+    required this.label,
+    required this.file,
+    this.required = true,
+  });
+
+  final String type;
+  final String label;
+  final XFile? file;
+  final bool required;
+}
+
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -760,7 +1132,7 @@ class _SignupPageState extends State<SignupPage> {
     );
     if (file == null || !mounted) return;
     final bytes = await file.readAsBytes();
-    if (bytes.length > 750000) {
+    if (bytes.length > _maxDocumentBytes) {
       setState(() => _error = 'Upload an image below 750 KB.');
       return;
     }
@@ -798,18 +1170,59 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
+  /// The requirements this role has to submit, in review order.
+  ///
+  /// Consumers are approved on the spot, so their permit stays optional;
+  /// farmers and riders cannot trade until a superadmin has seen these files.
+  List<_DocumentSlot> get _documentSlots => switch (_role) {
+        MobileRole.consumer => [
+            _DocumentSlot(
+              type: 'business_permit',
+              label: 'Business Permit',
+              file: _primaryDocument,
+              required: false,
+            ),
+          ],
+        MobileRole.farmer => [
+            _DocumentSlot(
+              type: 'barangay_certificate',
+              label: 'Barangay Certificate',
+              file: _primaryDocument,
+            ),
+          ],
+        MobileRole.rider => [
+            _DocumentSlot(
+              type: 'professional_license',
+              label: 'Professional Driver’s License',
+              file: _primaryDocument,
+            ),
+            _DocumentSlot(
+              type: 'vehicle_or_cr',
+              label: 'Vehicle OR/CR',
+              file: _secondaryDocument,
+            ),
+            _DocumentSlot(
+              type: 'nbi_or_police_clearance',
+              label: 'NBI or Police Clearance',
+              file: _clearanceDocument,
+            ),
+          ],
+        MobileRole.superadmin => const [],
+      };
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedLatitude == null || _selectedLongitude == null) {
       setState(() => _error = 'Pin your location on the map.');
       return;
     }
-    if (_role == MobileRole.rider &&
-        (_primaryDocument == null ||
-            _secondaryDocument == null ||
-            _clearanceDocument == null)) {
-      setState(() => _error =
-          'Attach your license, vehicle OR/CR, and NBI or Police Clearance.');
+    final slots = _documentSlots;
+    final missing = slots
+        .where((slot) => slot.required && slot.file == null)
+        .map((slot) => slot.label)
+        .toList();
+    if (missing.isNotEmpty) {
+      setState(() => _error = 'Attach your ${_join(missing)}.');
       return;
     }
     if (!_agreed) {
@@ -821,6 +1234,20 @@ class _SignupPageState extends State<SignupPage> {
       _error = null;
     });
     try {
+      // Read every attachment first: a file that cannot be loaded should fail
+      // here, not after the applicant already exists with nothing to review.
+      final attachments = <({String type, String filename, Uint8List bytes})>[];
+      for (final slot in slots) {
+        final file = slot.file;
+        if (file == null) continue;
+        final bytes = await file.readAsBytes();
+        if (bytes.length > _maxDocumentBytes) {
+          throw Exception('${slot.label} must be smaller than 750 KB.');
+        }
+        attachments.add((type: slot.type, filename: file.name, bytes: bytes));
+      }
+
+      final requiredCount = slots.where((slot) => slot.required).length;
       final user = await authService.signup(
         MobileUser(
           name: _name.text.trim(),
@@ -836,31 +1263,21 @@ class _SignupPageState extends State<SignupPage> {
             'publicServiceCode': _publicServiceCode.text.trim(),
             'latitude': '${_selectedLatitude ?? ''}',
             'longitude': '${_selectedLongitude ?? ''}',
+            // Recorded so the review queue can show whether everything the
+            // role owes actually arrived.
+            'requiredDocuments': '$requiredCount',
+            'submittedDocuments': '${attachments.length}',
             'status':
                 _role == MobileRole.consumer ? 'active' : 'pending_review',
           },
         ),
       );
-      final uploads = <(String, XFile)>[
-        if (_primaryDocument != null)
-          (
-            _role == MobileRole.consumer
-                ? 'business_permit'
-                : _role == MobileRole.farmer
-                    ? 'barangay_certificate'
-                    : 'professional_license',
-            _primaryDocument!,
-          ),
-        if (_secondaryDocument != null) ('vehicle_or_cr', _secondaryDocument!),
-        if (_clearanceDocument != null)
-          ('nbi_or_police_clearance', _clearanceDocument!),
-      ];
-      for (final upload in uploads) {
+      for (final attachment in attachments) {
         await authService.database.uploadVerificationFile(
           userId: user.id,
-          type: upload.$1,
-          filename: upload.$2.name,
-          bytes: await upload.$2.readAsBytes(),
+          type: attachment.type,
+          filename: attachment.filename,
+          bytes: attachment.bytes,
         );
       }
       if (mounted) openUserHome(context, user);
@@ -873,6 +1290,10 @@ class _SignupPageState extends State<SignupPage> {
       if (mounted) setState(() => _loading = false);
     }
   }
+
+  String _join(List<String> values) => values.length == 1
+      ? values.single
+      : '${values.take(values.length - 1).join(', ')} and ${values.last}';
 
   @override
   Widget build(BuildContext context) {
@@ -1001,8 +1422,9 @@ class _SignupPageState extends State<SignupPage> {
               _DocumentUploadCard(
                 icon: Icons.description_outlined,
                 title: 'Barangay Certificate',
-                subtitle: 'Optional proof of farm-area operation or residence',
+                subtitle: 'Proof of farm-area operation or residence',
                 attached: _primaryDocument != null,
+                required: true,
                 onTap: () => _pickDocument((file) => _primaryDocument = file),
               ),
               const SizedBox(height: 12),
@@ -1705,6 +2127,51 @@ class _AuthError extends StatelessWidget {
               child: Text(message, style: const TextStyle(color: Colors.red))),
         ],
       ),
+    );
+  }
+}
+
+/// Neutral counterpart to [_AuthError] for progress and setup messages.
+class _AuthNotice extends StatelessWidget {
+  const _AuthNotice({required this.message, this.icon = Icons.info_outline});
+  final String message;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: lightGreen,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFCFE5C5)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: green, size: 20),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(fontSize: 13, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ButtonSpinner extends StatelessWidget {
+  const _ButtonSpinner();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 18,
+      height: 18,
+      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
     );
   }
 }

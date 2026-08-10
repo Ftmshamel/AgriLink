@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// AgriLink has no backend: the Flutter app talks to Firestore over the REST
+// API, so these rules are the only thing between the collections and the
+// public internet. Deploy with:
+//
+//   firebase deploy --only firestore:rules
+//
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Password-reset tickets are stored under sha256(reference:code). Allowing
+    // `get` but never `list` is what makes the emailed code meaningful: you can
+    // fetch a ticket only if you already know the code, and you cannot browse
+    // the collection to discover one.
+    match /mobilePasswordResets/{ticketId} {
+      allow get, create, delete: if true;
+      allow list, update: if false;
+    }
+
+    // Verification documents are personal IDs and clearances. The signup form
+    // writes them and the superadmin console reads them back by applicant.
+    match /mobileVerificationFiles/{fileId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+
+    // Everything else the app owns stays open, matching how the client reads
+    // and writes it today.
+    match /mobileUsers/{userId} {
+      allow read, write: if true;
+    }
+    match /mobileCrops/{cropId} {
+      allow read, write: if true;
+    }
+    match /mobileOrders/{orderId} {
+      allow read, write: if true;
+    }
+    match /mobileTrips/{tripId} {
+      allow read, write: if true;
+    }
+    match /mobileReports/{reportId} {
+      allow read, write: if true;
+    }
+    match /agriData/{document} {
+      allow read, write: if true;
+    }
+  }
+}

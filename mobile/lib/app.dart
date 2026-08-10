@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'models/mobile_user.dart';
@@ -88,9 +90,39 @@ class RoleHome extends StatefulWidget {
 
 class _RoleHomeState extends State<RoleHome> {
   late final AppSession _session = AppSession(widget.user);
+  Timer? _approvalPoll;
+
+  @override
+  void initState() {
+    super.initState();
+    _watchForApproval();
+  }
+
+  /// Drops an applicant into their role shell as soon as a superadmin approves
+  /// them, so nobody has to guess when to sign in again.
+  void _watchForApproval() {
+    if (_session.user.isApproved) return;
+    _approvalPoll = Timer.periodic(const Duration(seconds: 20), _refreshApproval);
+  }
+
+  Future<void> _refreshApproval(Timer timer) async {
+    final Map<String, dynamic>? account;
+    try {
+      account = await authService.database.getAccount(_session.user.id);
+    } catch (_) {
+      return; // Offline or a transient failure: try again on the next tick.
+    }
+    if (!mounted) {
+      timer.cancel();
+      return;
+    }
+    if (account != null) _session.updateUser(MobileUser.fromJson(account));
+    if (_session.user.isApproved) timer.cancel();
+  }
 
   @override
   void dispose() {
+    _approvalPoll?.cancel();
     _session.dispose();
     super.dispose();
   }

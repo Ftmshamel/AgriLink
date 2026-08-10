@@ -472,6 +472,18 @@ class _ApplicantCardState extends State<ApplicantCard> {
     }
   }
 
+  /// Flags an applicant whose upload did not finish, so a missing requirement
+  /// is obvious before anyone taps Approve. Accounts registered before this
+  /// was recorded simply show nothing.
+  String? _requirementSummary(Map<dynamic, dynamic> profile) {
+    final required = int.tryParse('${profile['requiredDocuments'] ?? ''}');
+    final submitted = int.tryParse('${profile['submittedDocuments'] ?? ''}');
+    if (required == null || submitted == null || required == 0) return null;
+    return submitted >= required
+        ? '🗂 $submitted of $required required documents attached'
+        : '⚠️ Only $submitted of $required required documents attached';
+  }
+
   @override
   Widget build(BuildContext context) {
     final account = widget.account;
@@ -529,6 +541,7 @@ class _ApplicantCardState extends State<ApplicantCard> {
                   '🪪 ${profile['secondaryId']}',
                 if ('${account['phone'] ?? ''}'.isNotEmpty)
                   '📞 ${account['phone']}',
+                if (_requirementSummary(profile) case final summary?) summary,
               ].join('\n'),
               style: const TextStyle(color: muted, height: 1.6, fontSize: 12),
             ),

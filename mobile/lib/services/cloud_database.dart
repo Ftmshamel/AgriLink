@@ -53,8 +53,17 @@ class CloudDatabase {
   }
 
   Future<Map<String, dynamic>?> findAccountByEmail(String email) async {
-    final accounts = await listCollection('mobileUsers');
     final normalized = email.trim().toLowerCase();
+    if (normalized.isEmpty) return null;
+    try {
+      final matches = await _queryEquals('mobileUsers', 'email', normalized);
+      if (matches.isNotEmpty) return matches.first;
+    } catch (_) {
+      // Fall through to the scan below rather than failing a sign-in.
+    }
+    // Accounts written before emails were normalised can still be mixed case,
+    // so a miss falls back to a full comparison.
+    final accounts = await listCollection('mobileUsers');
     for (final account in accounts) {
       if ('${account['email']}'.toLowerCase() == normalized) return account;
     }
@@ -157,6 +166,121 @@ class CloudDatabase {
     final files = await listCollection('mobileVerificationFiles');
     return files.where((file) => file['userId'] == userId).toList();
   }
+
+  // --------------------------------------------------------- password resets
+
+  /// How long an emailed reset code stays usable.
+  static const resetCodeLifetime = Duration(minutes: 15);
+
+  /// Wrong codes tolerated before the whole request is burned.
+  static const maxResetAttempts = 5;
+
+  /// Issues a one-time reset code for [email].
+  ///
+  /// The code itself is never stored. It only survives as part of the document
+  /// id `sha256(reference:code)`, so the ticket can be fetched by someone who
+  /// already knows the code but cannot be read back out of the collection —
+  /// see `firestore.rules`, which allows `get` but not `list` here. Each
+  /// request mints a fresh reference, which is what retires any earlier code.
+  Future<PasswordResetRequest> createPasswordReset(String email) async {
+    final account = await findAccountByEmail(email);
+    if (account == null) {
+      throw Exception('No account found with that email.');
+    }
+    final userId = '${account['id'] ?? ''}';
+    if (userId.isEmpty) {
+      throw Exception('That account cannot be reset from the app.');
+    }
+    final reference = _token(24);
+    final code = _numericCode(6);
+    final now = DateTime.now().toUtc();
+    final expiresAt = now.add(resetCodeLifetime);
+    await _create('mobilePasswordResets', _resetTicketId(reference, code), {
+      'userId': userId,
+      'expiresAt': expiresAt.toIso8601String(),
+      'createdAt': now.toIso8601String(),
+    });
+    await updateDocument('mobileUsers', userId, {
+      'passwordResetReference': reference,
+      'passwordResetExpiresAt': expiresAt.toIso8601String(),
+      'passwordResetAttempts': 0,
+      'passwordResetRequestedAt': now.toIso8601String(),
+    });
+    return PasswordResetRequest(
+      userId: userId,
+      name: '${account['name'] ?? ''}',
+      email: '${account['email'] ?? email}',
+      code: code,
+      expiresAt: expiresAt,
+    );
+  }
+
+  /// Exchanges a code for the ticket id that authorises the actual reset.
+  Future<String> verifyPasswordResetCode(String email, String code) async {
+    final account = await findAccountByEmail(email);
+    if (account == null) throw Exception('No account found with that email.');
+    final userId = '${account['id'] ?? ''}';
+    final reference = '${account['passwordResetReference'] ?? ''}';
+    final expiresAt = DateTime.tryParse(
+      '${account['passwordResetExpiresAt'] ?? ''}',
+    );
+    final attempts = (account['passwordResetAttempts'] as num?)?.toInt() ?? 0;
+    if (reference.isEmpty || expiresAt == null) {
+      throw Exception('Request a new reset code first.');
+    }
+    if (DateTime.now().toUtc().isAfter(expiresAt)) {
+      throw Exception('That code has expired. Request a new one.');
+    }
+    if (attempts >= maxResetAttempts) {
+      throw Exception('Too many incorrect codes. Request a new one.');
+    }
+    final ticketId = _resetTicketId(reference, code.trim());
+    final ticket = await getDocument('mobilePasswordResets', ticketId);
+    if (ticket == null || ticket['userId'] != userId) {
+      await updateDocument('mobileUsers', userId, {
+        'passwordResetAttempts': attempts + 1,
+      });
+      final left = maxResetAttempts - attempts - 1;
+      throw Exception(
+        left > 0
+            ? 'That code is incorrect. $left ${left == 1 ? 'try' : 'tries'} left.'
+            : 'That code is incorrect. Request a new one.',
+      );
+    }
+    return ticketId;
+  }
+
+  /// Sets a new password and burns the ticket so the code cannot be reused.
+  Future<void> completePasswordReset({
+    required String email,
+    required String ticketId,
+    required String newPassword,
+  }) async {
+    final account = await findAccountByEmail(email);
+    if (account == null) throw Exception('No account found with that email.');
+    final userId = '${account['id'] ?? ''}';
+    final ticket = await getDocument('mobilePasswordResets', ticketId);
+    if (ticket == null || ticket['userId'] != userId) {
+      throw Exception('That reset session has expired. Start again.');
+    }
+    final expiresAt = DateTime.tryParse('${ticket['expiresAt'] ?? ''}');
+    if (expiresAt == null || DateTime.now().toUtc().isAfter(expiresAt)) {
+      throw Exception('That reset session has expired. Start again.');
+    }
+    final salt = _token(24);
+    await updateDocument('mobileUsers', userId, {
+      'passwordSalt': salt,
+      'passwordHash': _hash(newPassword, salt),
+      'passwordResetReference': '',
+      'passwordResetExpiresAt': '',
+      'passwordResetAttempts': 0,
+      'updatedAt': DateTime.now().toUtc().toIso8601String(),
+    });
+    await deleteDocument('mobilePasswordResets', ticketId);
+  }
+
+  String _resetTicketId(String reference, String code) =>
+      'reset-${sha256.convert(utf8.encode('$reference:$code'))}';
 
   // ------------------------------------------------------------------- crops
 
@@ -468,6 +592,42 @@ class CloudDatabase {
     return documents;
   }
 
+  /// Runs a server-side equality filter so a lookup does not have to download
+  /// the whole collection.
+  Future<List<Map<String, dynamic>>> _queryEquals(
+    String collection,
+    String field,
+    String value, {
+    int limit = 1,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$_base:runQuery'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'structuredQuery': {
+          'from': [
+            {'collectionId': collection},
+          ],
+          'where': {
+            'fieldFilter': {
+              'field': {'fieldPath': field},
+              'op': 'EQUAL',
+              'value': {'stringValue': value},
+            },
+          },
+          'limit': limit,
+        },
+      }),
+    );
+    _ensureSuccess(response);
+    final rows = jsonDecode(response.body) as List<dynamic>;
+    return [
+      for (final row in rows)
+        if ((row as Map<String, dynamic>)['document'] != null)
+          _decodeDocument(row['document'] as Map<String, dynamic>),
+    ];
+  }
+
   Future<Map<String, dynamic>?> getDocument(
     String collection,
     String id,
@@ -582,7 +742,29 @@ class CloudDatabase {
     ).join();
   }
 
+  String _numericCode(int length) {
+    final random = Random.secure();
+    return List.generate(length, (_) => '${random.nextInt(10)}').join();
+  }
+
   String _hash(String password, String salt) {
     return sha256.convert(utf8.encode('$salt:$password')).toString();
   }
+}
+
+/// A freshly issued reset code, returned once so it can be emailed.
+class PasswordResetRequest {
+  const PasswordResetRequest({
+    required this.userId,
+    required this.name,
+    required this.email,
+    required this.code,
+    required this.expiresAt,
+  });
+
+  final String userId;
+  final String name;
+  final String email;
+  final String code;
+  final DateTime expiresAt;
 }
