@@ -121,6 +121,19 @@ class RoutePath {
 class RouteService {
   static final _cache = <String, RoutePath>{};
 
+  static String _keyFor(List<LatLng> waypoints) => waypoints
+      .map((point) =>
+          '${point.latitude.toStringAsFixed(4)},${point.longitude.toStringAsFixed(4)}')
+      .join(';');
+
+  /// The already-resolved route for [stops], or null if it has not been
+  /// fetched yet. Lets a list paint a real distance without awaiting.
+  static RoutePath? cached(List<LatLng> stops) {
+    final waypoints = stops.where((point) => point.latitude != 0).toList();
+    if (waypoints.length < 2) return null;
+    return _cache[_keyFor(waypoints)];
+  }
+
   static Future<RoutePath> route(List<LatLng> stops) async {
     final waypoints = stops.where((point) => point.latitude != 0).toList();
     if (waypoints.length < 2) {
@@ -131,10 +144,7 @@ class RouteService {
         isEstimate: true,
       );
     }
-    final key = waypoints
-        .map((point) =>
-            '${point.latitude.toStringAsFixed(4)},${point.longitude.toStringAsFixed(4)}')
-        .join(';');
+    final key = _keyFor(waypoints);
     final cached = _cache[key];
     if (cached != null) return cached;
 

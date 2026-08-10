@@ -2,6 +2,21 @@ import 'package:latlong2/latlong.dart';
 
 enum MobileRole { consumer, farmer, rider, superadmin }
 
+/// Delivery vehicles AgriLink accepts from riders.
+///
+/// Everything on the platform is a bulk order sold by the sack, so a pooled
+/// load will not fit on a motorcycle, tricycle, or kolong-kolong. Riders must
+/// register a four-wheeled vehicle, which is also what the public-service code
+/// on a professional licence covers.
+const deliveryVehicles = <String>[
+  'Multicab (4-wheel)',
+  'L300 / FB van',
+  'Closed van',
+  'Pickup truck',
+  'Elf truck (4-wheeler)',
+  '6-wheeler truck',
+];
+
 class MobileUser {
   const MobileUser({
     this.id = '',

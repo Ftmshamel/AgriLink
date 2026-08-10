@@ -175,10 +175,23 @@ class _ProfileEditorPageState extends State<ProfileEditorPage> {
                   ],
                   if (role == MobileRole.rider) ...[
                     const SizedBox(height: 12),
-                    TextField(
-                      controller: _vehicle,
+                    // Constrained to the same four-wheel list as signup, so a
+                    // verified rider cannot quietly downgrade to a tricycle.
+                    DropdownButtonFormField<String>(
+                      initialValue: deliveryVehicles.contains(_vehicle.text)
+                          ? _vehicle.text
+                          : null,
+                      isExpanded: true,
+                      items: [
+                        for (final vehicle in deliveryVehicles)
+                          DropdownMenuItem(
+                            value: vehicle,
+                            child: Text(vehicle),
+                          ),
+                      ],
+                      onChanged: (value) => _vehicle.text = value ?? '',
                       decoration: const InputDecoration(
-                        labelText: 'Vehicle',
+                        labelText: 'Vehicle (4-wheel only)',
                         prefixIcon: Icon(Icons.local_shipping_outlined),
                       ),
                     ),

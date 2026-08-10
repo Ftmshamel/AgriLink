@@ -504,11 +504,19 @@ class PooledBatch {
     required this.area,
     required this.orders,
     this.distanceKm = 0,
+    this.stops = const [],
   });
 
   final String area;
   final List<AgriOrder> orders;
+
+  /// Straight-line length of [stops]. Shown immediately, then replaced with the
+  /// real driving distance once OSRM answers — see `RouteService`.
   final double distanceKm;
+
+  /// Rider → every farm → every drop-off, in visiting order. This is the
+  /// waypoint list handed to the routing service.
+  final List<LatLng> stops;
 
   String get key => area;
   int get orderCount => orders.length;
@@ -524,9 +532,13 @@ class PooledBatch {
     return '$origin → $area';
   }
 
-  /// How full a 300 kg motorcycle-and-sidecar load would be.
-  double get capacity => (totalKg / 300).clamp(0.0, 1.0);
+  /// A typical payload for the four-wheel vehicles AgriLink accepts — an
+  /// L300, multicab, or pickup — in kilograms.
+  static const vehicleCapacityKg = 1000;
+
+  /// How full that load the batch would leave the vehicle.
+  double get capacity => (totalKg / vehicleCapacityKg).clamp(0.0, 1.0);
 
   PooledBatch withDistance(double km) =>
-      PooledBatch(area: area, orders: orders, distanceKm: km);
+      PooledBatch(area: area, orders: orders, distanceKm: km, stops: stops);
 }

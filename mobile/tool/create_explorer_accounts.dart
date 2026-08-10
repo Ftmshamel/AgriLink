@@ -25,19 +25,19 @@ Future<void> main() async {
       'phone': '09170000002',
       'role': 'rider',
       'profile': {
-        'vehicle': 'L300',
+        'vehicle': 'L300 / FB van',
         'licenseType': 'Professional Driver’s License',
         'location': 'Bulacan',
       },
     },
     {
-      'name': 'Baterbonia Farm',
+      'name': 'S&R Farm',
       'email': 'farmer.baterbonia@agrilink.ph',
       'password': 'Farmer2026!',
       'phone': '09170000003',
       'role': 'farmer',
       'profile': {
-        'farmName': 'Baterbonia Farm',
+        'farmName': 'S&R Farm',
         'primaryCrop': 'Rice / Bigas',
         'location': 'San Ildefonso, Bulacan',
         'barangayCertificate': 'optional_not_submitted',
@@ -80,7 +80,7 @@ Future<void> main() async {
   if (crops.isEmpty) {
     await database.createCrop({
       'farmerId': farmer['id'],
-      'farmerName': 'Baterbonia Farm',
+      'farmerName': 'S&R Farm',
       'name': 'Palay (Bigas)',
       'quantityKg': 1000,
       'pricePerKg': 52,

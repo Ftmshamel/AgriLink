@@ -1466,12 +1466,10 @@ class _SignupPageState extends State<SignupPage> {
             ],
             if (_role == MobileRole.rider) ...[
               const SizedBox(height: 12),
-              _AuthField(
-                controller: _vehicle,
-                label: 'Vehicle type',
-                hint: 'L300 van, truck, tricycle, or kolong-kolong',
-                icon: Icons.local_shipping_outlined,
-                validator: _required('Enter your delivery vehicle.'),
+              _VehicleField(
+                value: _vehicle.text.isEmpty ? null : _vehicle.text,
+                onChanged: (value) =>
+                    setState(() => _vehicle.text = value ?? ''),
               ),
               const SizedBox(height: 12),
               _AuthField(
@@ -2156,6 +2154,53 @@ class _AuthError extends StatelessWidget {
               child: Text(message, style: const TextStyle(color: Colors.red))),
         ],
       ),
+    );
+  }
+}
+
+/// Vehicle picker limited to [deliveryVehicles].
+///
+/// This was a free-text field, which could not stop a rider registering a
+/// tricycle that a pooled bulk order will never fit in.
+class _VehicleField extends StatelessWidget {
+  const _VehicleField({required this.value, required this.onChanged});
+
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Vehicle type',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 7),
+        DropdownButtonFormField<String>(
+          initialValue: deliveryVehicles.contains(value) ? value : null,
+          isExpanded: true,
+          items: [
+            for (final vehicle in deliveryVehicles)
+              DropdownMenuItem(value: vehicle, child: Text(vehicle)),
+          ],
+          onChanged: onChanged,
+          validator: (selected) => selected == null || selected.isEmpty
+              ? 'Choose your delivery vehicle.'
+              : null,
+          decoration: _fieldDecoration(
+            hint: 'Select a 4-wheel vehicle',
+            icon: Icons.local_shipping_outlined,
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          'Bulk farm orders need four wheels. Motorcycles, tricycles, and '
+          'kolong-kolong cannot be registered.',
+          style: TextStyle(color: muted, fontSize: 11, height: 1.35),
+        ),
+      ],
     );
   }
 }

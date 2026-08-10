@@ -96,13 +96,15 @@ class RiderSnapshot {
     for (final order in pool) {
       grouped.putIfAbsent(order.dropArea, () => []).add(order);
     }
-    final batches = grouped.entries
-        .map((entry) => PooledBatch(
-              area: entry.key,
-              orders: entry.value,
-              distanceKm: _batchDistance(entry.value),
-            ))
-        .toList();
+    final batches = grouped.entries.map((entry) {
+      final stops = _batchStops(entry.value);
+      return PooledBatch(
+        area: entry.key,
+        orders: entry.value,
+        distanceKm: _straightLineLength(stops),
+        stops: stops,
+      );
+    }).toList();
     switch (sort) {
       case PoolSort.nearMe:
         batches.sort((a, b) =>
@@ -127,25 +129,26 @@ class RiderSnapshot {
     return nearest.isFinite ? nearest : batch.distanceKm;
   }
 
-  /// Rough end-to-end length: rider to the farthest farm, then out to the town.
-  double _batchDistance(List<AgriOrder> orders) {
-    var total = 0.0;
-    final farms = <LatLng>[];
+  /// The trip in visiting order: where the rider stands now, every farm to
+  /// collect from, then every buyer to drop at.
+  List<LatLng> _batchStops(List<AgriOrder> orders) {
+    final stops = <LatLng>[];
+    if (riderPoint != null) stops.add(riderPoint!);
     for (final order in orders) {
       final pickup = order.pickupPoint;
-      if (pickup != null && !farms.contains(pickup)) farms.add(pickup);
-    }
-    var cursor = riderPoint ?? (farms.isNotEmpty ? farms.first : null);
-    for (final farm in farms) {
-      if (cursor != null) total += GeoService.distanceKm(cursor, farm);
-      cursor = farm;
+      if (pickup != null && !stops.contains(pickup)) stops.add(pickup);
     }
     for (final order in orders) {
       final drop = order.dropPoint;
-      if (drop != null && cursor != null) {
-        total += GeoService.distanceKm(cursor, drop);
-        cursor = drop;
-      }
+      if (drop != null) stops.add(drop);
+    }
+    return stops;
+  }
+
+  double _straightLineLength(List<LatLng> stops) {
+    var total = 0.0;
+    for (var index = 0; index < stops.length - 1; index++) {
+      total += GeoService.distanceKm(stops[index], stops[index + 1]);
     }
     return total;
   }
@@ -672,6 +675,34 @@ class RiderPool extends StatefulWidget {
 
 class _RiderPoolState extends State<RiderPool> {
   PoolSort _sort = PoolSort.nearMe;
+  bool _resolvingRoutes = false;
+
+  /// Replaces the straight-line estimate on each card with the real driving
+  /// distance and ETA.
+  ///
+  /// Routes are fetched one at a time and only for the batches on screen:
+  /// this runs against the public OSRM demo server, and the pool reloads every
+  /// few seconds, so hammering it with a burst per poll would be abusive.
+  /// [RouteService] caches by waypoint list, making repeat polls free.
+  Future<void> _resolveRoutes(List<PooledBatch> batches) async {
+    if (_resolvingRoutes) return;
+    final pending = batches
+        .where((batch) =>
+            batch.stops.length >= 2 && RouteService.cached(batch.stops) == null)
+        .take(6)
+        .toList();
+    if (pending.isEmpty) return;
+    _resolvingRoutes = true;
+    try {
+      for (final batch in pending) {
+        await RouteService.route(batch.stops);
+        if (!mounted) return;
+      }
+      if (mounted) setState(() {});
+    } finally {
+      _resolvingRoutes = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -682,6 +713,10 @@ class _RiderPoolState extends State<RiderPool> {
         final snapshot = data.value;
         final batches =
             snapshot == null ? const <PooledBatch>[] : snapshot.batches(_sort);
+        if (widget.online && batches.isNotEmpty) {
+          WidgetsBinding.instance
+              .addPostFrameCallback((_) => _resolveRoutes(batches));
+        }
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
@@ -759,7 +794,7 @@ class _RiderPoolState extends State<RiderPool> {
                     badge: _badge(index, batches[index]),
                     orders: batches[index].orderCount,
                     farms: batches[index].farmCount,
-                    distance: formatKm(batches[index].distanceKm),
+                    distance: _distanceLabel(batches[index]),
                     pay: formatPeso(batches[index].payout),
                     capacity: batches[index].capacity,
                     onTap: () => Navigator.push(
@@ -780,6 +815,14 @@ class _RiderPoolState extends State<RiderPool> {
         );
       },
     );
+  }
+
+  /// Real road distance and ETA once OSRM has answered, otherwise the
+  /// straight-line estimate so the card is never blank.
+  String _distanceLabel(PooledBatch batch) {
+    final route = RouteService.cached(batch.stops);
+    if (route == null) return formatKm(batch.distanceKm);
+    return '${route.distanceLabel} • ${route.etaLabel}';
   }
 
   String _badge(int index, PooledBatch batch) {

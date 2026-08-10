@@ -215,12 +215,18 @@ void main() {
       expect(batch.payout, 112 + 160);
     });
 
-    test('caps capacity at a full load', () {
-      final batch = PooledBatch(
+    test('caps capacity at a full four-wheel load', () {
+      final full = PooledBatch(
         area: 'Gapan',
-        orders: [order(quantity: 900)],
+        orders: [order(quantity: PooledBatch.vehicleCapacityKg * 2)],
       );
-      expect(batch.capacity, 1.0);
+      expect(full.capacity, 1.0);
+
+      final half = PooledBatch(
+        area: 'Gapan',
+        orders: [order(quantity: PooledBatch.vehicleCapacityKg ~/ 2)],
+      );
+      expect(half.capacity, 0.5);
     });
 
     test('names the route from the farms and the destination town', () {
