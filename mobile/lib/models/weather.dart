@@ -45,6 +45,7 @@ class DailyForecast {
     required this.minTemperature,
     required this.rainChance,
     required this.rainfallMm,
+    this.isToday = false,
   });
 
   final DateTime date;
@@ -56,14 +57,17 @@ class DailyForecast {
   final int rainChance;
   final double rainfallMm;
 
+  /// True for the first day of the outlook. Open-Meteo is queried with
+  /// `timezone=auto`, so day zero is today *at the forecast location* — which
+  /// is not always today on the device, and comparing the two mislabels the
+  /// card whenever the phone sits in another timezone.
+  final bool isToday;
+
   WeatherCondition get condition => WeatherCondition.fromCode(code);
 
   /// "Today", then short weekday names.
-  String label(DateTime today) {
-    final sameDay = date.year == today.year &&
-        date.month == today.month &&
-        date.day == today.day;
-    if (sameDay) return 'Today';
+  String get label {
+    if (isToday) return 'Today';
     const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return names[date.weekday - 1];
   }
@@ -166,6 +170,7 @@ class FarmWeather {
             minTemperature: _toDouble(_at(daily['temperature_2m_min'], i)),
             rainChance: _toInt(_at(daily['precipitation_probability_max'], i)),
             rainfallMm: _toDouble(_at(daily['precipitation_sum'], i)),
+            isToday: i == 0,
           ),
       ],
     );

@@ -117,7 +117,6 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
-    final today = DateTime.now();
     return Scaffold(
       appBar: AppBar(title: const Text('Weather outlook')),
       body: RefreshIndicator(
@@ -224,8 +223,7 @@ class _WeatherPageState extends State<WeatherPage> {
                   ),
                   child: Column(
                     children: [
-                      for (final day in _weather.daily)
-                        _ForecastRow(day: day, today: today),
+                      for (final day in _weather.daily) _ForecastRow(day: day),
                     ],
                   ),
                 ),
@@ -245,10 +243,9 @@ class _WeatherPageState extends State<WeatherPage> {
 }
 
 class _ForecastRow extends StatelessWidget {
-  const _ForecastRow({required this.day, required this.today});
+  const _ForecastRow({required this.day});
 
   final DailyForecast day;
-  final DateTime today;
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +257,7 @@ class _ForecastRow extends StatelessWidget {
           SizedBox(
             width: 48,
             child: Text(
-              day.label(today),
+              day.label,
               style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
             ),
           ),

@@ -16,6 +16,7 @@ final weatherService = WeatherService();
 /// Cabanatuan, in the Nueva Ecija rice belt AgriLink serves.
 const _fallbackLatitude = 15.4865;
 const _fallbackLongitude = 120.9734;
+const _fallbackPlaceName = 'Cabanatuan, Nueva Ecija';
 
 /// Live weather for the signed-in account's pinned location.
 ///
@@ -35,11 +36,15 @@ class WeatherPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = session.user;
-    final latitude = user.latitude ?? _fallbackLatitude;
-    final longitude = user.longitude ?? _fallbackLongitude;
-    final place = user.location.isEmpty
-        ? 'Cabanatuan, Nueva Ecija'
-        : user.location.split(',').take(2).join(',').trim();
+    final pinned = user.point != null;
+    // Without a pin the reading is for the fallback town, so it is labelled
+    // that way — naming the account's address over someone else's coordinates
+    // would be a lie.
+    final latitude = pinned ? user.latitude! : _fallbackLatitude;
+    final longitude = pinned ? user.longitude! : _fallbackLongitude;
+    final place = pinned && user.location.isNotEmpty
+        ? user.location.split(',').take(2).join(',').trim()
+        : _fallbackPlaceName;
 
     return LiveBuilder<FarmWeather>(
       session: session,
@@ -288,7 +293,7 @@ class _DayChip extends StatelessWidget {
     return Column(
       children: [
         Text(
-          day.label(DateTime.now()),
+          day.label,
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w800,

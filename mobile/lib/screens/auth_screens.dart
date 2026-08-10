@@ -133,6 +133,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool _failed = false;
+
   @override
   void initState() {
     super.initState();
@@ -140,19 +142,26 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _start() async {
-    final results = await Future.wait<dynamic>([
-      authService.restoreSession(),
-      Future<void>.delayed(const Duration(milliseconds: 1500)),
-    ]);
-    if (!mounted) return;
-    final user = results.first as MobileUser?;
-    if (user != null) {
-      openUserHome(context, user);
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const AuthWelcomePage()),
-      );
+    if (_failed) setState(() => _failed = false);
+    try {
+      final results = await Future.wait<dynamic>([
+        authService.restoreSession(),
+        Future<void>.delayed(const Duration(milliseconds: 1500)),
+      ]);
+      if (!mounted) return;
+      final user = results.first as MobileUser?;
+      if (user != null) {
+        openUserHome(context, user);
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AuthWelcomePage()),
+        );
+      }
+    } catch (_) {
+      // Firestore is the only source of truth, so a failed restore means the
+      // device cannot reach it. Offer a retry instead of spinning forever.
+      if (mounted) setState(() => _failed = true);
     }
   }
 
@@ -172,11 +181,31 @@ class _SplashScreenState extends State<SplashScreen> {
                 style: TextStyle(color: muted, fontSize: 15),
               ),
               const SizedBox(height: 34),
-              const SizedBox(
-                width: 28,
-                height: 28,
-                child: CircularProgressIndicator(strokeWidth: 3),
-              ),
+              if (!_failed)
+                const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                )
+              else ...[
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 40),
+                  child: Text(
+                    'Cannot reach AgriLink. Check your internet connection.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: muted, height: 1.45),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _start,
+                  icon: const Icon(Icons.refresh),
+                  label: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    child: Text('Try again'),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
