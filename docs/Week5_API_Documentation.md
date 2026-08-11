@@ -134,6 +134,28 @@ calls; the refresh button clears it so refresh always means a real request.
 POST was not implemented because Open-Meteo is read-only and exposes no POST
 endpoint.
 
+### A second public API: OSRM routing
+
+The project also calls **OSRM** (`https://router.project-osrm.org/route/v1/driving/...`),
+a free routing API that needs no key. It returns a driving route as GeoJSON:
+
+```json
+{ "routes": [ {
+    "distance": 102344.7, "duration": 6019.2,
+    "geometry": { "coordinates": [[120.9414, 15.0794], ...] }
+} ] }
+```
+
+`distance` (metres) and `duration` (seconds) are parsed into a `RoutePath`, and
+`geometry.coordinates` is drawn as the rider's route line on the map. This was
+already powering the active-trip map; this week it was extended to the **Order
+Pool**, which previously showed a straight-line estimate. Riders now see the
+real road distance and ETA before accepting a route — screenshot 6.
+
+Routes are fetched one at a time and only for the batches on screen, and are
+cached by waypoint list, because this runs against the public OSRM demo server
+and the pool reloads every few seconds.
+
 **Database impact:** no new collection. The feature *reads* the existing
 `latitude` / `longitude` fields in the `profile` map of `mobileUsers`, captured
 when the user pinned their location at registration. Forecasts are not
@@ -154,6 +176,8 @@ All captured on a Pixel 9 emulator (Android 16) against the live API.
 | 3 | `screenshots/03-seven-day-outlook.png` | **Full outlook** — 7-day table with per-day condition, rain chance, rainfall in mm, and high/low |
 | 4 | `screenshots/04-town-search-geocoding.png` | **Second endpoint** — geocoding search for "Baguio" returning 8 matches |
 | 5 | `screenshots/05-offline-error-handling.png` | **Error handling** — the app with Wi-Fi and mobile data off, showing a clear message and a retry action instead of hanging |
+| 6 | `screenshots/06-rider-pool-osrm-routing.png` | **Second API** — the Order Pool showing real driving distance and ETA (102 km • 1h 40m) from OSRM |
+| 7 | `screenshots/07-four-wheel-vehicle-only.png` | Rider signup restricted to four-wheel vehicles |
 
 ![Farmer harvest weather](screenshots/01-farmer-harvest-weather.png)
 

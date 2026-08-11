@@ -721,7 +721,8 @@ class PoolCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                '$orders orders • $farms farms • $distance',
+                '$orders order${orders == 1 ? '' : 's'} • '
+                '$farms farm${farms == 1 ? '' : 's'} • $distance',
                 style: const TextStyle(color: muted),
               ),
               const SizedBox(height: 16),
