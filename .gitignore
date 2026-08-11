@@ -27,3 +27,6 @@ Thumbs.db
 
 # Local Flutter SDK managed outside the application source
 /flutter/
+
+# Course submission documents are kept outside the repository.
+docs/
