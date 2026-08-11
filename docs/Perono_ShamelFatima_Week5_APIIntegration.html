@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Perono, Shamel Fatima C. — Week 5 API Integration</title>
+<style>
+  @page { size: A4; margin: 16mm 17mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 10.5pt; line-height: 1.38; color: #000; margin: 0;
+    text-align: justify;
+  }
+  .namebar {
+    font-weight: 700; font-size: 11pt; letter-spacing: .2pt;
+    padding-bottom: 5pt; margin-bottom: 12pt;
+    border-bottom: 1.5pt solid #000;
+  }
+  h1 {
+    font-size: 14pt; text-align: center; margin: 0 0 2pt; letter-spacing: .2pt;
+  }
+  .subtitle {
+    text-align: center; font-size: 10pt; color: #333;
+    margin: 0 0 12pt; font-style: italic;
+  }
+  h2 { font-size: 11pt; margin: 12pt 0 4pt; }
+  p { margin: 0 0 6pt; }
+  ol.roman { margin: 0 0 6pt; padding-left: 18pt; }
+  ol.roman li { margin-bottom: 3pt; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 6pt; font-size: 9pt; }
+  th, td { border: 1px solid #999; padding: 3pt 5pt; text-align: left; vertical-align: top; }
+  th { background: #eaeaea; font-weight: 700; }
+  code { font-family: Consolas, monospace; font-size: 9pt; }
+  pre {
+    font-family: Consolas, monospace; font-size: 8.4pt; background: #f4f4f4;
+    border: 1px solid #ccc; padding: 5pt 6pt; margin: 4pt 0 6pt;
+    white-space: pre-wrap; word-break: break-word; line-height: 1.3;
+    text-align: left;
+  }
+  .page-break { break-before: page; page-break-before: always; }
+  .grid { display: flex; gap: 9pt; margin: 6pt 0 10pt; }
+  .grid figure { margin: 0; flex: 1; }
+  .grid img { width: 100%; border: 1px solid #999; display: block; }
+  .grid figcaption {
+    font-size: 8.5pt; margin-top: 3pt; text-align: left; line-height: 1.3;
+  }
+  h3 { font-size: 10.5pt; margin: 10pt 0 3pt; }
+</style>
+</head>
+<body>
+
+<div class="namebar">PERONO, SHAMEL FATIMA C. &nbsp;|&nbsp; ITE233</div>
+
+<h1>AgriLink — API Integration</h1>
+<p class="subtitle">Week 5 · OpenStreetMap routing and geocoding for pooled farm deliveries</p>
+
+<h2>I. API Name</h2>
+<p>
+  The project integrates <b>OpenStreetMap (OSM)</b> and its open service ecosystem. Three OSM-based services are used,
+  and none of them requires an API key or a registered account. OSRM (<code>router.project-osrm.org</code>) supplies
+  driving routes together with their distance and estimated travel time. Nominatim
+  (<code>nominatim.openstreetmap.org</code>) converts coordinates into a readable address. The OSM tile server provides
+  the map imagery itself.
+</p>
+<p>
+  OSM was chosen because AgriLink is fundamentally a logistics platform. Its core problem is moving bulk produce from
+  farms to buyers, and that is a routing problem. Commercial alternatives such as Google Maps require a
+  billing-enabled API key, whereas the OSM stack is free, openly licensed, and needs no secret stored in the project
+  repository. A fourth public API, Open-Meteo, was also integrated to supply weather information, and is described in
+  section VI.
+</p>
+
+<h2>II. API Endpoints Used</h2>
+<pre>GET https://router.project-osrm.org/route/v1/driving/{lon,lat};{lon,lat};...?overview=full&amp;geometries=geojson
+GET https://nominatim.openstreetmap.org/reverse?format=jsonv2&amp;lat=15.4864&amp;lon=120.9673&amp;zoom=18
+GET https://tile.openstreetmap.org/{z}/{x}/{y}.png</pre>
+<p>
+  OSRM expects each coordinate as <code>longitude,latitude</code>, which is the reverse of most other APIs, with the
+  waypoints joined by semicolons and one waypoint given per stop on the trip. The parameter
+  <code>overview=full</code> asks the server to return the complete road geometry, so the route can be drawn on the map
+  rather than only measured.
+</p>
+
+<h2>III. Sample JSON Response</h2>
+<p>An actual response from the routing endpoint, abbreviated for space:</p>
+<pre>{ "code": "Ok",
+  "routes": [{ "distance": 49426, "duration": 2893.8,
+    "geometry": { "coordinates": [[120.941396, 15.079411], [120.967269, 15.486488]] } }],
+  "waypoints": [ { "location": [120.941396, 15.079411], "name": "" },
+                 { "location": [120.967269, 15.486488], "name": "General Tinio Street" } ] }</pre>
+<p>
+  The field <code>distance</code> is expressed in metres and <code>duration</code> in seconds, so both are converted
+  before they are shown to the user. The list under <code>geometry.coordinates</code> arrives as
+  <code>[longitude, latitude]</code> pairs and has to be flipped into <code>[latitude, longitude]</code> before the
+  mapping library can draw it.
+</p>
+
+<h2>IV. Explanation of the Integration</h2>
+<pre>Farm and buyer coordinates (mobileOrders, Firestore)
+   → RouteService.route(stops)  ── HTTP GET ──▶  router.project-osrm.org
+   → jsonDecode() → RoutePath { points, distanceKm, duration }
+   → route polyline on OSM tiles, and "52 km • 52 min" on every Order Pool card</pre>
+<p>
+  The request is issued with <code>client.get(uri, headers: {'User-Agent': ...})</code> and a fifteen-second timeout,
+  since both OSRM and Nominatim require a calling application to identify itself. The response body is never handed to
+  the interface in its raw form. It is decoded and converted into a typed <code>RoutePath</code> object, which performs
+  the unit conversions and flips every coordinate pair. The resulting data appears in three places in the application:
+  the Pooled route map, the distance and estimated time on each Order Pool card, and the address shown in the signup
+  location picker.
+</p>
+<p>
+  Before this integration, AgriLink measured a delivery as a straight line drawn between the farm and the buyer. On
+  provincial roads that understates the real journey considerably. The route shown in Figure 1 is 52 kilometres of
+  actual road against roughly 45 kilometres of straight line, and that difference is fuel and time the rider is not
+  paid for. The routing API therefore gives the platform three things it could not calculate on its own:
+</p>
+<ol class="roman">
+  <li>a distance the rider can trust before deciding whether to accept a pooled route;</li>
+  <li>an estimated arrival time, so the buyer can be told when the produce will actually arrive; and</li>
+  <li>a drawn route, so the rider can see the roads the trip follows instead of a line crossing rice fields.</li>
+</ol>
+
+<h2>V. Error Handling</h2>
+<p>
+  Each way the request can fail is caught separately and given a name through a <code>RouteFailure</code> enumeration,
+  so that the application knows which problem occurred rather than treating every failure as the same event.
+</p>
+<table>
+  <tr><th style="width:20%">Requirement</th><th style="width:30%">Failure</th><th style="width:25%">Detection</th><th>Result</th></tr>
+  <tr><td rowspan="2">Connection issue</td><td>No network, host unreachable</td><td><code>SocketException</code></td>
+      <td rowspan="8">Every case degrades to the same straight-line estimate, calculated at an assumed 28 km/h and flagged as an estimate. Failed routes are never cached, so the following refresh tries again.</td></tr>
+  <tr><td>Connection dropped mid-request</td><td><code>ClientException</code></td></tr>
+  <tr><td rowspan="4">Unavailable API</td><td>Server down</td><td>HTTP 5xx</td></tr>
+  <tr><td>Rate limited</td><td>HTTP 429</td></tr>
+  <tr><td>Server too slow to answer</td><td><code>TimeoutException</code> (15 s)</td></tr>
+  <tr><td>No road between the points</td><td>empty <code>routes</code> array</td></tr>
+  <tr><td rowspan="2">Invalid response</td><td>HTML error page where JSON was expected</td><td><code>FormatException</code></td></tr>
+  <tr><td>Valid JSON in an unexpected shape</td><td>cast failure</td></tr>
+</table>
+<p>
+  The guiding rule is that a failed lookup should fall back to a usable number instead of an error message, because a
+  rider must never be prevented from seeing a distance. Nominatim failures behave the same way and fall back to the raw
+  latitude and longitude, so the dropped pin remains usable. When there is no connection at all as the application
+  starts, the splash screen offers a retry rather than waiting indefinitely, as shown in Figure 4.
+</p>
+
+<div class="page-break"></div>
+<div class="namebar">PERONO, SHAMEL FATIMA C. &nbsp;|&nbsp; ITE233</div>
+
+<h2>VI. Bonus Features</h2>
+<p>
+  <b>Multiple API endpoints.</b> Five endpoints are called in total: the OSRM routing endpoint, Nominatim reverse
+  geocoding, the OSM tile server, the Open-Meteo forecast endpoint, and the Open-Meteo geocoding endpoint.
+</p>
+<p>
+  <b>Search and filter.</b> The weather screen searches for any town through the Open-Meteo geocoding endpoint, with the
+  request delayed by 450 milliseconds so that one lookup is sent per pause in typing rather than one per keystroke
+  (Figure 5). The Order Pool can be filtered by Near me, Best pay, or Shortest route (Figure 6).
+</p>
+<p>
+  <b>POST request.</b> OSRM, Nominatim, and Open-Meteo are all read-only services and expose no POST endpoint, so the
+  condition attached to this item does not apply to them. The application does, however, issue POST requests to the
+  Firestore REST API, both for <code>documents:runQuery</code> and for creating documents, and to the transactional
+  email service used by the password-reset feature.
+</p>
+<p>
+  <b>Dynamic refresh without reloading the page.</b> Routes in the Order Pool are resolved after the screen has already
+  been drawn and are then written into place through <code>setState</code>. The weather card refreshes on a ten-minute
+  timer, through a refresh button, and by pulling down on the screen. Figure 7 was captured during a refresh: the button
+  shows a progress indicator while the card continues to display data, and the reading has changed from the previous
+  figure without the page being rebuilt.
+</p>
+<p>
+  <b>Secondary integration.</b> Open-Meteo supplies current conditions and a seven-day outlook for the coordinates each
+  account pinned during signup, shown on both the Farmer and the Rider dashboard. The numeric WMO weather code returned
+  by the service is mapped to advice specific to the role, so the same thunderstorm tells a farmer to secure stored
+  produce while telling a rider not to accept trips.
+</p>
+
+<h2>VII. Testing</h2>
+<p>
+  Running <code>flutter test</code> executes 64 tests against a mocked HTTP client, so none of them require a network
+  connection. Twelve of these cover the routing service specifically, including the request URL and its unusual
+  longitude-first ordering, the parsing of distance and duration, the coordinate flip, the caching behaviour, and every
+  row of the table in section V. The command <code>flutter analyze</code> reports no issues. No new database collection
+  was required, because routing reads coordinates that are already stored on the <code>mobileOrders</code> documents.
+</p>
+
+<h2>VIII. Reflection</h2>
+<p>
+  Integrating the OpenStreetMap stack turned AgriLink's pooled delivery feature from an estimate into something a rider
+  can actually trust, because the Order Pool previously measured a route as a straight line, which on provincial roads
+  understates the real trip by several kilometres of unpaid fuel and time. The most difficult part was that OSRM returns
+  its coordinates as longitude followed by latitude, which is the reverse of almost every other API and of the mapping
+  library used to draw the result, so every point has to be flipped between the two conventions and a single missed flip
+  places the entire route in the wrong hemisphere. A second challenge was learning to be a responsible consumer of a
+  free public service, since the pool screen reloads every few seconds and the obvious implementation would have sent a
+  burst of routing requests on every refresh; the requests are therefore resolved one at a time, only for the routes
+  currently visible on screen, and cached by their waypoint list. The most valuable lesson from this activity was that an
+  integration is judged by how it fails rather than by how it succeeds, because the routing service is allowed to be
+  unavailable, and when it is, the application quietly falls back to a straight-line estimate instead of showing a rider
+  an error where a distance should be.
+</p>
+
+<div class="page-break"></div>
+<div class="namebar">PERONO, SHAMEL FATIMA C. &nbsp;|&nbsp; ITE233</div>
+
+<h2>Appendix A. Screenshots</h2>
+<p>All screenshots were captured on a Pixel 9 emulator running Android 16, against the live APIs.</p>
+
+<h3>API request working, and data displayed in the project</h3>
+<div class="grid">
+  <figure>
+    <img src="screenshots/01-osrm-route-on-osm-map.png" alt="OSRM route drawn on OpenStreetMap tiles">
+    <figcaption><b>Figure 1.</b> The OSRM route drawn over OpenStreetMap tiles, labelled "52 km • 52 min • OSM".</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/02-pool-osrm-distance-eta.png" alt="Order Pool card with real driving distance and ETA">
+    <figcaption><b>Figure 2.</b> The Order Pool card showing the real driving distance and travel time returned by the API.</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/03-nominatim-location-picker.png" alt="Location picker showing a Nominatim address">
+    <figcaption><b>Figure 3.</b> Nominatim reverse geocoding, turning the dropped pin into a full address.</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/07-offline-error-handling.png" alt="Offline error state with a retry action">
+    <figcaption><b>Figure 4.</b> Error handling with no connection: a clear message and a retry action instead of hanging.</figcaption>
+  </figure>
+</div>
+
+<h3>Bonus features</h3>
+<div class="grid">
+  <figure>
+    <img src="screenshots/06-open-meteo-town-search.png" alt="Town search returning eight matches">
+    <figcaption><b>Figure 5.</b> Search: querying the Open-Meteo geocoding endpoint for "Baguio" returns eight matches.</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/09-bonus-filter.png" alt="Order Pool filtered by Best pay">
+    <figcaption><b>Figure 6.</b> Filter: the Order Pool sorted by Best pay instead of the default Near me.</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/10-bonus-dynamic-refresh.png" alt="Weather card refreshing in place">
+    <figcaption><b>Figure 7.</b> Dynamic refresh: the button shows a progress indicator and the reading updates in place, with no page reload.</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/04-farmer-harvest-weather.png" alt="Open-Meteo weather on the farmer dashboard">
+    <figcaption><b>Figure 8.</b> The secondary Open-Meteo integration on the Farmer dashboard, with harvest advice.</figcaption>
+  </figure>
+</div>
+
+</body>
+</html>
