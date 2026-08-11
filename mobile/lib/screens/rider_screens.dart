@@ -129,11 +129,15 @@ class RiderSnapshot {
     return nearest.isFinite ? nearest : batch.distanceKm;
   }
 
-  /// The trip in visiting order: where the rider stands now, every farm to
-  /// collect from, then every buyer to drop at.
+  /// The trip in visiting order: every farm to collect from, then every buyer
+  /// to drop at.
+  ///
+  /// The rider's own position is deliberately left out so the pool card and the
+  /// Pooled route screen quote the same distance for the same trip. How far the
+  /// rider is from the first farm is a separate question, answered by
+  /// [_distanceToFirstPickup] for the "Near me" sort.
   List<LatLng> _batchStops(List<AgriOrder> orders) {
     final stops = <LatLng>[];
-    if (riderPoint != null) stops.add(riderPoint!);
     for (final order in orders) {
       final pickup = order.pickupPoint;
       if (pickup != null && !stops.contains(pickup)) stops.add(pickup);
