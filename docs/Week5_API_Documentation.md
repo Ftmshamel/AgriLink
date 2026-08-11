@@ -4,6 +4,19 @@
 
 ---
 
+## 0. Requirements Checklist
+
+| Requirement | Where it is met |
+| --- | --- |
+| Integrate at least one public API | Four: OSRM routing, Nominatim geocoding, OSM tiles, Open-Meteo weather — §1, §7 |
+| Implement an HTTP GET request | `RouteService.route()` in `lib/services/geo.dart` — §4.3 |
+| Retrieve and process JSON data | `RoutePath` parsing, incl. the `[lon,lat]` → `[lat,lng]` flip — §4.4 |
+| Display API data in the UI | Pooled route map, Order Pool cards, location picker — §4.5, screenshots 1–3 |
+| Handle basic errors | Nine named failure modes, all tested — §4.6, §8 |
+| Explain how the API improves the project | §4.2 and the Reflection in §9 |
+
+---
+
 ## 1. API Name
 
 **OpenStreetMap (OSM)** and its open service ecosystem. Three OSM-based
@@ -114,7 +127,25 @@ Farm + buyer coordinates (mobileOrders, Firestore)
 `lib/widgets/live_map.dart` (map + polyline), `lib/screens/rider_screens.dart`
 (Order Pool), `lib/screens/auth_screens.dart` (`LocationPickerPage`, Nominatim).
 
-### 4.2 What this week added
+### 4.2 How the API improves the project
+
+Before this integration, AgriLink measured a delivery as a **straight line**
+between the farm and the buyer. On provincial roads that understates the real
+trip badly — the route in screenshot 1 is **52 km of road against roughly 45 km
+of straight line**, and that 7 km gap is the rider's unpaid fuel and time.
+
+Concretely, the routing API gives the platform three things it could not
+compute on its own:
+
+1. **A distance a rider can trust** before accepting a pooled route, instead of
+   a figure that is always optimistic.
+2. **An ETA** (52 min), so a buyer can be told when produce actually arrives.
+3. **A drawn route** on the map, so the rider can see the roads the trip
+   follows rather than a line through rice fields.
+
+
+
+### 4.2b What this week added
 
 OSRM already powered the rider's active-trip map. This week it was extended to
 the **Open Order Pool**, which had been showing a straight-line estimate — the
@@ -153,16 +184,30 @@ address captured at signup is what riders later navigate to.
 
 ### 4.6 Error handling
 
-| Failure | Handling |
-| --- | --- |
-| Routing server unreachable / non-200 | Falls back to a straight-line path at an assumed 28 km/h, flagged `isEstimate` |
-| Request exceeds 15 s | Same fallback, so the map never hangs |
-| Empty `routes` array | Same fallback |
-| Nominatim unreachable or non-200 | Address falls back to the raw `lat, lng`, so the pin is still usable |
-| No connection at app start | Splash screen shows "Cannot reach AgriLink" with a retry (screenshot 7) |
+Each failure is caught **separately and named**, via the `RouteFailure` enum, so
+the app knows which one happened rather than treating every problem the same:
 
-The design rule is that **a failed lookup degrades to a usable estimate rather
-than an error** — a rider must never be blocked from seeing a route.
+| Requirement | Failure | Detection | `RouteFailure` |
+| --- | --- | --- | --- |
+| **Connection issue** | No network / host unreachable | `SocketException` | `connection` |
+| **Connection issue** | Connection dropped mid-request | `http.ClientException` | `connection` |
+| **Unavailable API** | Server down | HTTP 5xx | `unavailable` |
+| **Unavailable API** | Rate limited | HTTP 429 | `unavailable` |
+| **Unavailable API** | Server too slow | `TimeoutException` (15 s) | `timeout` |
+| **Unavailable API** | No road between the points | empty `routes` array | `unavailable` |
+| **Invalid response** | HTML error page where JSON was expected | `FormatException` | `invalidResponse` |
+| **Invalid response** | Valid JSON, unexpected shape | cast failure | `invalidResponse` |
+| — | Fewer than two stops | guard before the request | `notEnoughStops` |
+
+All of them degrade to the **same straight-line estimate** at an assumed
+28 km/h, flagged `isEstimate`. The design rule is that **a failed lookup
+degrades to a usable number rather than an error** — a rider must never be
+blocked from seeing a distance. Failed routes are never cached, so the next
+refresh retries.
+
+Elsewhere: Nominatim failures fall back to the raw `lat, lng`, so the pin stays
+usable; and if there is no connection at app start the splash screen shows
+"Cannot reach AgriLink" with a retry (screenshot 7) instead of hanging.
 
 ### 4.7 Being a good citizen of a free service
 
@@ -215,9 +260,24 @@ are in `API_INTEGRATION.md`.
 
 ## 8. Testing
 
-`flutter test` runs 52 tests with a mocked HTTP client, covering JSON parsing,
-endpoint URLs, every error path, and the caching behaviour. `flutter analyze`
-reports no issues.
+`flutter test` runs **64 tests** with a mocked HTTP client, so they need no
+network. Twelve cover OSRM specifically: the request URL and its `lon,lat`
+ordering, distance/duration parsing, the `[lon, lat]` → `[lat, lng]` flip,
+caching, and **every row of the error table above**. `flutter analyze` reports
+no issues.
+
+```
+flutter test test/route_service_test.dart
+  ✓ parses distance, duration, and the road geometry
+  ✓ a repeat lookup is served from cache
+  ✓ connection issue          ✓ dropped client connection
+  ✓ timeout                   ✓ service unavailable
+  ✓ rate limited              ✓ no route between the points
+  ✓ invalid response — an HTML error page where JSON was expected
+  ✓ valid JSON in an unexpected shape
+  ✓ a failed route is never cached
+  ✓ a single stop is not routed at all
+```
 
 ## 9. Reflection
 

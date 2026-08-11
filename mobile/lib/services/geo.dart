@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -97,6 +98,27 @@ class GeoService {
       const Distance().as(LengthUnit.Kilometer, from, to).toDouble();
 }
 
+/// Why a route fell back to a straight line instead of real road data.
+enum RouteFailure {
+  /// The device could not reach the routing server at all.
+  connection('No connection to the routing service.'),
+
+  /// The server accepted the request but took too long.
+  timeout('The routing service took too long to respond.'),
+
+  /// The server answered, but not with a usable route (5xx, 429, no route).
+  unavailable('The routing service is unavailable right now.'),
+
+  /// The body was not the JSON this app knows how to read.
+  invalidResponse('The routing service returned an unreadable response.'),
+
+  /// Fewer than two usable waypoints — nothing to route between.
+  notEnoughStops('Not enough stops to build a route.');
+
+  const RouteFailure(this.message);
+  final String message;
+}
+
 /// A driving route returned by OSRM, or a straight-line fallback.
 class RoutePath {
   const RoutePath({
@@ -104,6 +126,7 @@ class RoutePath {
     required this.distanceKm,
     required this.duration,
     required this.isEstimate,
+    this.failure,
   });
 
   final List<LatLng> points;
@@ -113,6 +136,9 @@ class RoutePath {
   /// True when routing was unavailable and this is a straight-line guess.
   final bool isEstimate;
 
+  /// Set only on a fallback, naming which failure caused it.
+  final RouteFailure? failure;
+
   String get distanceLabel => formatKm(distanceKm);
   String get etaLabel => formatDuration(duration);
 }
@@ -120,6 +146,11 @@ class RoutePath {
 /// Public OSRM routing, used for the rider's road route and delivery ETAs.
 class RouteService {
   static final _cache = <String, RoutePath>{};
+
+  /// Swappable so tests can drive the failure paths without a network.
+  static http.Client client = http.Client();
+
+  static void clearCache() => _cache.clear();
 
   static String _keyFor(List<LatLng> waypoints) => waypoints
       .map((point) =>
@@ -142,6 +173,7 @@ class RouteService {
         distanceKm: 0,
         duration: Duration.zero,
         isEstimate: true,
+        failure: RouteFailure.notEnoughStops,
       );
     }
     final key = _keyFor(waypoints);
@@ -155,21 +187,39 @@ class RouteService {
       'https://router.project-osrm.org/route/v1/driving/$coordinates'
       '?overview=full&geometries=geojson',
     );
+    // Each failure mode is caught separately so the app can say which one
+    // happened; they all degrade to the same straight-line estimate, because a
+    // rider must never be blocked from seeing a distance.
+    final http.Response response;
     try {
-      final response = await http.get(
+      response = await client.get(
         uri,
         headers: const {'User-Agent': 'AgriLinkMobile/1.0'},
       ).timeout(const Duration(seconds: 15));
-      if (response.statusCode != 200) {
-        throw Exception('Routing service returned ${response.statusCode}.');
-      }
+    } on TimeoutException {
+      return _straightLine(waypoints, RouteFailure.timeout);
+    } on SocketException {
+      return _straightLine(waypoints, RouteFailure.connection);
+    } on http.ClientException {
+      return _straightLine(waypoints, RouteFailure.connection);
+    }
+
+    if (response.statusCode != 200) {
+      return _straightLine(waypoints, RouteFailure.unavailable);
+    }
+
+    try {
       final payload = jsonDecode(response.body) as Map<String, dynamic>;
       final routes = payload['routes'] as List<dynamic>? ?? const [];
-      if (routes.isEmpty) throw Exception('No driving route found.');
+      if (routes.isEmpty) {
+        return _straightLine(waypoints, RouteFailure.unavailable);
+      }
       final first = routes.first as Map<String, dynamic>;
       final geometry = first['geometry'] as Map<String, dynamic>;
       final coordinateList = geometry['coordinates'] as List<dynamic>;
       final path = RoutePath(
+        // OSRM returns [longitude, latitude] — the reverse of latlong2 — so
+        // every pair is flipped here.
         points: coordinateList.map((value) {
           final pair = value as List<dynamic>;
           return LatLng(
@@ -185,12 +235,13 @@ class RouteService {
       );
       _cache[key] = path;
       return path;
-    } catch (_) {
-      return _straightLine(waypoints);
+    } on Object {
+      // Not JSON, or JSON in a shape this app cannot read.
+      return _straightLine(waypoints, RouteFailure.invalidResponse);
     }
   }
 
-  static RoutePath _straightLine(List<LatLng> stops) {
+  static RoutePath _straightLine(List<LatLng> stops, [RouteFailure? failure]) {
     var distance = 0.0;
     for (var index = 0; index < stops.length - 1; index++) {
       distance += GeoService.distanceKm(stops[index], stops[index + 1]);
@@ -201,6 +252,7 @@ class RouteService {
       // Roughly 28 km/h average on provincial roads with stops.
       duration: Duration(minutes: (distance / 28 * 60).round()),
       isEstimate: true,
+      failure: failure,
     );
   }
 }
