@@ -4,37 +4,42 @@
 <meta charset="utf-8">
 <title>Perono, Shamel Fatima C. — Week 5 API Integration</title>
 <style>
-  @page { size: A4; margin: 16mm 17mm; }
+  @page { size: A4; margin: 14mm 15mm; }
   * { box-sizing: border-box; }
   body {
     font-family: Calibri, "Segoe UI", Arial, sans-serif;
-    font-size: 10.5pt; line-height: 1.38; color: #000; margin: 0;
+    font-size: 9.7pt; line-height: 1.33; color: #000; margin: 0;
     text-align: justify;
   }
   .namebar {
-    font-weight: 700; font-size: 11pt; letter-spacing: .2pt;
-    padding-bottom: 5pt; margin-bottom: 12pt;
-    border-bottom: 1.5pt solid #000;
+    font-weight: 700; font-size: 13pt; letter-spacing: .3pt;
+    margin-bottom: 12pt;
   }
   h1 {
     font-size: 14pt; text-align: center; margin: 0 0 2pt; letter-spacing: .2pt;
   }
   .subtitle {
-    text-align: center; font-size: 10pt; color: #333;
-    margin: 0 0 12pt; font-style: italic;
+    text-align: center; font-size: 9.5pt; color: #333;
+    margin: 0 0 11pt; font-style: italic;
   }
-  h2 { font-size: 11pt; margin: 12pt 0 4pt; }
-  p { margin: 0 0 6pt; }
-  ol.roman { margin: 0 0 6pt; padding-left: 18pt; }
-  ol.roman li { margin-bottom: 3pt; }
-  table { border-collapse: collapse; width: 100%; margin: 4pt 0 6pt; font-size: 9pt; }
+  /* Keep a numbered section whole: a heading never ends a page alone, and a
+     section moves to the next page rather than being cut in half. */
+  section { break-inside: avoid; page-break-inside: avoid; }
+  h2 {
+    font-size: 10.5pt; margin: 10pt 0 3pt;
+    break-after: avoid; page-break-after: avoid;
+  }
+  p { margin: 0 0 5pt; }
+  ol.roman { margin: 0 0 5pt; padding-left: 18pt; }
+  ol.roman li { margin-bottom: 2pt; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 5pt; font-size: 8.5pt; }
   th, td { border: 1px solid #999; padding: 3pt 5pt; text-align: left; vertical-align: top; }
   th { background: #eaeaea; font-weight: 700; }
   code { font-family: Consolas, monospace; font-size: 9pt; }
   pre {
-    font-family: Consolas, monospace; font-size: 8.4pt; background: #f4f4f4;
-    border: 1px solid #ccc; padding: 5pt 6pt; margin: 4pt 0 6pt;
-    white-space: pre-wrap; word-break: break-word; line-height: 1.3;
+    font-family: Consolas, monospace; font-size: 7.9pt; background: #f4f4f4;
+    border: 1px solid #ccc; padding: 4pt 5pt; margin: 4pt 0 5pt;
+    white-space: pre-wrap; word-break: break-word; line-height: 1.28;
     text-align: left;
   }
   .page-break { break-before: page; page-break-before: always; }
@@ -54,6 +59,7 @@
 <h1>AgriLink — API Integration</h1>
 <p class="subtitle">Week 5 · OpenStreetMap routing and geocoding for pooled farm deliveries</p>
 
+<section>
 <h2>I. API Name</h2>
 <p>
   The project integrates <b>OpenStreetMap (OSM)</b> and its open service ecosystem. Three OSM-based services are used,
@@ -67,9 +73,11 @@
   farms to buyers, and that is a routing problem. Commercial alternatives such as Google Maps require a
   billing-enabled API key, whereas the OSM stack is free, openly licensed, and needs no secret stored in the project
   repository. A fourth public API, Open-Meteo, was also integrated to supply weather information, and is described in
-  section VI.
+  Appendix B.
 </p>
+</section>
 
+<section>
 <h2>II. API Endpoints Used</h2>
 <pre>GET https://router.project-osrm.org/route/v1/driving/{lon,lat};{lon,lat};...?overview=full&amp;geometries=geojson
 GET https://nominatim.openstreetmap.org/reverse?format=jsonv2&amp;lat=15.4864&amp;lon=120.9673&amp;zoom=18
@@ -80,7 +88,9 @@ GET https://tile.openstreetmap.org/{z}/{x}/{y}.png</pre>
   <code>overview=full</code> asks the server to return the complete road geometry, so the route can be drawn on the map
   rather than only measured.
 </p>
+</section>
 
+<section>
 <h2>III. Sample JSON Response</h2>
 <p>An actual response from the routing endpoint, abbreviated for space:</p>
 <pre>{ "code": "Ok",
@@ -94,7 +104,9 @@ GET https://tile.openstreetmap.org/{z}/{x}/{y}.png</pre>
   <code>[longitude, latitude]</code> pairs and has to be flipped into <code>[latitude, longitude]</code> before the
   mapping library can draw it.
 </p>
+</section>
 
+<section>
 <h2>IV. Explanation of the Integration</h2>
 <pre>Farm and buyer coordinates (mobileOrders, Firestore)
    → RouteService.route(stops)  ── HTTP GET ──▶  router.project-osrm.org
@@ -119,7 +131,9 @@ GET https://tile.openstreetmap.org/{z}/{x}/{y}.png</pre>
   <li>an estimated arrival time, so the buyer can be told when the produce will actually arrive; and</li>
   <li>a drawn route, so the rider can see the roads the trip follows instead of a line crossing rice fields.</li>
 </ol>
+</section>
 
+<section>
 <h2>V. Error Handling</h2>
 <p>
   Each way the request can fail is caught separately and given a name through a <code>RouteFailure</code> enumeration,
@@ -143,11 +157,53 @@ GET https://tile.openstreetmap.org/{z}/{x}/{y}.png</pre>
   latitude and longitude, so the dropped pin remains usable. When there is no connection at all as the application
   starts, the splash screen offers a retry rather than waiting indefinitely, as shown in Figure 4.
 </p>
+</section>
+
+<section>
+<h2>VI. Reflection</h2>
+<p>
+  Integrating the OpenStreetMap stack turned AgriLink's pooled delivery feature from an estimate into something a rider
+  can actually trust, because the Order Pool previously measured a route as a straight line, which on provincial roads
+  understates the real trip by several kilometres of unpaid fuel and time. The most difficult part was that OSRM returns
+  its coordinates as longitude followed by latitude, which is the reverse of almost every other API and of the mapping
+  library used to draw the result, so every point has to be flipped between the two conventions and a single missed flip
+  places the entire route in the wrong hemisphere. A second challenge was learning to be a responsible consumer of a
+  free public service, since the pool screen reloads every few seconds and the obvious implementation would have sent a
+  burst of routing requests on every refresh; the requests are therefore resolved one at a time, only for the routes
+  currently visible on screen, and cached by their waypoint list. The most valuable lesson from this activity was that an
+  integration is judged by how it fails rather than by how it succeeds, because the routing service is allowed to be
+  unavailable, and when it is, the application quietly falls back to a straight-line estimate instead of showing a rider
+  an error where a distance should be.
+</p>
+</section>
 
 <div class="page-break"></div>
-<div class="namebar">PERONO, SHAMEL FATIMA C. &nbsp;|&nbsp; ITE233</div>
 
-<h2>VI. Bonus Features</h2>
+<h2>Appendix A. Screenshots</h2>
+<p>All screenshots were captured on a Pixel 9 emulator running Android 16, against the live APIs.</p>
+
+<h3>API request working, and data displayed in the project</h3>
+<div class="grid">
+  <figure>
+    <img src="screenshots/01-osrm-route-on-osm-map.png" alt="OSRM route drawn on OpenStreetMap tiles">
+    <figcaption><b>Figure 1.</b> The OSRM route drawn over OpenStreetMap tiles, labelled "52 km • 52 min • OSM".</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/02-pool-osrm-distance-eta.png" alt="Order Pool card with real driving distance and ETA">
+    <figcaption><b>Figure 2.</b> The Order Pool card showing the real driving distance and travel time returned by the API.</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/03-nominatim-location-picker.png" alt="Location picker showing a Nominatim address">
+    <figcaption><b>Figure 3.</b> Nominatim reverse geocoding, turning the dropped pin into a full address.</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/07-offline-error-handling.png" alt="Offline error state with a retry action">
+    <figcaption><b>Figure 4.</b> Error handling with no connection: a clear message and a retry action instead of hanging.</figcaption>
+  </figure>
+</div>
+
+<section>
+<h2>Appendix B. Bonus Features</h2>
 <p>
   <b>Multiple API endpoints.</b> Five endpoints are called in total: the OSRM routing endpoint, Nominatim reverse
   geocoding, the OSM tile server, the Open-Meteo forecast endpoint, and the Open-Meteo geocoding endpoint.
@@ -176,8 +232,10 @@ GET https://tile.openstreetmap.org/{z}/{x}/{y}.png</pre>
   by the service is mapped to advice specific to the role, so the same thunderstorm tells a farmer to secure stored
   produce while telling a rider not to accept trips.
 </p>
+</section>
 
-<h2>VII. Testing</h2>
+<section>
+<h2>Appendix C. Testing</h2>
 <p>
   Running <code>flutter test</code> executes 64 tests against a mocked HTTP client, so none of them require a network
   connection. Twelve of these cover the routing service specifically, including the request URL and its unusual
@@ -185,50 +243,9 @@ GET https://tile.openstreetmap.org/{z}/{x}/{y}.png</pre>
   row of the table in section V. The command <code>flutter analyze</code> reports no issues. No new database collection
   was required, because routing reads coordinates that are already stored on the <code>mobileOrders</code> documents.
 </p>
+</section>
 
-<h2>VIII. Reflection</h2>
-<p>
-  Integrating the OpenStreetMap stack turned AgriLink's pooled delivery feature from an estimate into something a rider
-  can actually trust, because the Order Pool previously measured a route as a straight line, which on provincial roads
-  understates the real trip by several kilometres of unpaid fuel and time. The most difficult part was that OSRM returns
-  its coordinates as longitude followed by latitude, which is the reverse of almost every other API and of the mapping
-  library used to draw the result, so every point has to be flipped between the two conventions and a single missed flip
-  places the entire route in the wrong hemisphere. A second challenge was learning to be a responsible consumer of a
-  free public service, since the pool screen reloads every few seconds and the obvious implementation would have sent a
-  burst of routing requests on every refresh; the requests are therefore resolved one at a time, only for the routes
-  currently visible on screen, and cached by their waypoint list. The most valuable lesson from this activity was that an
-  integration is judged by how it fails rather than by how it succeeds, because the routing service is allowed to be
-  unavailable, and when it is, the application quietly falls back to a straight-line estimate instead of showing a rider
-  an error where a distance should be.
-</p>
-
-<div class="page-break"></div>
-<div class="namebar">PERONO, SHAMEL FATIMA C. &nbsp;|&nbsp; ITE233</div>
-
-<h2>Appendix A. Screenshots</h2>
-<p>All screenshots were captured on a Pixel 9 emulator running Android 16, against the live APIs.</p>
-
-<h3>API request working, and data displayed in the project</h3>
-<div class="grid">
-  <figure>
-    <img src="screenshots/01-osrm-route-on-osm-map.png" alt="OSRM route drawn on OpenStreetMap tiles">
-    <figcaption><b>Figure 1.</b> The OSRM route drawn over OpenStreetMap tiles, labelled "52 km • 52 min • OSM".</figcaption>
-  </figure>
-  <figure>
-    <img src="screenshots/02-pool-osrm-distance-eta.png" alt="Order Pool card with real driving distance and ETA">
-    <figcaption><b>Figure 2.</b> The Order Pool card showing the real driving distance and travel time returned by the API.</figcaption>
-  </figure>
-  <figure>
-    <img src="screenshots/03-nominatim-location-picker.png" alt="Location picker showing a Nominatim address">
-    <figcaption><b>Figure 3.</b> Nominatim reverse geocoding, turning the dropped pin into a full address.</figcaption>
-  </figure>
-  <figure>
-    <img src="screenshots/07-offline-error-handling.png" alt="Offline error state with a retry action">
-    <figcaption><b>Figure 4.</b> Error handling with no connection: a clear message and a retry action instead of hanging.</figcaption>
-  </figure>
-</div>
-
-<h3>Bonus features</h3>
+<h3>Bonus feature evidence</h3>
 <div class="grid">
   <figure>
     <img src="screenshots/06-open-meteo-town-search.png" alt="Town search returning eight matches">

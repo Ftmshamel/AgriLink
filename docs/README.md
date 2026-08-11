@@ -4,11 +4,15 @@
 
 **`Perono_ShamelFatima_Week5_APIIntegration.pdf`**
 
-Four pages: two pages of documentation (API name, endpoints, sample JSON
-response, explanation of the integration, error handling, bonus features, and
-the reflection), followed by a two-page screenshot appendix. The screenshots sit
-in an appendix on purpose, so the documentation itself stays within the 1–2 page
-limit while the screenshots remain a separate deliverable.
+Four pages. Pages 1–2 are the documentation itself (API name, endpoints, sample
+JSON response, explanation of the integration, error handling, and the
+reflection), which keeps the body inside the 1–2 page limit. Pages 3–4 are
+appendices holding the screenshots, the bonus features, and the testing notes,
+since screenshots are a separate deliverable and should not count against the
+page limit.
+
+Each numbered section is marked `page-break-inside: avoid`, so a section is
+moved whole to the next page rather than being cut in half.
 
 ## The other files
 
