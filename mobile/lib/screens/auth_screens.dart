@@ -11,6 +11,7 @@ import 'package:latlong2/latlong.dart';
 import '../app.dart';
 import '../models/mobile_user.dart';
 import '../services/cloud_database.dart';
+import '../services/document_check.dart';
 import '../services/local_auth_service.dart';
 import '../utils/app_colors.dart';
 
@@ -85,8 +86,8 @@ class VerificationPendingPage extends StatelessWidget {
                       Expanded(
                         child: Text(
                           status == 'pending_review'
-                              ? 'We will notify ${user.phone} when your account is approved.'
-                              : 'AgriLink support will reach you at ${user.phone}.',
+                              ? 'We will email ${user.email} once a reviewer has decided.'
+                              : 'AgriLink support will reach you at ${user.email}.',
                           style: const TextStyle(
                               fontSize: 13, fontWeight: FontWeight.w700),
                         ),
@@ -96,6 +97,26 @@ class VerificationPendingPage extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              if (status == 'rejected' &&
+                  requirementsFor(user.role).isNotEmpty) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ResubmitDocumentsPage(user: user),
+                      ),
+                    ),
+                    icon: const Icon(Icons.upload_file_outlined),
+                    label: const Padding(
+                      padding: EdgeInsets.all(14),
+                      child: Text('Resubmit requirements'),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -120,6 +141,153 @@ class VerificationPendingPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Lets a refused applicant replace their requirements and be reviewed again.
+///
+/// Without this a farmer whose Barangay Certificate came out blurry is locked
+/// out for good and has to register a second account under a new email.
+class ResubmitDocumentsPage extends StatefulWidget {
+  const ResubmitDocumentsPage({super.key, required this.user});
+
+  final MobileUser user;
+
+  @override
+  State<ResubmitDocumentsPage> createState() => _ResubmitDocumentsPageState();
+}
+
+class _ResubmitDocumentsPageState extends State<ResubmitDocumentsPage> {
+  final _picked = <String, XFile>{};
+  bool _saving = false;
+  String? _error;
+
+  List<Requirement> get _requirements => requirementsFor(widget.user.role);
+
+  Future<void> _pick(Requirement requirement) async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 55,
+      maxWidth: 1400,
+    );
+    if (file == null || !mounted) return;
+    setState(() {
+      _picked[requirement.type] = file;
+      _error = null;
+    });
+  }
+
+  Future<void> _submit() async {
+    final missing = _requirements
+        .where((r) => r.required && !_picked.containsKey(r.type))
+        .map((r) => r.label)
+        .toList();
+    if (missing.isNotEmpty) {
+      setState(() => _error = 'Attach your ${missing.join(', ')}.');
+      return;
+    }
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      // Screen everything before touching the account, so a rejected
+      // application is never left with no documents at all.
+      final ready = <({String type, String filename, Uint8List bytes, DocumentInspection inspection})>[];
+      final seen = <String, String>{};
+      for (final requirement in _requirements) {
+        final file = _picked[requirement.type];
+        if (file == null) continue;
+        final prepared = await prepareAttachment(
+          file: file,
+          label: requirement.label,
+          seen: seen,
+        );
+        ready.add((
+          type: requirement.type,
+          filename: file.name,
+          bytes: prepared.bytes,
+          inspection: prepared.inspection,
+        ));
+      }
+
+      final database = authService.database;
+      await database.deleteVerificationFiles(widget.user.id);
+      for (final item in ready) {
+        await database.uploadVerificationFile(
+          userId: widget.user.id,
+          type: item.type,
+          filename: item.filename,
+          bytes: item.bytes,
+          inspection: item.inspection,
+        );
+      }
+      await database.setVerificationStatus(widget.user.id, 'pending_review');
+
+      if (!mounted) return;
+      Navigator.pop(context, true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Documents resubmitted. Your application is back in the review queue.'),
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = error.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _AuthScaffold(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        children: [
+          const _AuthIcon(icon: Icons.upload_file_outlined),
+          const SizedBox(height: 16),
+          const Text(
+            'Resubmit requirements',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'Upload clear photos of each requirement. Your old files are '
+            'replaced and your application goes back for review.',
+            style: TextStyle(color: muted, fontSize: 15, height: 1.4),
+          ),
+          const SizedBox(height: 22),
+          if (_error != null) ...[
+            _AuthError(message: _error!),
+            const SizedBox(height: 16),
+          ],
+          for (final requirement in _requirements) ...[
+            _DocumentUploadCard(
+              icon: Icons.description_outlined,
+              title: requirement.label,
+              subtitle: requirement.hint,
+              attached: _picked.containsKey(requirement.type),
+              required: requirement.required,
+              onTap: () => _pick(requirement),
+            ),
+            const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _saving ? null : _submit,
+            icon: _saving ? const _ButtonSpinner() : const Icon(Icons.send),
+            label: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(_saving ? 'Uploading…' : 'Resubmit for review'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1098,6 +1266,76 @@ class _SuperadminLoginPageState extends State<SuperadminLoginPage> {
 /// Firestore keeps documents inline as base64, so attachments stay small.
 const _maxDocumentBytes = 750000;
 
+/// One requirement a role owes, independent of any file chosen for it.
+typedef Requirement = ({String type, String label, String hint, bool required});
+
+/// What each role must submit, in review order.
+///
+/// Consumers are approved immediately, so their permit stays optional. Farmers
+/// and riders cannot trade until a superadmin has seen these.
+List<Requirement> requirementsFor(MobileRole role) => switch (role) {
+      MobileRole.consumer => const [
+          (
+            type: 'business_permit',
+            label: 'Business Permit',
+            hint: 'Optional proof for registered restaurants',
+            required: false,
+          ),
+        ],
+      MobileRole.farmer => const [
+          (
+            type: 'barangay_certificate',
+            label: 'Barangay Certificate',
+            hint: 'Proof of farm-area operation or residence',
+            required: true,
+          ),
+        ],
+      MobileRole.rider => const [
+          (
+            type: 'professional_license',
+            label: 'Professional Driver’s License',
+            hint: 'Must show the applicable public-service code',
+            required: true,
+          ),
+          (
+            type: 'vehicle_or_cr',
+            label: 'Vehicle OR/CR',
+            hint: 'Registration for the declared delivery vehicle',
+            required: true,
+          ),
+          (
+            type: 'nbi_or_police_clearance',
+            label: 'NBI or Police Clearance',
+            hint: 'Required for product and network security',
+            required: true,
+          ),
+        ],
+      MobileRole.superadmin => const [],
+    };
+
+/// Reads, screens, and returns one attachment, refusing anything that is
+/// obviously not a document or that repeats a file already in [seen].
+Future<({Uint8List bytes, DocumentInspection inspection})> prepareAttachment({
+  required XFile file,
+  required String label,
+  required Map<String, String> seen,
+}) async {
+  final bytes = await file.readAsBytes();
+  if (bytes.length > _maxDocumentBytes) {
+    throw Exception('$label must be smaller than 750 KB.');
+  }
+  final inspection = await DocumentCheck.inspect(bytes);
+  final alreadyUsedFor = seen[inspection.contentHash];
+  if (alreadyUsedFor != null) {
+    throw Exception(
+      'You attached the same image for $alreadyUsedFor and $label. '
+      'Upload the actual document for each requirement.',
+    );
+  }
+  seen[inspection.contentHash] = label;
+  return (bytes: bytes, inspection: inspection);
+}
+
 /// One requirement on the signup form, and the file picked for it.
 class _DocumentSlot {
   const _DocumentSlot({
@@ -1263,9 +1501,16 @@ class _SignupPageState extends State<SignupPage> {
       _error = null;
     });
     try {
-      // Read every attachment first: a file that cannot be loaded should fail
-      // here, not after the applicant already exists with nothing to review.
-      final attachments = <({String type, String filename, Uint8List bytes})>[];
+      // Read and screen every attachment first: a file that cannot be loaded,
+      // or that is obviously not a document, should fail here rather than
+      // after the applicant already exists with nothing usable to review.
+      final attachments = <({
+        String type,
+        String filename,
+        Uint8List bytes,
+        DocumentInspection inspection,
+      })>[];
+      final seen = <String, String>{};
       for (final slot in slots) {
         final file = slot.file;
         if (file == null) continue;
@@ -1273,7 +1518,24 @@ class _SignupPageState extends State<SignupPage> {
         if (bytes.length > _maxDocumentBytes) {
           throw Exception('${slot.label} must be smaller than 750 KB.');
         }
-        attachments.add((type: slot.type, filename: file.name, bytes: bytes));
+        final inspection = await DocumentCheck.inspect(bytes);
+        // The same picture standing in for two requirements is refused
+        // outright, since it can only ever be a mistake or an attempt to skip
+        // one of them.
+        final alreadyUsedFor = seen[inspection.contentHash];
+        if (alreadyUsedFor != null) {
+          throw Exception(
+            'You attached the same image for $alreadyUsedFor and '
+            '${slot.label}. Upload the actual document for each requirement.',
+          );
+        }
+        seen[inspection.contentHash] = slot.label;
+        attachments.add((
+          type: slot.type,
+          filename: file.name,
+          bytes: bytes,
+          inspection: inspection,
+        ));
       }
 
       final requiredCount = slots.where((slot) => slot.required).length;
@@ -1307,6 +1569,7 @@ class _SignupPageState extends State<SignupPage> {
           type: attachment.type,
           filename: attachment.filename,
           bytes: attachment.bytes,
+          inspection: attachment.inspection,
         );
       }
       if (mounted) openUserHome(context, user);

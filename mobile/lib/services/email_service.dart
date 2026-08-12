@@ -108,6 +108,48 @@ class EmailService {
     );
   }
 
+  /// Tells an applicant what the superadmin decided.
+  ///
+  /// The review screen promises the applicant they will hear back, so this is
+  /// what keeps that promise. A build with no mail provider simply reports
+  /// [EmailDeliveryStatus.notConfigured] and the decision still stands.
+  Future<EmailDelivery> sendVerificationDecision({
+    required String email,
+    required String name,
+    required bool approved,
+    required String role,
+  }) {
+    final greeting = name.isEmpty ? 'Hello' : 'Hi $name';
+    final subject = approved
+        ? 'Your AgriLink $role account is approved'
+        : 'About your AgriLink $role application';
+    final body = approved
+        ? 'Your requirements have been reviewed and your account is now active. '
+            'Open AgriLink and you can start trading straight away.'
+        : 'A reviewer could not approve the requirements you submitted. Open '
+            'AgriLink, go to your application screen, and tap "Resubmit '
+            'requirements" to upload clearer photos.';
+    return _send(
+      toEmail: email,
+      toName: name,
+      subject: subject,
+      text: '$greeting,\n\n$body\n\nAgriLink • Fresh harvest. Fair trade.',
+      html: '''
+<div style="font-family:Arial,Helvetica,sans-serif;color:#1A1F17;max-width:520px">
+  <h2 style="color:${approved ? '#2E7D32' : '#B42318'};margin:0 0 6px">$subject</h2>
+  <p style="margin:0 0 12px;color:#6B7A66">$greeting,</p>
+  <p style="margin:0 0 18px;line-height:1.5">$body</p>
+  <p style="margin:0;color:#6B7A66;font-size:13px">AgriLink • Fresh harvest. Fair trade.</p>
+</div>''',
+      templateParams: {
+        'to_email': email,
+        'to_name': name,
+        'code': '',
+        'minutes': '',
+      },
+    );
+  }
+
   Future<EmailDelivery> _send({
     required String toEmail,
     required String toName,

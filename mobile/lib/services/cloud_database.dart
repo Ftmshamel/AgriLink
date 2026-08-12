@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/agri_models.dart';
+import 'document_check.dart';
 
 class CloudDatabase {
   static const projectId = 'agrilink-19ea5';
@@ -31,7 +32,6 @@ class CloudDatabase {
       throw Exception('An account with that email already exists.');
     }
     final id = 'mobile-${DateTime.now().millisecondsSinceEpoch}-${_token(6)}';
-    final salt = _token(24);
     final now = DateTime.now().toUtc().toIso8601String();
     final data = <String, dynamic>{
       'id': id,
@@ -39,8 +39,7 @@ class CloudDatabase {
       'email': normalizedEmail,
       'phone': phone.trim(),
       'role': role,
-      'passwordSalt': salt,
-      'passwordHash': _hash(password, salt),
+      ..._passwordFields(password),
       'verificationStatus': role == 'consumer' || role == 'superadmin'
           ? 'active'
           : 'pending_review',
@@ -93,10 +92,10 @@ class CloudDatabase {
     if (!staffOnly && role == 'superadmin') {
       throw Exception('Use Platform staff access for this account.');
     }
-    final salt = '${account['passwordSalt'] ?? ''}';
-    if (_hash(password, salt) != account['passwordHash']) {
+    if (!_passwordMatches(account, password)) {
       throw Exception('Incorrect password.');
     }
+    await _upgradePasswordIfLegacy(account, password);
     return account;
   }
 
@@ -137,6 +136,7 @@ class CloudDatabase {
     required String type,
     required String filename,
     required Uint8List bytes,
+    DocumentInspection? inspection,
   }) async {
     if (bytes.length > 750000) {
       throw Exception('File must be smaller than 750 KB.');
@@ -150,6 +150,12 @@ class CloudDatabase {
       'contentBase64': base64Encode(bytes),
       'size': bytes.length,
       'createdAt': DateTime.now().toUtc().toIso8601String(),
+      if (inspection != null) ...{
+        'contentHash': inspection.contentHash,
+        'width': inspection.width,
+        'height': inspection.height,
+        'screeningFlags': DocumentCheck.encode(inspection.flags),
+      },
     };
     await _create('mobileVerificationFiles', id, data);
     return {
@@ -158,6 +164,39 @@ class CloudDatabase {
       'size': bytes.length,
       'type': type,
     };
+  }
+
+  /// Finds the same picture submitted by a different applicant.
+  ///
+  /// Queried by hash so only genuine collisions are downloaded — the documents
+  /// themselves carry the base64 image and are far too heavy to scan.
+  Future<List<Map<String, dynamic>>> findDuplicateUploads({
+    required String contentHash,
+    required String excludingUserId,
+  }) async {
+    if (contentHash.isEmpty) return const [];
+    try {
+      final matches = await _queryEquals(
+        'mobileVerificationFiles',
+        'contentHash',
+        contentHash,
+        limit: 5,
+      );
+      return matches
+          .where((file) => '${file['userId']}' != excludingUserId)
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Removes an applicant's files so a rejected application can be resubmitted
+  /// without the old, refused images hanging around for the reviewer.
+  Future<void> deleteVerificationFiles(String userId) async {
+    final files = await listVerificationFiles(userId);
+    for (final file in files) {
+      await deleteDocument('mobileVerificationFiles', '${file['id']}');
+    }
   }
 
   Future<List<Map<String, dynamic>>> listVerificationFiles(
@@ -175,6 +214,14 @@ class CloudDatabase {
   /// Wrong codes tolerated before the whole request is burned.
   static const maxResetAttempts = 5;
 
+  /// Minimum gap between reset requests for one account.
+  ///
+  /// Without this, anybody who knows an email address can hold down "Send reset
+  /// code" and flood that person's inbox — and burn the daily quota of the mail
+  /// provider along with it. Settable so tests can exercise the surrounding
+  /// behaviour without waiting a real minute.
+  static Duration resetRequestCooldown = const Duration(seconds: 60);
+
   /// Issues a one-time reset code for [email].
   ///
   /// The code itself is never stored. It only survives as part of the document
@@ -190,6 +237,17 @@ class CloudDatabase {
     final userId = '${account['id'] ?? ''}';
     if (userId.isEmpty) {
       throw Exception('That account cannot be reset from the app.');
+    }
+    final lastRequest =
+        DateTime.tryParse('${account['passwordResetRequestedAt'] ?? ''}');
+    if (lastRequest != null) {
+      final waited = DateTime.now().toUtc().difference(lastRequest);
+      if (waited < resetRequestCooldown) {
+        final left = resetRequestCooldown - waited;
+        throw Exception(
+          'Please wait ${left.inSeconds + 1} seconds before asking for another code.',
+        );
+      }
     }
     final reference = _token(24);
     final code = _numericCode(6);
@@ -267,10 +325,8 @@ class CloudDatabase {
     if (expiresAt == null || DateTime.now().toUtc().isAfter(expiresAt)) {
       throw Exception('That reset session has expired. Start again.');
     }
-    final salt = _token(24);
     await updateDocument('mobileUsers', userId, {
-      'passwordSalt': salt,
-      'passwordHash': _hash(newPassword, salt),
+      ..._passwordFields(newPassword),
       'passwordResetReference': '',
       'passwordResetExpiresAt': '',
       'passwordResetAttempts': 0,
@@ -747,8 +803,89 @@ class CloudDatabase {
     return List.generate(length, (_) => '${random.nextInt(10)}').join();
   }
 
-  String _hash(String password, String salt) {
-    return sha256.convert(utf8.encode('$salt:$password')).toString();
+  // ------------------------------------------------------------- passwords
+
+  /// Work factor for new passwords.
+  ///
+  /// A single SHA-256 pass is far too cheap: commodity hardware tries billions
+  /// of those per second, so a leaked hash is a leaked password. PBKDF2 makes
+  /// each guess cost the attacker the same as it costs us. The count is a
+  /// compromise — high enough to hurt an attacker, low enough that a mid-range
+  /// phone still signs in quickly, since this runs in Dart on the device.
+  static const passwordIterations = 60000;
+  static const passwordAlgorithm = 'pbkdf2-sha256';
+
+  /// The fields to store for [password]. Written on signup and on reset.
+  Map<String, dynamic> _passwordFields(String password) {
+    final salt = _token(24);
+    return {
+      'passwordSalt': salt,
+      'passwordHash': _pbkdf2(password, salt, passwordIterations),
+      'passwordAlgorithm': passwordAlgorithm,
+      'passwordIterations': passwordIterations,
+    };
+  }
+
+  /// Checks [password] against a stored account, accepting both the current
+  /// PBKDF2 format and the original single-pass SHA-256 one.
+  bool _passwordMatches(Map<String, dynamic> account, String password) {
+    final salt = '${account['passwordSalt'] ?? ''}';
+    final stored = '${account['passwordHash'] ?? ''}';
+    if (salt.isEmpty || stored.isEmpty) return false;
+    if ('${account['passwordAlgorithm'] ?? ''}' == passwordAlgorithm) {
+      final rounds =
+          (account['passwordIterations'] as num?)?.toInt() ?? passwordIterations;
+      return _constantTimeEquals(_pbkdf2(password, salt, rounds), stored);
+    }
+    return _constantTimeEquals(_legacyHash(password, salt), stored);
+  }
+
+  /// Accounts created before PBKDF2 are re-hashed the next time their owner
+  /// signs in, so the weak hashes drain away without anyone resetting.
+  Future<void> _upgradePasswordIfLegacy(
+    Map<String, dynamic> account,
+    String password,
+  ) async {
+    if ('${account['passwordAlgorithm'] ?? ''}' == passwordAlgorithm) return;
+    final userId = '${account['id'] ?? ''}';
+    if (userId.isEmpty) return;
+    try {
+      final fields = _passwordFields(password);
+      await updateDocument('mobileUsers', userId, fields);
+      account.addAll(fields);
+    } catch (_) {
+      // Never block a valid sign-in because the upgrade could not be saved.
+    }
+  }
+
+  String _pbkdf2(String password, String salt, int iterations) {
+    final hmac = Hmac(sha256, utf8.encode(password));
+    // One 32-byte block is enough for a 256-bit key, so this is PBKDF2 with
+    // the block index fixed at 1.
+    final firstInput = <int>[...utf8.encode(salt), 0, 0, 0, 1];
+    var block = hmac.convert(firstInput).bytes;
+    final result = List<int>.from(block);
+    for (var round = 1; round < iterations; round++) {
+      block = hmac.convert(block).bytes;
+      for (var i = 0; i < result.length; i++) {
+        result[i] ^= block[i];
+      }
+    }
+    return result.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  String _legacyHash(String password, String salt) =>
+      sha256.convert(utf8.encode('$salt:$password')).toString();
+
+  /// Compares without an early exit, so the time taken cannot reveal how much
+  /// of the hash was correct.
+  bool _constantTimeEquals(String a, String b) {
+    if (a.length != b.length) return false;
+    var difference = 0;
+    for (var i = 0; i < a.length; i++) {
+      difference |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
+    }
+    return difference == 0;
   }
 }
 

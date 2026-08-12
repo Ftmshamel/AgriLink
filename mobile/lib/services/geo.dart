@@ -49,12 +49,16 @@ class GeoService {
       return cached;
     }
     await ensurePermission();
+    // Indoors, or on a handset that has not held a fix recently, a GPS read can
+    // sit there for a long time. Ten seconds is enough for a real fix outdoors
+    // and short enough that a screen waiting on it never looks frozen; the
+    // outer timeout is a backstop for platforms that ignore timeLimit.
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 25),
+        timeLimit: Duration(seconds: 10),
       ),
-    );
+    ).timeout(const Duration(seconds: 12));
     return _remember(LatLng(position.latitude, position.longitude));
   }
 

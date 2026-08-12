@@ -19,10 +19,12 @@ service cloud.firestore {
     }
 
     // Verification documents are personal IDs and clearances. The signup form
-    // writes them and the superadmin console reads them back by applicant.
+    // writes them, the superadmin console reads them back by applicant, and a
+    // refused applicant deletes their own set when resubmitting. They are never
+    // edited in place, so an approved document cannot be swapped afterwards.
     match /mobileVerificationFiles/{fileId} {
-      allow read, create: if true;
-      allow update, delete: if false;
+      allow read, create, delete: if true;
+      allow update: if false;
     }
 
     // Everything else the app owns stays open, matching how the client reads

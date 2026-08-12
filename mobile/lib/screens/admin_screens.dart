@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../app.dart';
 import '../models/agri_models.dart';
 import '../models/mobile_user.dart';
+import '../services/document_check.dart';
 import '../services/geo.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
@@ -451,14 +452,29 @@ class _ApplicantCardState extends State<ApplicantCard> {
         '${widget.account['id']}',
         status,
       );
+      // The applicant was told they would hear back, so tell them. A failure
+      // here must not undo a decision that is already saved.
+      var emailed = false;
+      try {
+        final delivery = await authService.email.sendVerificationDecision(
+          email: '${widget.account['email'] ?? ''}',
+          name: '${widget.account['name'] ?? ''}',
+          approved: status == 'active',
+          role: '${widget.account['role'] ?? 'account'}',
+        );
+        emailed = delivery.sent;
+      } catch (_) {
+        emailed = false;
+      }
       widget.session.bump();
       if (!mounted) return;
+      final decision = status == 'active'
+          ? '${widget.account['name']} approved.'
+          : '${widget.account['name']} rejected.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            status == 'active'
-                ? '${widget.account['name']} approved.'
-                : '${widget.account['name']} rejected.',
+            emailed ? '$decision Applicant notified by email.' : decision,
           ),
         ),
       );
@@ -586,25 +602,69 @@ class _ApplicantCardState extends State<ApplicantCard> {
   }
 }
 
-/// Renders the base64 documents an applicant uploaded at signup.
-class DocumentsPage extends StatelessWidget {
+/// Renders the documents an applicant uploaded, with the screening warnings
+/// raised against each one.
+///
+/// The screening never claims a document is forged. It reports what can be
+/// measured — resolution, file weight, how flat the image is, and whether the
+/// same picture has been submitted before — and leaves the judgement to the
+/// reviewer looking at the photo.
+class DocumentsPage extends StatefulWidget {
   const DocumentsPage({super.key, required this.userId, required this.name});
 
   final String userId;
   final String name;
 
   @override
+  State<DocumentsPage> createState() => _DocumentsPageState();
+}
+
+class _DocumentsPageState extends State<DocumentsPage> {
+  late Future<List<_ReviewedDocument>> _documents = _load();
+
+  Future<List<_ReviewedDocument>> _load() async {
+    final files =
+        await authService.database.listVerificationFiles(widget.userId);
+    final reviewed = <_ReviewedDocument>[];
+    for (final file in files) {
+      final duplicates = await authService.database.findDuplicateUploads(
+        contentHash: '${file['contentHash'] ?? ''}',
+        excludingUserId: widget.userId,
+      );
+      reviewed.add(
+        _ReviewedDocument(
+          file: file,
+          flags: [
+            ...DocumentCheck.decode(file['screeningFlags']),
+            if (duplicates.isNotEmpty) DocumentFlag.reusedByAnotherAccount,
+          ],
+        ),
+      );
+    }
+    return reviewed;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('$name • Documents')),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: authService.database.listVerificationFiles(userId),
+      appBar: AppBar(title: Text('${widget.name} • Documents')),
+      body: FutureBuilder<List<_ReviewedDocument>>(
+        future: _documents,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final files = snapshot.data ?? const [];
-          if (files.isEmpty) {
+          if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: LiveErrorCard(
+                message: '${snapshot.error}'.replaceFirst('Exception: ', ''),
+                onRetry: () => setState(() => _documents = _load()),
+              ),
+            );
+          }
+          final documents = snapshot.data ?? const <_ReviewedDocument>[];
+          if (documents.isEmpty) {
             return const Padding(
               padding: EdgeInsets.all(20),
               child: EmptyState(
@@ -614,41 +674,29 @@ class DocumentsPage extends StatelessWidget {
               ),
             );
           }
+          final flagged = documents.where((d) => d.flags.isNotEmpty).length;
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              for (final file in files) ...[
-                Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
+              if (flagged > 0) ...[
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF7E8),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFFFD99A)),
+                  ),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(14),
+                      const Icon(Icons.warning_amber_rounded, color: orange),
+                      const SizedBox(width: 10),
+                      Expanded(
                         child: Text(
-                          '${file['type']}'.replaceAll('_', ' ').toUpperCase(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 12,
-                            color: green,
-                          ),
-                        ),
-                      ),
-                      if (file['contentBase64'] is String)
-                        Image.memory(
-                          base64Decode(file['contentBase64'] as String),
-                          width: double.infinity,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Padding(
-                            padding: EdgeInsets.all(20),
-                            child: Text('Preview unavailable.'),
-                          ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Text(
-                          '${file['filename']}',
-                          style: const TextStyle(color: muted, fontSize: 12),
+                          '$flagged of ${documents.length} uploads raised a '
+                          'screening warning. Look at the photos yourself '
+                          'before approving.',
+                          style: const TextStyle(fontSize: 12.5, height: 1.4),
                         ),
                       ),
                     ],
@@ -656,9 +704,193 @@ class DocumentsPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
               ],
+              for (final document in documents) ...[
+                _DocumentCard(document: document),
+                const SizedBox(height: 14),
+              ],
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _ReviewedDocument {
+  const _ReviewedDocument({required this.file, required this.flags});
+
+  final Map<String, dynamic> file;
+  final List<DocumentFlag> flags;
+
+  String get type => '${file['type']}'.replaceAll('_', ' ').toUpperCase();
+  String get filename => '${file['filename'] ?? ''}';
+  int get width => (file['width'] as num?)?.toInt() ?? 0;
+  int get height => (file['height'] as num?)?.toInt() ?? 0;
+  int get size => (file['size'] as num?)?.toInt() ?? 0;
+
+  String get measurements {
+    final parts = <String>[
+      if (width > 0 && height > 0) '$width x $height px',
+      if (size > 0) '${(size / 1024).round()} KB',
+    ];
+    return parts.join(' • ');
+  }
+}
+
+class _DocumentCard extends StatelessWidget {
+  const _DocumentCard({required this.document});
+
+  final _ReviewedDocument document;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = document.file['contentBase64'];
+    final suspicious = document.flags.isNotEmpty;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: suspicious ? orange : const Color(0xFFE6EAE2),
+          width: suspicious ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    document.type,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                      color: green,
+                    ),
+                  ),
+                ),
+                if (suspicious)
+                  const Pill(
+                    icon: Icons.warning_amber_rounded,
+                    text: 'CHECK',
+                    color: orange,
+                  ),
+              ],
+            ),
+          ),
+          if (content is String)
+            InkWell(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => _DocumentViewer(
+                    title: document.type,
+                    contentBase64: content,
+                  ),
+                ),
+              ),
+              child: Image.memory(
+                base64Decode(content),
+                width: double.infinity,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text('Preview unavailable.'),
+                ),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  document.filename,
+                  style: const TextStyle(color: muted, fontSize: 12),
+                ),
+                if (document.measurements.isNotEmpty)
+                  Text(
+                    document.measurements,
+                    style: const TextStyle(color: muted, fontSize: 11),
+                  ),
+                for (final flag in document.flags) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.error_outline, size: 16, color: orange),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: const TextStyle(
+                              color: ink,
+                              fontSize: 11.5,
+                              height: 1.35,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: '${flag.label}. ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              TextSpan(text: flag.explanation),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (!suspicious) ...[
+                  const SizedBox(height: 8),
+                  const Row(
+                    children: [
+                      Icon(Icons.check_circle_outline, size: 16, color: green),
+                      SizedBox(width: 7),
+                      Text(
+                        'No screening warnings',
+                        style: TextStyle(color: muted, fontSize: 11.5),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-screen, zoomable view. Small print on a permit is unreadable at card
+/// size, and a reviewer has to be able to actually look at it.
+class _DocumentViewer extends StatelessWidget {
+  const _DocumentViewer({required this.title, required this.contentBase64});
+
+  final String title;
+  final String contentBase64;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text(title, style: const TextStyle(fontSize: 14)),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 6,
+          child: Image.memory(base64Decode(contentBase64)),
+        ),
       ),
     );
   }
