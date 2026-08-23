@@ -15,14 +15,20 @@ riders, and superadministrators in one agricultural marketplace.
 - Live weather from Open-Meteo for harvest planning and delivery safety
 - Cloud-backed account and marketplace data
 
+## API integration
+
+AgriLink has no application server. The Flutter client calls Cloud Firestore's
+REST API for all data — create, read, update, delete, and server-side queries
+— plus four services that need no API key: Open-Meteo for forecasts and town
+search, OSRM for road routing, and OpenStreetMap for map tiles. Every request is
+built, decoded, and error-handled on the device.
+
 ## Weather integration
 
 The Farmer and Rider dashboards show live conditions for the location the
 account pinned at signup, using the free [Open-Meteo](https://open-meteo.com)
 API — no API key or account is needed, so it runs straight from source. The
-outlook page adds a 7-day forecast and a town search. See
-[docs/API_INTEGRATION.md](docs/API_INTEGRATION.md) for endpoints, sample
-responses, and error handling.
+outlook page adds a 7-day forecast and a town search.
 
 ## Account verification
 
