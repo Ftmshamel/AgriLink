@@ -11,6 +11,7 @@ import '../services/geo.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
+import '../widgets/live_map.dart';
 import '../widgets/ui_kit.dart';
 import '../widgets/weather_card.dart';
 import 'shared_screens.dart';
@@ -216,9 +217,8 @@ class FarmerDashboard extends StatelessWidget {
                     title: '${order.buyerName} • ${order.quantityKg} kg',
                     subtitle:
                         '${order.cropName} • ${formatPeso(order.totalPrice)}',
-                    badge: order.status == OrderStatus.placed
-                        ? 'NEW'
-                        : 'PACKING',
+                    badge:
+                        order.status == OrderStatus.placed ? 'NEW' : 'PACKING',
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -316,7 +316,8 @@ class FarmerInventory extends StatelessWidget {
                 const EmptyState(
                   icon: Icons.add_business_outlined,
                   title: 'No crop listings',
-                  message: 'Tap “List a new harvest” to publish your first crop.',
+                  message:
+                      'Tap “List a new harvest” to publish your first crop.',
                 )
               else
                 for (final crop in crops) ...[
@@ -333,8 +334,7 @@ class FarmerInventory extends StatelessWidget {
                               ? Image.memory(
                                   base64Decode(crop.photoBase64!),
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      _emojiBox(crop),
+                                  errorBuilder: (_, __, ___) => _emojiBox(crop),
                                 )
                               : _emojiBox(crop),
                         ),
@@ -405,7 +405,8 @@ class _CropEditorPageState extends State<CropEditorPage> {
   late final TextEditingController _moq = TextEditingController(
     text: widget.crop == null ? '10' : '${widget.crop!.moqKg}',
   );
-  late CropCategory _category = widget.crop?.category ?? CropCategory.vegetables;
+  late CropCategory _category =
+      widget.crop?.category ?? CropCategory.vegetables;
   late DateTime _harvest = DateTime.tryParse(widget.crop?.harvestDate ?? '') ??
       DateTime.now().add(const Duration(days: 3));
 
@@ -594,8 +595,9 @@ class _CropEditorPageState extends State<CropEditorPage> {
                 hintText: 'e.g. Red onions',
                 prefixIcon: Icon(Icons.eco_outlined),
               ),
-              validator: (value) =>
-                  value == null || value.trim().isEmpty ? 'Enter a crop name.' : null,
+              validator: (value) => value == null || value.trim().isEmpty
+                  ? 'Enter a crop name.'
+                  : null,
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<CropCategory>(
@@ -728,21 +730,92 @@ class _CropEditorPageState extends State<CropEditorPage> {
   }
 }
 
-class FarmerFulfillment extends StatelessWidget {
+class FarmerFulfillment extends StatefulWidget {
   const FarmerFulfillment({super.key, required this.session});
 
   final AppSession session;
 
   @override
+  State<FarmerFulfillment> createState() => _FarmerFulfillmentState();
+}
+
+class _FarmerFulfillmentState extends State<FarmerFulfillment> {
+  /// Orders the farmer has ticked for one booking, and the town they all
+  /// share. A batch is only worth a rider's trip if the drops are near each
+  /// other, so the first tick fixes the town and the rest are locked to it.
+  final Set<String> _selected = <String>{};
+  String? _area;
+  bool _busy = false;
+
+  void _toggle(AgriOrder order) {
+    setState(() {
+      if (_selected.remove(order.id)) {
+        if (_selected.isEmpty) _area = null;
+        return;
+      }
+      _selected.add(order.id);
+      _area = order.dropArea;
+    });
+  }
+
+  Future<void> _book(List<AgriOrder> chosen) async {
+    setState(() => _busy = true);
+    try {
+      for (final order in chosen) {
+        await authService.database.advanceOrder(
+          order.id,
+          OrderStatus.readyForPickup,
+          existingTimeline: order.timeline,
+        );
+      }
+      widget.session.bump();
+      if (!mounted) return;
+      setState(() {
+        _selected.clear();
+        _area = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            chosen.length == 1
+                ? 'Order sent to the rider pool.'
+                : '${chosen.length} orders booked as one route. A rider can '
+                    'now accept them together.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LiveBuilder<List<AgriOrder>>(
-      session: session,
+      session: widget.session,
       load: () =>
-          authService.database.listAgriOrders(farmerId: session.user.id),
+          authService.database.listAgriOrders(farmerId: widget.session.user.id),
       builder: (context, data) {
         final orders = data.value ?? const <AgriOrder>[];
         final open = orders.where((order) => order.status.isOpen).toList();
         final done = orders.where((order) => !order.status.isOpen).toList();
+
+        // Only packed-and-confirmed orders can be sent out, and pooling is
+        // only on offer once there are two of them to pool.
+        final packable = open
+            .where((order) => order.status == OrderStatus.preparing)
+            .toList();
+        final poolable = packable.length > 1;
+        final chosen =
+            packable.where((order) => _selected.contains(order.id)).toList();
+        final totalKg =
+            chosen.fold<int>(0, (sum, order) => sum + order.quantityKg);
+
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
@@ -753,7 +826,8 @@ class FarmerFulfillment extends StatelessWidget {
                 eyebrow: 'ORDER FULFILLMENT',
                 title: 'Prepare & Dispatch',
                 subtitle:
-                    'Pack confirmed orders and send them to the rider pool.',
+                    'Pack confirmed orders and book one rider for the ones '
+                    'heading the same way.',
               ),
               const SizedBox(height: 18),
               if (data.error != null && orders.isEmpty)
@@ -765,8 +839,93 @@ class FarmerFulfillment extends StatelessWidget {
                   message:
                       'When a buyer books one of your harvests it lands here.',
                 ),
+              if (poolable && chosen.isEmpty) ...[
+                const Card(
+                  color: canvas,
+                  elevation: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Icon(Icons.checklist_rtl, color: green, size: 20),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Tick the packed orders going to the same town to '
+                            'book one rider for all of them.',
+                            style: TextStyle(fontSize: 12, height: 1.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (chosen.isNotEmpty) ...[
+                Card(
+                  color: lightGreen,
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _area ?? 'Selected orders',
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${chosen.length} stop${chosen.length == 1 ? '' : 's'}'
+                          ' \u2022 $totalKg kg',
+                          style: const TextStyle(color: muted, fontSize: 12),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: _busy ? null : () => _book(chosen),
+                                icon: const Icon(Icons.local_shipping),
+                                label: Text(
+                                  chosen.length == 1
+                                      ? 'Book a rider for this order'
+                                      : 'Book one rider for these '
+                                          '${chosen.length}',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton.outlined(
+                              tooltip: 'Clear selection',
+                              onPressed: _busy
+                                  ? null
+                                  : () => setState(() {
+                                        _selected.clear();
+                                        _area = null;
+                                      }),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               for (final order in open) ...[
-                FulfillmentCard(session: session, order: order),
+                FulfillmentCard(
+                  session: widget.session,
+                  order: order,
+                  selectable: poolable && order.status == OrderStatus.preparing,
+                  selected: _selected.contains(order.id),
+                  // Once a town is picked, orders bound elsewhere cannot join
+                  // that booking - that is the whole point of pooling.
+                  blocked: _area != null && order.dropArea != _area,
+                  onToggle: () => _toggle(order),
+                ),
                 const SizedBox(height: 12),
               ],
               if (done.isNotEmpty) ...[
@@ -778,7 +937,7 @@ class FarmerFulfillment extends StatelessWidget {
                     id: order.reference,
                     emoji: order.emoji,
                     name: order.cropName,
-                    detail: '${order.quantityKg} kg • ${order.buyerName}',
+                    detail: '${order.quantityKg} kg \u2022 ${order.buyerName}',
                     price: formatPeso(order.totalPrice),
                     statusText: order.status == OrderStatus.delivered
                         ? 'DELIVERED'
@@ -806,10 +965,22 @@ class FulfillmentCard extends StatefulWidget {
     super.key,
     required this.session,
     required this.order,
+    this.selectable = false,
+    this.selected = false,
+    this.blocked = false,
+    this.onToggle,
   });
 
   final AppSession session;
   final AgriOrder order;
+
+  /// Whether this order can join a pooled booking right now.
+  final bool selectable;
+  final bool selected;
+
+  /// Bound for a different town than the booking being built.
+  final bool blocked;
+  final VoidCallback? onToggle;
 
   @override
   State<FulfillmentCard> createState() => _FulfillmentCardState();
@@ -875,147 +1046,559 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
   Widget build(BuildContext context) {
     final order = widget.order;
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${order.reference} • ${order.buyerName}',
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FarmerOrderDetails(
+              session: widget.session,
+              orderId: order.id,
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  if (widget.selectable) ...[
+                    SizedBox(
+                      width: 26,
+                      height: 26,
+                      child: Checkbox(
+                        value: widget.selected,
+                        onChanged: widget.blocked
+                            ? null
+                            : (_) => widget.onToggle?.call(),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    child: Text(
+                      '${order.reference} • ${order.buyerName}',
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
                   ),
-                ),
-                Text(
-                  formatPeso(order.totalPrice),
-                  style: const TextStyle(
-                    color: green,
-                    fontWeight: FontWeight.w900,
+                  Text(
+                    formatPeso(order.totalPrice),
+                    style: const TextStyle(
+                      color: green,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${order.cropName} • ${order.quantityKg} kg • ${order.status.label}',
+                style: const TextStyle(color: muted),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                order.deliveryAddress.isEmpty
+                    ? 'No delivery address on file'
+                    : order.deliveryAddress,
+                style: const TextStyle(color: muted, fontSize: 12, height: 1.4),
+              ),
+              if (order.status == OrderStatus.readyForPickup) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(11),
+                  decoration: BoxDecoration(
+                    color: canvas,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.inventory_2_outlined, color: green, size: 19),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Waiting for a rider to accept this pickup',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${order.cropName} • ${order.quantityKg} kg • ${order.status.label}',
-              style: const TextStyle(color: muted),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              order.deliveryAddress.isEmpty
-                  ? 'No delivery address on file'
-                  : order.deliveryAddress,
-              style: const TextStyle(color: muted, fontSize: 12, height: 1.4),
-            ),
-            if (order.status == OrderStatus.readyForPickup) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(11),
-                decoration: BoxDecoration(
-                  color: canvas,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Row(
+              if (order.hasRider) ...[
+                const SizedBox(height: 12),
+                Row(
                   children: [
-                    Icon(Icons.inventory_2_outlined, color: green, size: 19),
-                    SizedBox(width: 8),
+                    const CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Color(0xFFFFF1DD),
+                      child: Icon(Icons.two_wheeler, color: orange, size: 18),
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        'Waiting for a rider to accept this pickup',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${order.riderName}${order.riderVehicle.isEmpty ? '' : ' • ${order.riderVehicle}'}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          if (order.riderPhone.isNotEmpty)
+                            Text(
+                              order.riderPhone,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: muted,
+                              ),
+                            ),
+                        ],
                       ),
+                    ),
+                    if (order.riderPhone.isNotEmpty) ...[
+                      IconButton.filledTonal(
+                        tooltip: 'Message rider',
+                        onPressed: () => launchUrl(
+                          Uri(scheme: 'sms', path: order.riderPhone),
+                        ),
+                        icon: const Icon(Icons.sms_outlined, size: 18),
+                      ),
+                      const SizedBox(width: 6),
+                      IconButton.filledTonal(
+                        tooltip: 'Call rider',
+                        onPressed: () => launchUrl(
+                          Uri(scheme: 'tel', path: order.riderPhone),
+                        ),
+                        icon: const Icon(Icons.call, size: 18),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+              const SizedBox(height: 12),
+              if (order.status == OrderStatus.placed)
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _busy
+                            ? null
+                            : () => _advance(OrderStatus.preparing),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Confirm order'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.outlined(
+                      tooltip: 'Cancel order',
+                      onPressed: _busy ? null : _cancel,
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                )
+              else if (order.status == OrderStatus.preparing)
+                widget.blocked
+                    ? Text(
+                        'Going to ${order.dropArea} — finish the current '
+                        'booking first, or clear it to pick this town instead.',
+                        style: const TextStyle(color: muted, fontSize: 11.5),
+                      )
+                    : SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _busy
+                              ? null
+                              : () => _advance(OrderStatus.readyForPickup),
+                          icon: const Icon(Icons.send_outlined),
+                          label: Text(
+                            widget.selectable
+                                ? 'Send this one on its own'
+                                : 'Packed — push to rider pool',
+                          ),
+                        ),
+                      )
+              else
+                Row(
+                  children: [
+                    Pill(
+                      icon: Icons.local_shipping,
+                      text: order.status.label.toUpperCase(),
+                      color: green,
+                    ),
+                    const Spacer(),
+                    if (order.riderUpdatedAt != null)
+                      Text(
+                        'Updated ${formatClock(order.riderUpdatedAt!)}',
+                        style: const TextStyle(color: muted, fontSize: 11),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The farm's side of a live delivery.
+///
+/// A farmer has to hand the sacks to a specific person and answer "when will
+/// he get here?", so this screen leads with the rider: who accepted, what they
+/// drive, their number in plain text, and how far away they still are. The
+/// buyer's own tracking screen answers a different question, so the two are
+/// worded differently even though they read the same order.
+class FarmerOrderDetails extends StatelessWidget {
+  const FarmerOrderDetails({
+    super.key,
+    required this.session,
+    required this.orderId,
+  });
+
+  final AppSession session;
+  final String orderId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Order & rider')),
+      body: LiveBuilder<AgriOrder?>(
+        session: session,
+        // The rider pin should keep moving without the farmer pulling to
+        // refresh, so this polls faster than the list behind it.
+        interval: const Duration(seconds: 6),
+        load: () => authService.database.getOrder(orderId),
+        builder: (context, data) {
+          final order = data.value;
+          if (order == null) {
+            return LiveErrorCard(
+              message: data.errorMessage.isEmpty
+                  ? 'This order is no longer available.'
+                  : data.errorMessage,
+              onRetry: data.reload,
+            );
+          }
+          final stops = <MapStop>[
+            if (order.pickupPoint != null)
+              MapStop(
+                point: order.pickupPoint!,
+                label: 'Your farm',
+                icon: Icons.agriculture,
+                color: orange,
+              ),
+            if (order.dropPoint != null)
+              MapStop(
+                point: order.dropPoint!,
+                label: order.buyerName,
+                icon: Icons.store,
+                color: green,
+              ),
+          ];
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+              children: [
+                if (stops.isNotEmpty)
+                  LiveRouteMap(
+                    stops: stops,
+                    riderPoint: order.riderPoint,
+                    showControls: false,
+                  ),
+                const SizedBox(height: 16),
+                _riderCard(context, order),
+                const SizedBox(height: 16),
+                _buyerCard(context, order),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LineItem(
+                          emoji: order.emoji,
+                          name: order.cropName,
+                          detail:
+                              '${order.quantityKg} kg \u2022 ${order.reference}',
+                          price: formatPeso(order.totalPrice),
+                        ),
+                        const Divider(height: 26),
+                        MoneyRow(
+                          label: 'Delivery',
+                          value: formatPeso(order.deliveryFee),
+                        ),
+                        MoneyRow(
+                          label: 'Buyer pays',
+                          value: formatPeso(order.grandTotal),
+                          strong: true,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${order.paymentMethod}'
+                          '${order.paymentReference.isEmpty ? '' : ' \u2022 ${order.paymentReference}'}',
+                          style: const TextStyle(color: muted, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Progress',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 14),
+                ..._timeline(order),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _riderCard(BuildContext context, AgriOrder order) {
+    if (!order.hasRider) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                backgroundColor: Color(0xFFFFF1DD),
+                child: Icon(Icons.hourglass_empty, color: orange),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'No rider yet',
+                      style: TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                    Text(
+                      order.status == OrderStatus.readyForPickup
+                          ? 'The order is in the pool. A rider will accept it.'
+                          : 'Push the order to the pool once it is packed.',
+                      style: const TextStyle(color: muted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
             ],
-            if (order.hasRider) ...[
-              const SizedBox(height: 12),
+          ),
+        ),
+      );
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(
+                  backgroundColor: Color(0xFFFFF1DD),
+                  child: Icon(Icons.two_wheeler, color: orange),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.riderName,
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      Text(
+                        order.riderVehicle.isEmpty
+                            ? 'Assigned rider'
+                            : order.riderVehicle,
+                        style: const TextStyle(color: muted, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (order.riderPhone.isNotEmpty) ...[
+              const SizedBox(height: 14),
               Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Color(0xFFFFF1DD),
-                    child: Icon(Icons.two_wheeler, color: orange, size: 18),
-                  ),
-                  const SizedBox(width: 10),
+                  const Icon(Icons.phone_outlined, size: 18, color: muted),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '${order.riderName}${order.riderVehicle.isEmpty ? '' : ' • ${order.riderVehicle}'}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    child: SelectableText(
+                      order.riderPhone,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
-                  if (order.riderPhone.isNotEmpty)
-                    IconButton.filledTonal(
-                      tooltip: 'Call rider',
-                      onPressed: () => launchUrl(
-                        Uri(scheme: 'tel', path: order.riderPhone),
-                      ),
-                      icon: const Icon(Icons.call, size: 18),
+                  OutlinedButton.icon(
+                    onPressed: () => launchUrl(
+                      Uri(scheme: 'sms', path: order.riderPhone),
                     ),
+                    icon: const Icon(Icons.sms_outlined, size: 17),
+                    label: const Text('Text'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton.icon(
+                    onPressed: () => launchUrl(
+                      Uri(scheme: 'tel', path: order.riderPhone),
+                    ),
+                    icon: const Icon(Icons.call, size: 17),
+                    label: const Text('Call'),
+                  ),
                 ],
               ),
             ],
-            const SizedBox(height: 12),
-            if (order.status == OrderStatus.placed)
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: _busy
-                          ? null
-                          : () => _advance(OrderStatus.preparing),
-                      icon: const Icon(Icons.check),
-                      label: const Text('Confirm order'),
-                    ),
+            const Divider(height: 30),
+            Row(
+              children: [
+                const Icon(Icons.navigation_outlined, color: green),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _riderLine(order),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton.outlined(
-                    tooltip: 'Cancel order',
-                    onPressed: _busy ? null : _cancel,
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              )
-            else if (order.status == OrderStatus.preparing)
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _busy
-                      ? null
-                      : () => _advance(OrderStatus.readyForPickup),
-                  icon: const Icon(Icons.send_outlined),
-                  label: const Text('Packed — push to rider pool'),
                 ),
-              )
-            else
-              Row(
-                children: [
-                  Pill(
-                    icon: Icons.local_shipping,
-                    text: order.status.label.toUpperCase(),
-                    color: green,
-                  ),
-                  const Spacer(),
-                  if (order.riderUpdatedAt != null)
-                    Text(
-                      'Updated ${formatClock(order.riderUpdatedAt!)}',
-                      style: const TextStyle(color: muted, fontSize: 11),
-                    ),
-                ],
+              ],
+            ),
+            if (order.riderUpdatedAt != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                'Rider location updated ${formatClock(order.riderUpdatedAt!)}',
+                style: const TextStyle(color: muted, fontSize: 11),
               ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Widget _buyerCard(BuildContext context, AgriOrder order) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(
+                  backgroundColor: lightGreen,
+                  child: Icon(Icons.store, color: green),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.buyerName,
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      const Text(
+                        'Buyer',
+                        style: TextStyle(color: muted, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                if (order.buyerPhone.isNotEmpty)
+                  IconButton.filledTonal(
+                    tooltip: 'Call buyer',
+                    onPressed: () => launchUrl(
+                      Uri(scheme: 'tel', path: order.buyerPhone),
+                    ),
+                    icon: const Icon(Icons.call, size: 18),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.place_outlined, size: 18, color: muted),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    order.deliveryAddress.isEmpty
+                        ? 'No delivery address on file'
+                        : order.deliveryAddress,
+                    style: const TextStyle(color: muted, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Before pickup the farmer wants the rider's distance to the farm; after
+  /// pickup that number is useless and the distance to the buyer is the one
+  /// that matters.
+  String _riderLine(AgriOrder order) {
+    if (order.status == OrderStatus.delivered) {
+      final at = order.timeline[OrderStatus.delivered.wire];
+      return at == null ? 'Delivered' : 'Delivered ${formatClock(at)}';
+    }
+    final rider = order.riderPoint;
+    final pickedUp = order.status.step >= OrderStatus.pickedUp.step;
+    final target = pickedUp ? order.dropPoint : order.pickupPoint;
+    if (rider != null && target != null) {
+      final km = GeoService.distanceKm(rider, target);
+      final minutes = (km / 28 * 60).round().clamp(1, 600);
+      return pickedUp
+          ? '${formatKm(km)} from the buyer \u2022 ETA $minutes min'
+          : '${formatKm(km)} from your farm \u2022 arriving in ~$minutes min';
+    }
+    return pickedUp
+        ? 'On the way to the buyer'
+        : 'Heading to your farm for pickup';
+  }
+
+  List<Widget> _timeline(AgriOrder order) {
+    const steps = [
+      (OrderStatus.placed, 'Order placed'),
+      (OrderStatus.preparing, 'You confirmed the order'),
+      (OrderStatus.readyForPickup, 'Packed and pushed to the rider pool'),
+      (OrderStatus.riderAssigned, 'Rider accepted the trip'),
+      (OrderStatus.pickedUp, 'Picked up from your farm'),
+      (OrderStatus.inTransit, 'On the way to the buyer'),
+      (OrderStatus.delivered, 'Delivered'),
+    ];
+    final current = order.status.step;
+    return [
+      for (var index = 0; index < steps.length; index++)
+        TimelineItem(
+          title: steps[index].$2,
+          subtitle: () {
+            final stamp = order.timeline[steps[index].$1.wire];
+            if (stamp != null) {
+              return '${formatRelativeDay(stamp)} \u2022 ${formatClock(stamp)}';
+            }
+            if (steps[index].$1.step == current) return 'Current status';
+            return steps[index].$1.step < current ? 'Completed' : 'Pending';
+          }(),
+          done: steps[index].$1.step <= current,
+          active: steps[index].$1.step == current,
+          last: index == steps.length - 1,
+        ),
+    ];
   }
 }
 
@@ -1099,9 +1682,8 @@ class FarmerProfile extends StatelessWidget {
               ProfileTile(
                 icon: Icons.verified_user_outlined,
                 title: 'Verification',
-                subtitle: user.isApproved
-                    ? 'Approved by AgriLink'
-                    : 'Under review',
+                subtitle:
+                    user.isApproved ? 'Approved by AgriLink' : 'Under review',
                 onTap: () {},
               ),
               const SizedBox(height: 16),
