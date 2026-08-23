@@ -833,8 +833,8 @@ class CloudDatabase {
     final stored = '${account['passwordHash'] ?? ''}';
     if (salt.isEmpty || stored.isEmpty) return false;
     if ('${account['passwordAlgorithm'] ?? ''}' == passwordAlgorithm) {
-      final rounds =
-          (account['passwordIterations'] as num?)?.toInt() ?? passwordIterations;
+      final rounds = (account['passwordIterations'] as num?)?.toInt() ??
+          passwordIterations;
       return _constantTimeEquals(_pbkdf2(password, salt, rounds), stored);
     }
     return _constantTimeEquals(_legacyHash(password, salt), stored);

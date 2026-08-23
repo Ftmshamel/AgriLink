@@ -1955,7 +1955,14 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
         if (mounted) setState(() => _loading = false);
         return;
       }
-      final position = await Geolocator.getCurrentPosition();
+      // Indoors, or on a handset without a recent fix, a GPS read can sit
+      // there indefinitely. Bounded the same way as GeoService.currentPoint,
+      // so the picker always falls through to a tappable map.
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          timeLimit: Duration(seconds: 10),
+        ),
+      ).timeout(const Duration(seconds: 12));
       final point = LatLng(position.latitude, position.longitude);
       _mapController.move(point, 17);
       await _select(point);
@@ -1979,9 +1986,13 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
         'lon': '${point.longitude}',
         'zoom': '18',
       });
+      // Without this the picker can sit on "Finding address…" forever when
+      // Nominatim stalls, and a pinned location is required to finish signup.
+      // On timeout the catch below leaves [address] as the coordinates, which
+      // is a perfectly usable answer.
       final response = await http.get(uri, headers: {
         'User-Agent': 'AgriLink-Mobile/1.0 (agrilink.ph)',
-      });
+      }).timeout(const Duration(seconds: 12));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         address = '${data['display_name'] ?? address}';
