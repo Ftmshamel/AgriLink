@@ -1023,9 +1023,16 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Cancel this order?'),
-        content: const Text(
-          'The buyer will see it as cancelled. Do this only if you cannot '
-          'supply the harvest.',
+        content: Text(
+          widget.order.paymentStatus == 'paid'
+              // Refunds are not handled in the app, so the farm has to settle
+              // with the buyer directly. Saying so here is the only warning
+              // they get.
+              ? 'The buyer has already paid for this order. Cancelling does '
+                  'not refund them — you will have to return the money '
+                  'yourself. Do this only if you cannot supply the harvest.'
+              : 'The buyer will see it as cancelled. Do this only if you '
+                  'cannot supply the harvest.',
         ),
         actions: [
           TextButton(
@@ -1209,19 +1216,30 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                         'booking first, or clear it to pick this town instead.',
                         style: const TextStyle(color: muted, fontSize: 11.5),
                       )
-                    : SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: _busy
-                              ? null
-                              : () => _advance(OrderStatus.readyForPickup),
-                          icon: const Icon(Icons.send_outlined),
-                          label: Text(
-                            widget.selectable
-                                ? 'Send this one on its own'
-                                : 'Packed — push to rider pool',
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: _busy
+                                  ? null
+                                  : () => _advance(OrderStatus.readyForPickup),
+                              icon: const Icon(Icons.send_outlined),
+                              label: Text(
+                                widget.selectable
+                                    ? 'Send this one on its own'
+                                    : 'Packed — push to rider pool',
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          // A paid order arrives already confirmed, so this is
+                          // the farm's only chance to say it cannot supply.
+                          IconButton.outlined(
+                            tooltip: 'Cancel order',
+                            onPressed: _busy ? null : _cancel,
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
                       )
               else
                 Row(

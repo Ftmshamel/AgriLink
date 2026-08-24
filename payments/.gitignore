@@ -1,0 +1,5 @@
+# Wrangler's local cache. Holds the signed-in account id and name - not a
+# credential, but machine-local state that has no business in the repository.
+.wrangler/
+
+node_modules/

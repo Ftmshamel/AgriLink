@@ -30,3 +30,4 @@ Thumbs.db
 
 # Course submission documents are kept outside the repository.
 docs/
+firebase-debug.log

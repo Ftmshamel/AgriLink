@@ -1,0 +1,10 @@
+name = "agrilink-payments"
+main = "src/worker.js"
+compatibility_date = "2026-08-24"
+
+# Publish on <worker>.<subdomain>.workers.dev.
+workers_dev = true
+
+# No secrets live in this file. XENDIT_SECRET and APP_TOKEN are set with
+# `wrangler secret put`, which stores them on Cloudflare and never writes them
+# to disk or to git.

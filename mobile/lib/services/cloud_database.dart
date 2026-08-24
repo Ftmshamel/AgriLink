@@ -443,13 +443,20 @@ class CloudDatabase {
     final now = DateTime.now();
     final id = 'order-${now.millisecondsSinceEpoch}-${_token(5)}';
     final status = '${order['status'] ?? OrderStatus.placed.wire}';
+    final stamp = now.toUtc().toIso8601String();
+    // An order paid up front is created already confirmed, but it was still
+    // placed - stamping only the later step would leave a hole at the top of
+    // the buyer's timeline.
     await _create('mobileOrders', id, {
       ...order,
       'id': id,
       'reference': _orderReference(now),
       'status': status,
-      'timeline': {status: now.toUtc().toIso8601String()},
-      'createdAt': now.toUtc().toIso8601String(),
+      'timeline': {
+        OrderStatus.placed.wire: stamp,
+        if (status != OrderStatus.placed.wire) status: stamp,
+      },
+      'createdAt': stamp,
     });
     return id;
   }

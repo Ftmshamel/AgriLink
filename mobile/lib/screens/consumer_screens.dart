@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../app.dart';
 import '../models/agri_models.dart';
 import '../services/geo.dart';
+import '../services/payment_service.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
@@ -313,8 +315,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: .66,
                     crossAxisSpacing: 12,
@@ -707,6 +708,15 @@ class CartSheet extends StatefulWidget {
 class _CartSheetState extends State<CartSheet> {
   final _reference = TextEditingController();
   String _method = 'GCash';
+
+  /// Set only after the worker confirms Xendit marked the invoice paid.
+  PaymentInvoice? _paidInvoice;
+  final _payments = PaymentService();
+
+  /// Every order is paid before it is created. Cash on delivery is not
+  /// offered: the rider belongs to the pool, not to the farm, so there is
+  /// nobody on the trip who should be holding the buyer's money.
+  bool get _payingOnline => PaymentService.enabled;
   bool _placing = false;
   String? _error;
 
@@ -726,8 +736,9 @@ class _CartSheetState extends State<CartSheet> {
     }
     grouped.forEach((farmerId, lines) {
       final farm = lines.first.crop.point;
-      final distance =
-          buyer != null && farm != null ? GeoService.distanceKm(buyer, farm) : 0.0;
+      final distance = buyer != null && farm != null
+          ? GeoService.distanceKm(buyer, farm)
+          : 0.0;
       final kilos = lines.fold<int>(0, (sum, line) => sum + line.quantityKg);
       fees[farmerId] =
           DeliveryPricing.fee(distanceKm: distance, quantityKg: kilos);
@@ -742,7 +753,7 @@ class _CartSheetState extends State<CartSheet> {
           'Add a delivery address in your profile before checking out.');
       return;
     }
-    if (_method != 'Cash on delivery' && _reference.text.trim().isEmpty) {
+    if (!_payingOnline && _reference.text.trim().isEmpty) {
       setState(() => _error = 'Enter your $_method reference number.');
       return;
     }
@@ -751,6 +762,13 @@ class _CartSheetState extends State<CartSheet> {
       _error = null;
     });
     try {
+      if (_payingOnline && _paidInvoice == null) {
+        final settled = await _collectPayment();
+        if (!settled) {
+          if (mounted) setState(() => _placing = false);
+          return;
+        }
+      }
       final fees = _feesByFarm();
       final grouped = <String, List<CartLine>>{};
       for (final line in widget.cart.lines) {
@@ -795,10 +813,16 @@ class _CartSheetState extends State<CartSheet> {
             'farmLatitude': crop.latitude,
             'farmLongitude': crop.longitude,
             'paymentMethod': _method,
-            'paymentReference': _reference.text.trim(),
-            'paymentStatus':
-                _method == 'Cash on delivery' ? 'cod_pending' : 'submitted',
-            'status': OrderStatus.placed.wire,
+            'paymentReference':
+                _paidInvoice?.reference ?? _reference.text.trim(),
+            'paymentStatus': _paidInvoice != null ? 'paid' : 'submitted',
+            if (_paidInvoice != null) 'paymentInvoiceId': _paidInvoice!.id,
+            // Money already in means there is nothing left for the farm to
+            // accept or refuse, so a paid order arrives confirmed and the
+            // farmer's only job is to pack it and book a rider.
+            'status': _paidInvoice != null
+                ? OrderStatus.preparing.wire
+                : OrderStatus.placed.wire,
           });
           await authService.database.reduceCropStock(crop.id, line.quantityKg);
         }
@@ -819,6 +843,70 @@ class _CartSheetState extends State<CartSheet> {
         _placing = false;
       });
     }
+  }
+
+  /// Opens a Xendit checkout page and waits for the buyer to come back.
+  ///
+  /// Returns true only when the worker says Xendit has the money. The buyer
+  /// tapping "I have paid" is not evidence of anything, so that button just
+  /// triggers another check.
+  Future<bool> _collectPayment() async {
+    final total = _grandTotal();
+    final reference = 'AGRILINK-${DateTime.now().millisecondsSinceEpoch}';
+    final PaymentInvoice invoice;
+    try {
+      invoice = await _payments.createInvoice(
+        amount: total,
+        reference: reference,
+        description: 'AgriLink order \u2022 ${widget.cart.lines.length} item'
+            '${widget.cart.lines.length == 1 ? '' : 's'}',
+      );
+    } on PaymentException catch (error) {
+      if (mounted) setState(() => _error = error.message);
+      return false;
+    }
+
+    final opened = await launchUrl(
+      Uri.parse(invoice.url),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened) {
+      if (mounted) {
+        setState(() => _error = 'Could not open the payment page.');
+      }
+      return false;
+    }
+
+    if (!mounted) return false;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => _PaymentWaitDialog(
+        payments: _payments,
+        invoice: invoice,
+        amount: total,
+        onChannel: _recordChannel,
+      ),
+    );
+    if (confirmed != true) return false;
+    _paidInvoice = invoice;
+    return true;
+  }
+
+  /// Xendit names the channel only after the money lands, so this is the
+  /// earliest the app can honestly say how the buyer paid.
+  void _recordChannel(String channel) {
+    if (channel.isEmpty) return;
+    _method = channel;
+  }
+
+  /// What the buyer owes for the whole cart, items plus every farm's fee.
+  int _grandTotal() {
+    final fees = _feesByFarm();
+    final items =
+        widget.cart.lines.fold<int>(0, (sum, line) => sum + line.subtotal);
+    final delivery = fees.values.fold<int>(0, (sum, fee) => sum + fee);
+    return items + delivery;
   }
 
   @override
@@ -917,30 +1005,53 @@ class _CartSheetState extends State<CartSheet> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  DropdownButtonFormField<String>(
-                    initialValue: _method,
-                    decoration: const InputDecoration(
-                      labelText: 'Payment method',
-                      prefixIcon: Icon(Icons.payments_outlined),
+                  if (!PaymentService.enabled)
+                    DropdownButtonFormField<String>(
+                      initialValue: _method,
+                      decoration: const InputDecoration(
+                        labelText: 'Payment method',
+                        prefixIcon: Icon(Icons.payments_outlined),
+                      ),
+                      items:
+                          const ['GCash', 'Maya', 'MariBank', 'Bank transfer']
+                              .map(
+                                (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(item),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) =>
+                          setState(() => _method = value ?? 'GCash'),
                     ),
-                    items: const [
-                      'GCash',
-                      'Maya',
-                      'MariBank',
-                      'Bank transfer',
-                      'Cash on delivery',
-                    ]
-                        .map(
-                          (item) => DropdownMenuItem(
-                            value: item,
-                            child: Text(item),
+                  if (_payingOnline) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: canvas,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.lock_outline,
+                              color: green, size: 19),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              _paidInvoice == null
+                                  ? 'Pay on the next screen. GCash, Maya, card, '
+                                      'or bank \u2014 you pick there, and there is '
+                                      'no reference number to type.'
+                                  : 'Paid \u2022 $_method \u2022 '
+                                      '${_paidInvoice!.reference}',
+                              style:
+                                  const TextStyle(fontSize: 11.5, height: 1.4),
+                            ),
                           ),
-                        )
-                        .toList(),
-                    onChanged: (value) =>
-                        setState(() => _method = value ?? 'GCash'),
-                  ),
-                  if (_method != 'Cash on delivery') ...[
+                        ],
+                      ),
+                    ),
+                  ] else if (_method != 'Cash on delivery') ...[
                     const SizedBox(height: 12),
                     TextField(
                       controller: _reference,
@@ -979,6 +1090,148 @@ class _CartSheetState extends State<CartSheet> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Sits between the buyer and their order while Xendit is being paid.
+///
+/// It checks by itself every few seconds, so the buyer only has to pay and
+/// come back. The manual button is a shortcut for the impatient, not a way in:
+/// every check asks the worker, which asks Xendit. Saying you paid proves
+/// nothing here, and the order is not written until Xendit says the money
+/// arrived.
+class _PaymentWaitDialog extends StatefulWidget {
+  const _PaymentWaitDialog({
+    required this.payments,
+    required this.invoice,
+    required this.amount,
+    required this.onChannel,
+  });
+
+  final PaymentService payments;
+  final PaymentInvoice invoice;
+  final int amount;
+  final ValueChanged<String> onChannel;
+
+  @override
+  State<_PaymentWaitDialog> createState() => _PaymentWaitDialogState();
+}
+
+class _PaymentWaitDialogState extends State<_PaymentWaitDialog> {
+  Timer? _poll;
+  bool _checking = false;
+  String? _message;
+
+  @override
+  void initState() {
+    super.initState();
+    // Xendit needs a moment to register a payment, so the first look is not
+    // immediate; after that keep watching until it lands.
+    _poll = Timer.periodic(const Duration(seconds: 4), (_) => _check());
+  }
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _check({bool manual = false}) async {
+    if (_checking) return;
+    setState(() {
+      _checking = true;
+      if (manual) _message = null;
+    });
+    try {
+      final status = await widget.payments.check(widget.invoice.id);
+      if (!mounted) return;
+      if (status.paid) {
+        widget.onChannel(status.channel);
+        _poll?.cancel();
+        Navigator.pop(context, true);
+        return;
+      }
+      if (manual) {
+        setState(() => _message =
+            'Xendit has not received the payment yet. Finish paying and this '
+                'will update on its own.');
+      }
+    } on PaymentException catch (error) {
+      // A dropped check is not a failed payment - keep watching, and only say
+      // something when the buyer asked.
+      if (mounted && manual) setState(() => _message = error.message);
+    } finally {
+      if (mounted) setState(() => _checking = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Waiting for payment'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Pay ${formatPeso(widget.amount)} on the page that just opened. '
+            'This screen updates by itself once Xendit receives it.',
+            style: const TextStyle(height: 1.4),
+          ),
+          const SizedBox(height: 14),
+          const Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Checking with Xendit\u2026',
+                  style: TextStyle(color: muted, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Reference ${widget.invoice.reference}',
+            style: const TextStyle(color: muted, fontSize: 12),
+          ),
+          if (_message != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _message!,
+              style: const TextStyle(
+                color: Color(0xFFB42318),
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => launchUrl(
+            Uri.parse(widget.invoice.url),
+            mode: LaunchMode.externalApplication,
+          ),
+          child: const Text('Reopen page'),
+        ),
+        FilledButton(
+          onPressed: _checking ? null : () => _check(manual: true),
+          child: const Text('Check now'),
+        ),
+      ],
     );
   }
 }
