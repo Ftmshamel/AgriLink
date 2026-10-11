@@ -370,16 +370,18 @@ class AgriOrder {
 
   bool get isScheduled => raw['deliveryType'] == 'scheduled';
 
-  /// The day the buyer wants it, at local midnight. Null for same-day orders.
+  /// The day it is delivered, at local midnight. Same-day orders carry the
+  /// day [DeliveryHours] assigned at checkout; orders saved before that have
+  /// none.
   DateTime? get deliveryDate {
-    if (!isScheduled) return null;
     final parsed = DateTime.tryParse('${raw['deliveryDate'] ?? ''}');
     return parsed == null ? null : dateOnly(parsed);
   }
 
   /// Last day the buyer can cancel, or null when they cannot at all.
-  DateTime? get cancelDeadline => deliveryDate
-      ?.subtract(const Duration(days: cancelNoticeDays));
+  DateTime? get cancelDeadline => isScheduled
+      ? deliveryDate?.subtract(const Duration(days: cancelNoticeDays))
+      : null;
 
   /// Same-day orders are committed the moment they are paid. A scheduled
   /// order can be cancelled up to [cancelNoticeDays] before delivery, as long
@@ -390,11 +392,19 @@ class AgriOrder {
     return !dateOnly(now).isAfter(deadline);
   }
 
-  /// Riders only see an order once its delivery day has arrived; a packed
-  /// order for next week should not be picked up today.
+  /// Riders only see an order once deliveries open on its delivery day: a
+  /// packed order for next week, or one placed at 2 AM, waits until then.
   bool isDueForPickup(DateTime now) {
     final date = deliveryDate;
-    return date == null || !date.isAfter(dateOnly(now));
+    return date == null || !now.isBefore(DeliveryHours.opensOn(date));
+  }
+
+  /// A same-day order placed after the cutoff that rolled over to tomorrow.
+  bool get isNextDay {
+    final date = deliveryDate;
+    final placed = createdAt;
+    if (isScheduled || date == null || placed == null) return false;
+    return date.isAfter(dateOnly(placed.toLocal()));
   }
 
   /// What goes back to the buyer's wallet if this order is cancelled.
@@ -466,6 +476,30 @@ class AgriOrder {
 }
 
 DateTime dateOnly(DateTime time) => DateTime(time.year, time.month, time.day);
+
+/// When deliveries run. Riders work from [opensAt]; an order placed at or
+/// after [cutoff] is delivered the next day. Times are the phone's local time.
+class DeliveryHours {
+  static const opensAt = 6;
+  static const cutoff = 18;
+
+  /// The day a same-day order placed at [now] is delivered. Before 6 AM it is
+  /// still today (riders start at 6); from 6 PM it rolls over to tomorrow.
+  static DateTime sameDayDate(DateTime now) {
+    final today = dateOnly(now);
+    return now.hour >= cutoff ? today.add(const Duration(days: 1)) : today;
+  }
+
+  static bool pastCutoff(DateTime now) => now.hour >= cutoff;
+
+  /// The earliest date a scheduled order can be booked for: the day after
+  /// whatever same-day would give.
+  static DateTime firstScheduleDate(DateTime now) =>
+      sameDayDate(now).add(const Duration(days: 1));
+
+  static DateTime opensOn(DateTime date) =>
+      DateTime(date.year, date.month, date.day, opensAt);
+}
 
 /// One movement of money in a buyer's AgriLink wallet.
 ///

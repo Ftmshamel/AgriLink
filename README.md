@@ -50,7 +50,10 @@ the balance is the sum of its entries, which are never edited or deleted.
   the flow can be shown without a payment gateway.
 
 At checkout the buyer picks **Same day** or a **scheduled date** (up to 60
-days ahead). Same-day orders are final. A scheduled order can be cancelled by
+days ahead). Riders deliver from 6:00 AM, and the same-day cutoff is 6:00 PM:
+an order placed from 6:00 PM to midnight is delivered the next day, while one
+placed between midnight and 6:00 AM is still same-day, starting at 6:00 AM.
+Same-day (and next-day) orders are final. A scheduled order can be cancelled by
 the buyer until 5 days before delivery, as long as no rider has it; the stock
 goes back on the listing. The farm can cancel any order before pickup, and
 the buyer is refunded the same way. Riders only see a scheduled order in the

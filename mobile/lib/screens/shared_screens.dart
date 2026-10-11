@@ -331,12 +331,17 @@ Future<void> showFarmSheet(
 }
 
 /// Sends a dispute to the superadmin queue.
-/// "Same-day delivery" or "Delivery Mon, Oct 20", for order cards.
+/// "Same-day delivery", "Next-day delivery • Tue, Oct 12" or
+/// "Scheduled • Mon, Oct 20", for order cards.
 String deliveryScheduleLabel(AgriOrder order) {
   final date = order.deliveryDate;
-  return date == null
-      ? 'Same-day delivery'
-      : 'Delivery ${formatDeliveryDate(date)}';
+  if (order.isScheduled && date != null) {
+    return 'Scheduled \u2022 ${formatDeliveryDate(date)}';
+  }
+  if (order.isNextDay) {
+    return 'Next-day delivery \u2022 ${formatDeliveryDate(date!)}';
+  }
+  return 'Same-day delivery';
 }
 
 /// Returns true once a report was actually filed.

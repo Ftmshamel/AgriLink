@@ -233,5 +233,63 @@ void main() {
       expect(order(date: '2026-10-11').isDueForPickup(now), isTrue);
       expect(order().isDueForPickup(now), isTrue);
     });
+
+    test('riders do not see even today\'s orders before 6 AM', () {
+      final early = order(date: '2026-10-11');
+      expect(early.isDueForPickup(DateTime(2026, 10, 11, 5, 59)), isFalse);
+      expect(early.isDueForPickup(DateTime(2026, 10, 11, 6)), isTrue);
+    });
+
+    test('a same-day order that rolled past the cutoff reads as next-day', () {
+      final rolled = AgriOrder.fromMap({
+        'id': 'o',
+        'deliveryType': 'same_day',
+        'deliveryDate': '2026-10-12',
+        'createdAt': DateTime(2026, 10, 11, 19).toUtc().toIso8601String(),
+      });
+      expect(rolled.isNextDay, isTrue);
+      expect(rolled.canBuyerCancel(now), isFalse,
+          reason: 'next-day is still same-day service and is final');
+
+      final sameDay = AgriOrder.fromMap({
+        'id': 'o',
+        'deliveryType': 'same_day',
+        'deliveryDate': '2026-10-11',
+        'createdAt': DateTime(2026, 10, 11, 9).toUtc().toIso8601String(),
+      });
+      expect(sameDay.isNextDay, isFalse);
+    });
+  });
+
+  group('delivery hours', () {
+    DateTime at(int hour, [int minute = 0]) =>
+        DateTime(2026, 10, 11, hour, minute);
+    final today = DateTime(2026, 10, 11);
+    final tomorrow = DateTime(2026, 10, 12);
+
+    test('orders before 6 PM are delivered the same day', () {
+      expect(DeliveryHours.sameDayDate(at(6)), today);
+      expect(DeliveryHours.sameDayDate(at(12)), today);
+      expect(DeliveryHours.sameDayDate(at(17, 59)), today);
+    });
+
+    test('orders from 6 PM on are delivered tomorrow', () {
+      expect(DeliveryHours.sameDayDate(at(18)), tomorrow);
+      expect(DeliveryHours.sameDayDate(at(23, 59)), tomorrow);
+      expect(DeliveryHours.pastCutoff(at(18)), isTrue);
+      expect(DeliveryHours.pastCutoff(at(17, 59)), isFalse);
+    });
+
+    test('orders between midnight and 6 AM are still same-day', () {
+      expect(DeliveryHours.sameDayDate(at(0)), today);
+      expect(DeliveryHours.sameDayDate(at(5, 59)), today);
+      expect(DeliveryHours.opensOn(today), at(6));
+    });
+
+    test('scheduling starts the day after same-day would deliver', () {
+      expect(DeliveryHours.firstScheduleDate(at(10)), tomorrow);
+      expect(DeliveryHours.firstScheduleDate(at(19)),
+          DateTime(2026, 10, 13));
+    });
   });
 }

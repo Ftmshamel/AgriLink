@@ -1168,8 +1168,12 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                         child: Text(
                           order.isDueForPickup(DateTime.now())
                               ? 'Waiting for a rider to accept this pickup'
-                              : 'Riders will see this on '
-                                  '${formatDeliveryDate(order.deliveryDate!)}',
+                              : dateOnly(order.deliveryDate!) ==
+                                      dateOnly(DateTime.now())
+                                  ? 'Riders will see this from 6:00 AM'
+                                  : 'Riders will see this on '
+                                      '${formatDeliveryDate(order.deliveryDate!)}'
+                                      ' from 6:00 AM',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,

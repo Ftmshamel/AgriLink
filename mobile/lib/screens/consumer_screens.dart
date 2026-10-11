@@ -707,6 +707,10 @@ class _CartSheetState extends State<CartSheet> {
   bool _scheduled = false;
   DateTime? _deliveryDate;
 
+  /// The same-day date the buyer was last shown, to catch the 6 PM cutoff
+  /// passing while the sheet is open.
+  DateTime _sameDayShown = DeliveryHours.sameDayDate(DateTime.now());
+
   bool _useWallet = false;
   int? _walletBalance;
 
@@ -738,13 +742,21 @@ class _CartSheetState extends State<CartSheet> {
   }
 
   Future<void> _pickDate() async {
-    final today = dateOnly(DateTime.now());
+    final now = DateTime.now();
+    final first = DeliveryHours.firstScheduleDate(now);
+    final last = dateOnly(now).add(const Duration(days: 60));
+    final suggested =
+        dateOnly(now).add(const Duration(days: AgriOrder.cancelNoticeDays + 1));
+    final current = _deliveryDate;
     final picked = await showDatePicker(
       context: context,
-      initialDate: _deliveryDate ??
-          today.add(const Duration(days: AgriOrder.cancelNoticeDays + 1)),
-      firstDate: today.add(const Duration(days: 1)),
-      lastDate: today.add(const Duration(days: 60)),
+      initialDate: current != null && !current.isBefore(first)
+          ? current
+          : suggested.isBefore(first)
+              ? first
+              : suggested,
+      firstDate: first,
+      lastDate: last,
       helpText: 'Delivery date',
     );
     if (picked != null) setState(() => _deliveryDate = dateOnly(picked));
@@ -783,10 +795,29 @@ class _CartSheetState extends State<CartSheet> {
           'Add a delivery address in your profile before checking out.');
       return;
     }
+    final now = DateTime.now();
     if (_scheduled && _deliveryDate == null) {
       setState(() => _error = 'Pick a delivery date.');
       return;
     }
+    if (_scheduled &&
+        _deliveryDate!.isBefore(DeliveryHours.firstScheduleDate(now))) {
+      setState(() => _error = 'That date is no longer available. Pick a '
+          'later delivery date.');
+      return;
+    }
+    // The screen may have been open since before 6 PM; say so rather than
+    // quietly moving the delivery to tomorrow.
+    final sameDay = DeliveryHours.sameDayDate(now);
+    if (!_scheduled && sameDay != _sameDayShown) {
+      setState(() {
+        _sameDayShown = sameDay;
+        _error = 'It is past 6:00 PM, so this order will be delivered '
+            'tomorrow, ${formatDeliveryDate(sameDay)}. Tap again to confirm.';
+      });
+      return;
+    }
+    final deliveryDate = _scheduled ? _deliveryDate! : sameDay;
     if (!_useWallet && !_payingOnline && _reference.text.trim().isEmpty) {
       setState(() => _error = 'Enter your $_method reference number.');
       return;
@@ -878,9 +909,7 @@ class _CartSheetState extends State<CartSheet> {
             'paymentStatus': paid ? 'paid' : 'submitted',
             if (_paidInvoice != null) 'paymentInvoiceId': _paidInvoice!.id,
             'deliveryType': _scheduled ? 'scheduled' : 'same_day',
-            if (_scheduled)
-              'deliveryDate':
-                  _deliveryDate!.toIso8601String().substring(0, 10),
+            'deliveryDate': deliveryDate.toIso8601String().substring(0, 10),
             // Money already in means there is nothing left for the farm to
             // accept or refuse, so a paid order arrives confirmed and the
             // farmer's only job is to pack it and book a rider.
@@ -1068,7 +1097,18 @@ class _CartSheetState extends State<CartSheet> {
 
   String _cancelPolicy() {
     if (!_scheduled) {
-      return 'Same-day orders are final once placed and cannot be cancelled.';
+      final now = DateTime.now();
+      final String when;
+      if (DeliveryHours.pastCutoff(now)) {
+        when = 'Orders after 6:00 PM are delivered tomorrow, '
+            '${formatDeliveryDate(DeliveryHours.sameDayDate(now))}, '
+            'from 6:00 AM.';
+      } else if (now.hour < DeliveryHours.opensAt) {
+        when = 'Delivered today. Riders start at 6:00 AM.';
+      } else {
+        when = 'Delivered today. Order before 6:00 PM for same-day delivery.';
+      }
+      return '$when This order is final once placed and cannot be cancelled.';
     }
     final date = _deliveryDate;
     if (date == null) {
@@ -1244,13 +1284,17 @@ class _CartSheetState extends State<CartSheet> {
                   ),
                   const SizedBox(height: 8),
                   SegmentedButton<bool>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: false,
-                        icon: Icon(Icons.bolt),
-                        label: Text('Same day'),
+                        icon: const Icon(Icons.bolt),
+                        label: Text(
+                          DeliveryHours.pastCutoff(DateTime.now())
+                              ? 'Tomorrow'
+                              : 'Same day',
+                        ),
                       ),
-                      ButtonSegment(
+                      const ButtonSegment(
                         value: true,
                         icon: Icon(Icons.event),
                         label: Text('Schedule'),
