@@ -13,6 +13,7 @@ riders, and superadministrators in one agricultural marketplace.
 - Password recovery through an emailed one-time code
 - Farmer and rider requirement uploads held for superadmin approval
 - Live weather from Open-Meteo for harvest planning and delivery safety
+- Verified proof of delivery: geofence, buyer code, photo, and buyer receipt
 - Cloud-backed account and marketplace data
 
 ## API integration
@@ -29,6 +30,25 @@ The Farmer and Rider dashboards show live conditions for the location the
 account pinned at signup, using the free [Open-Meteo](https://open-meteo.com)
 API — no API key or account is needed, so it runs straight from source. The
 outlook page adds a 7-day forecast and a town search.
+
+## Proof of delivery
+
+A rider cannot mark a drop-off delivered on their word alone. **Verify &
+confirm delivery** requires all of:
+
+1. **Geofence** — a fresh GPS fix within 150 m of the buyer's pinned location.
+   Fixes from a mock-location app are refused.
+2. **Delivery code** — a 4-digit code generated when the rider accepts the
+   trip and shown only on the buyer's tracking screen. The rider types it in
+   at the door, so the buyer has to be there to hand it over.
+3. **Photo** — taken with the camera (not the gallery) and stored in
+   `mobileDeliveryProofs` with the GPS position and time. Firestore rules keep
+   these photos read-only once written.
+
+Once delivered, the buyer sees the photo and distance on the tracking screen
+and can tap **I received my order** or report a problem. A report flags the
+order as disputed, and the superadmin can open the same delivery proof from
+**Active Disputes**.
 
 ## Account verification
 

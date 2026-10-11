@@ -984,6 +984,30 @@ class DisputeCenter extends StatelessWidget {
                               style: const TextStyle(height: 1.45),
                             ),
                           ),
+                          if ('${report['riderName'] ?? ''}'.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Rider: ${report['riderName']}',
+                              style: const TextStyle(
+                                color: muted,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                          if ('${report['orderId'] ?? ''}'.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _showProof(
+                                  context,
+                                  '${report['orderId']}',
+                                ),
+                                icon: const Icon(Icons.fact_check_outlined),
+                                label: const Text('View delivery proof'),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
@@ -1030,6 +1054,38 @@ class DisputeCenter extends StatelessWidget {
   String _reportDate(Map<String, dynamic> report) {
     final at = DateTime.tryParse('${report['createdAt'] ?? ''}');
     return at == null ? '' : '${formatRelativeDay(at)} • ${formatClock(at)}';
+  }
+
+  /// Puts the rider's drop-off evidence next to the buyer's complaint.
+  Future<void> _showProof(BuildContext context, String orderId) async {
+    final order = await authService.database.getOrder(orderId);
+    if (!context.mounted) return;
+    if (order == null || order.status != OrderStatus.delivered) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This order has not been marked delivered.'),
+        ),
+      );
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DeliveryProofCard(order: order),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _resolve(

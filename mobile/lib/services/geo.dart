@@ -62,6 +62,22 @@ class GeoService {
     return _remember(LatLng(position.latitude, position.longitude));
   }
 
+  /// A fresh, full GPS fix for proving where the device is right now.
+  ///
+  /// Unlike [currentPoint] this never reuses a cached fix and keeps the whole
+  /// [Position], because the caller needs `isMocked` and the fix time.
+  static Future<Position> freshFix() async {
+    await ensurePermission();
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        timeLimit: Duration(seconds: 15),
+      ),
+    ).timeout(const Duration(seconds: 17));
+    _remember(LatLng(position.latitude, position.longitude));
+    return position;
+  }
+
   static DateTime? _retryAfter;
 
   /// Best-effort position that returns null instead of throwing, for screens

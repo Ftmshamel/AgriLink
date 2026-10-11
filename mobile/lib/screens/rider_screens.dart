@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app.dart';
 import '../models/agri_models.dart';
+import '../services/delivery_proof.dart';
 import '../services/geo.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
@@ -1114,7 +1118,82 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
 
   List<AgriOrder> _liveOrders = const [];
 
-  Future<void> _completeStop(TripStop stop, List<AgriOrder> allOrders) async {
+  /// A drop-off only counts once the rider proves three things: they are at
+  /// the buyer's pin (fresh, non-mocked GPS), the buyer handed over their code,
+  /// and there is a photo of the items at the door.
+  Future<void> _confirmDelivery(
+    TripStop stop,
+    List<AgriOrder> allOrders,
+  ) async {
+    setState(() => _busy = true);
+    Position fix;
+    try {
+      fix = await GeoService.freshFix();
+    } on TimeoutException {
+      _fail('Could not get a GPS fix. Step outside or near a window and '
+          'try again.');
+      return;
+    } catch (error) {
+      _fail('$error'.replaceFirst('Exception: ', ''));
+      return;
+    }
+    final here = LatLng(fix.latitude, fix.longitude);
+    _devicePoint = here;
+    final geofence = DeliveryProof.checkGeofence(
+      rider: here,
+      drop: stop.point,
+      mocked: fix.isMocked,
+    );
+    if (!geofence.allowed) {
+      _fail(geofence.message);
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    final proof = await showDialog<Uint8List>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _DeliveryProofDialog(stop: stop, geofence: geofence),
+    );
+    if (proof == null || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final proofId = await authService.database.uploadDeliveryProof(
+        orderIds: stop.orders.map((order) => order.id).toList(),
+        riderId: widget.session.user.id,
+        photo: proof,
+        latitude: here.latitude,
+        longitude: here.longitude,
+        distanceMetres: geofence.distanceMetres,
+      );
+      await _completeStop(stop, allOrders, extra: {
+        'deliveryProofId': proofId,
+        'deliveredLatitude': here.latitude,
+        'deliveredLongitude': here.longitude,
+        if (geofence.distanceMetres != null)
+          'deliveredDistanceMetres': geofence.distanceMetres,
+        'deliveryCodeVerified': DeliveryProof.requiresCode(stop.orders),
+      });
+    } catch (error) {
+      _fail('$error'.replaceFirst('Exception: ', ''));
+    }
+  }
+
+  void _fail(String message) {
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _completeStop(
+    TripStop stop,
+    List<AgriOrder> allOrders, {
+    Map<String, dynamic> extra = const {},
+  }) async {
     setState(() => _busy = true);
     try {
       final next =
@@ -1129,6 +1208,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
             if (_devicePoint != null)
               'riderLongitude': _devicePoint!.longitude,
             'riderUpdatedAt': DateTime.now().toUtc().toIso8601String(),
+            ...extra,
           },
         );
       }
@@ -1460,7 +1540,9 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                       ? null
                       : !stop.isPickup && pickupsLeft > 0
                           ? null
-                          : () => _completeStop(stop, orders),
+                          : stop.isPickup
+                              ? () => _completeStop(stop, orders)
+                              : () => _confirmDelivery(stop, orders),
                   icon: const Icon(Icons.check_circle_outline),
                   label: Padding(
                     padding: const EdgeInsets.all(14),
@@ -1472,7 +1554,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                                   '${pickupsLeft == 1 ? '' : 's'} first'
                               : stop.isPickup
                                   ? 'Confirm pickup & continue'
-                                  : 'Confirm delivery & continue',
+                                  : 'Verify & confirm delivery',
                     ),
                   ),
                 ),
@@ -1481,6 +1563,157 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Collects the buyer's code and a photo of the items at the door. Returns
+/// the photo once both check out; the code itself never leaves this dialog.
+class _DeliveryProofDialog extends StatefulWidget {
+  const _DeliveryProofDialog({required this.stop, required this.geofence});
+
+  final TripStop stop;
+  final GeofenceResult geofence;
+
+  @override
+  State<_DeliveryProofDialog> createState() => _DeliveryProofDialogState();
+}
+
+class _DeliveryProofDialogState extends State<_DeliveryProofDialog> {
+  final _code = TextEditingController();
+  Uint8List? _photo;
+  String? _error;
+
+  bool get _needsCode => DeliveryProof.requiresCode(widget.stop.orders);
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _takePhoto() async {
+    // Camera only: a gallery picture could have been taken anywhere, any day.
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 55,
+      maxWidth: 1280,
+    );
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
+    if (!mounted) return;
+    setState(() {
+      if (bytes.length > 750000) {
+        _error = 'That photo is too large. Take it again a little further '
+            'back.';
+      } else {
+        _photo = bytes;
+        _error = null;
+      }
+    });
+  }
+
+  void _submit() {
+    if (_needsCode &&
+        !DeliveryProof.codeMatches(widget.stop.orders, _code.text)) {
+      setState(() => _error = 'That code does not match. Ask '
+          '${widget.stop.contactName} for the code shown in their app.');
+      return;
+    }
+    if (_photo == null) {
+      setState(() => _error = 'Take a photo of the items at the drop-off.');
+      return;
+    }
+    Navigator.pop(context, _photo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Proof of delivery'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.where_to_vote, color: green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.geofence.message,
+                    style: const TextStyle(
+                      color: green,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_needsCode) ...[
+              Text(
+                'Ask ${widget.stop.contactName} for the delivery code in '
+                'their AgriLink app.',
+                style: const TextStyle(height: 1.4),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _code,
+                keyboardType: TextInputType.number,
+                maxLength: DeliveryProof.codeLength,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 26,
+                  letterSpacing: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Delivery code',
+                  counterText: '',
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
+            if (_photo != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(
+                  _photo!,
+                  height: 160,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _takePhoto,
+              icon: const Icon(Icons.photo_camera_outlined),
+              label: Text(
+                _photo == null ? 'Take photo of items' : 'Retake photo',
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.red, height: 1.4),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: const Text('Confirm delivery'),
+        ),
+      ],
     );
   }
 }

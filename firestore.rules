@@ -27,6 +27,13 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Drop-off photos are the evidence in a delivery dispute. A rider writes
+    // one when confirming a stop; nobody may swap or remove it afterwards.
+    match /mobileDeliveryProofs/{proofId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+
     // Everything else the app owns stays open, matching how the client reads
     // and writes it today.
     match /mobileUsers/{userId} {

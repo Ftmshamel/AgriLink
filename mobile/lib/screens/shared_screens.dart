@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../app.dart';
 import '../models/agri_models.dart';
 import '../models/mobile_user.dart';
+import '../services/delivery_proof.dart';
+import '../services/geo.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/ui_kit.dart';
@@ -327,13 +331,16 @@ Future<void> showFarmSheet(
 }
 
 /// Sends a dispute to the superadmin queue.
-Future<void> showReportSheet(
+/// Returns true once a report was actually filed.
+Future<bool> showReportSheet(
   BuildContext context, {
   required AppSession session,
   required String farmerId,
   required String farmerName,
   String cropId = '',
   String orderId = '',
+  String riderId = '',
+  String riderName = '',
 }) async {
   final reason = TextEditingController();
   final submit = await showDialog<bool>(
@@ -361,7 +368,7 @@ Future<void> showReportSheet(
       ],
     ),
   );
-  if (submit != true || reason.text.trim().isEmpty) return;
+  if (submit != true || reason.text.trim().isEmpty) return false;
   await authService.database.createReport({
     'reporterId': session.user.id,
     'reporterName': session.user.name,
@@ -370,11 +377,173 @@ Future<void> showReportSheet(
     'farmerName': farmerName,
     'cropId': cropId,
     'orderId': orderId,
+    if (riderId.isNotEmpty) 'riderId': riderId,
+    if (riderName.isNotEmpty) 'riderName': riderName,
     'reason': reason.text.trim(),
   });
   session.bump();
-  if (!context.mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Report submitted to AgriLink support.')),
-  );
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Report submitted to AgriLink support.')),
+    );
+  }
+  return true;
+}
+
+/// The evidence a rider left at the drop-off: the photo, how far from the
+/// buyer's pin it was taken, whether the buyer's code was entered, and when.
+///
+/// The photo never changes once stored, so it is fetched once rather than
+/// polled with the order.
+class DeliveryProofCard extends StatefulWidget {
+  const DeliveryProofCard({super.key, required this.order});
+
+  final AgriOrder order;
+
+  @override
+  State<DeliveryProofCard> createState() => _DeliveryProofCardState();
+}
+
+class _DeliveryProofCardState extends State<DeliveryProofCard> {
+  late Future<Map<String, dynamic>?> _proof;
+
+  @override
+  void initState() {
+    super.initState();
+    _proof = _load();
+  }
+
+  @override
+  void didUpdateWidget(DeliveryProofCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.order.deliveryProofId != widget.order.deliveryProofId) {
+      _proof = _load();
+    }
+  }
+
+  Future<Map<String, dynamic>?> _load() =>
+      authService.database.getDeliveryProof(widget.order.deliveryProofId);
+
+  @override
+  Widget build(BuildContext context) {
+    final order = widget.order;
+    final distance = order.deliveredDistanceMetres;
+    final at = order.timeline[OrderStatus.delivered.wire];
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Proof of delivery',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            if (order.deliveryProofId.isEmpty)
+              const Text(
+                'This order was delivered before photo proof was required.',
+                style: TextStyle(color: muted, height: 1.4),
+              )
+            else
+              FutureBuilder<Map<String, dynamic>?>(
+                future: _proof,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const SizedBox(
+                      height: 160,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  final photo = '${snapshot.data?['photoBase64'] ?? ''}';
+                  if (photo.isEmpty) {
+                    return const Text(
+                      'The delivery photo could not be loaded.',
+                      style: TextStyle(color: muted),
+                    );
+                  }
+                  final bytes = base64Decode(photo);
+                  return GestureDetector(
+                    onTap: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => Dialog(
+                        child: InteractiveViewer(child: Image.memory(bytes)),
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.memory(
+                        bytes,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            const SizedBox(height: 12),
+            _ProofLine(
+              icon: Icons.where_to_vote_outlined,
+              text: distance == null
+                  ? 'No pinned location to measure against'
+                  : 'Confirmed ${DeliveryProof.formatMetres(distance)} '
+                      'from the delivery pin',
+            ),
+            _ProofLine(
+              icon: order.deliveryCodeVerified
+                  ? Icons.verified_user_outlined
+                  : Icons.remove_moderator_outlined,
+              text: order.deliveryCodeVerified
+                  ? 'Buyer\'s delivery code entered by the rider'
+                  : 'No delivery code on this order',
+            ),
+            if (at != null)
+              _ProofLine(
+                icon: Icons.schedule,
+                text: 'Delivered ${formatRelativeDay(at)} • ${formatClock(at)}',
+              ),
+            if (order.isReceiptConfirmed)
+              _ProofLine(
+                icon: Icons.thumb_up_alt_outlined,
+                text: 'Buyer confirmed receipt '
+                    '${formatRelativeDay(order.receivedConfirmedAt!)} • '
+                    '${formatClock(order.receivedConfirmedAt!)}',
+              ),
+            if (order.isDisputed)
+              const _ProofLine(
+                icon: Icons.report_outlined,
+                text: 'Buyer reported a problem with this delivery',
+                color: orange,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProofLine extends StatelessWidget {
+  const _ProofLine({required this.icon, required this.text, this.color = green});
+
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text, style: const TextStyle(height: 1.35)),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/agri_models.dart';
+import 'delivery_proof.dart';
 import 'document_check.dart';
 
 class CloudDatabase {
@@ -509,12 +510,20 @@ class CloudDatabase {
       'startedAt': now.toUtc().toIso8601String(),
       'createdAt': now.toUtc().toIso8601String(),
     });
+    // One code per drop-off: a buyer with several orders on this trip reads
+    // out a single code, and no buyer can open another buyer's stop.
+    final codes = <String, String>{};
     for (final order in orders) {
+      final code = codes.putIfAbsent(
+        '${order.buyerId}|${order.deliveryAddress}',
+        () => _numericCode(DeliveryProof.codeLength),
+      );
       await advanceOrder(
         order.id,
         OrderStatus.riderAssigned,
         existingTimeline: order.timeline,
         extra: {
+          'deliveryCode': code,
           'riderId': riderId,
           'riderName': riderName,
           'riderPhone': riderPhone,
@@ -548,6 +557,56 @@ class CloudDatabase {
           'completedAt': DateTime.now().toUtc().toIso8601String(),
         },
       );
+
+  // --------------------------------------------------------- delivery proof
+
+  /// Stores the drop-off photo with where and when it was taken.
+  ///
+  /// Kept in its own collection, like verification files, so the order list
+  /// every screen polls does not drag a base64 image along with it.
+  Future<String> uploadDeliveryProof({
+    required List<String> orderIds,
+    required String riderId,
+    required Uint8List photo,
+    required double latitude,
+    required double longitude,
+    double? distanceMetres,
+  }) async {
+    if (photo.length > 750000) {
+      throw Exception('The delivery photo must be smaller than 750 KB.');
+    }
+    final now = DateTime.now();
+    final id = 'proof-${now.millisecondsSinceEpoch}-${_token(5)}';
+    await _create('mobileDeliveryProofs', id, {
+      'id': id,
+      'orderIds': orderIds,
+      'riderId': riderId,
+      'photoBase64': base64Encode(photo),
+      'size': photo.length,
+      'latitude': latitude,
+      'longitude': longitude,
+      if (distanceMetres != null) 'distanceMetres': distanceMetres,
+      'createdAt': now.toUtc().toIso8601String(),
+    });
+    return id;
+  }
+
+  Future<Map<String, dynamic>?> getDeliveryProof(String id) =>
+      getDocument('mobileDeliveryProofs', id);
+
+  /// The buyer's own acknowledgement that the items arrived.
+  Future<void> confirmReceived(String orderId) =>
+      updateDocument('mobileOrders', orderId, {
+        'receivedConfirmedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  /// Flags an order the buyer has reported, so the rider's "delivered" is
+  /// visibly contested until support resolves it.
+  Future<void> markDeliveryDisputed(String orderId) =>
+      updateDocument('mobileOrders', orderId, {
+        'deliveryDisputed': true,
+        'deliveryDisputedAt': DateTime.now().toUtc().toIso8601String(),
+      });
 
   /// Publishes the rider's live position onto every order in the trip so the
   /// buyers watching those orders all see the same pin move.

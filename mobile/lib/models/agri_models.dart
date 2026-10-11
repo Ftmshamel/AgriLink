@@ -393,6 +393,23 @@ class AgriOrder {
   final Map<String, DateTime> timeline;
   final Map<String, dynamic> raw;
 
+  // Proof of delivery. Read straight from [raw] because they are only set on
+  // orders that reach those steps, and older documents never carry them.
+
+  /// Shown to the buyer, typed in by the rider at the door.
+  String get deliveryCode => '${raw['deliveryCode'] ?? ''}';
+
+  /// The photo the rider took at the drop-off, in `mobileDeliveryProofs`.
+  String get deliveryProofId => '${raw['deliveryProofId'] ?? ''}';
+
+  /// How far the rider was from the buyer's pin when they confirmed.
+  double? get deliveredDistanceMetres =>
+      _toDouble(raw['deliveredDistanceMetres']);
+  bool get deliveryCodeVerified => raw['deliveryCodeVerified'] == true;
+  DateTime? get receivedConfirmedAt => _toDate(raw['receivedConfirmedAt']);
+  bool get isReceiptConfirmed => receivedConfirmedAt != null;
+  bool get isDisputed => raw['deliveryDisputed'] == true;
+
   String get emoji => cropEmoji(cropName);
   bool get hasRider => riderId.isNotEmpty;
   int get riderPayout => DeliveryPricing.riderPayout(

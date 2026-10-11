@@ -1559,6 +1559,17 @@ class DeliveryTracking extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (order.status.isWithRider &&
+                    order.deliveryCode.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _DeliveryCodeCard(code: order.deliveryCode),
+                ],
+                if (order.status == OrderStatus.delivered) ...[
+                  const SizedBox(height: 16),
+                  DeliveryProofCard(order: order),
+                  const SizedBox(height: 12),
+                  _ReceiptActions(session: session, order: order),
+                ],
                 const SizedBox(height: 16),
                 Card(
                   child: Padding(
@@ -1654,6 +1665,148 @@ class DeliveryTracking extends StatelessWidget {
           last: index == steps.length - 1,
         ),
     ];
+  }
+}
+
+/// The code the buyer reads out at the door. The rider cannot finish the
+/// drop-off without it, so handing it over is the buyer's signature.
+class _DeliveryCodeCard extends StatelessWidget {
+  const _DeliveryCodeCard({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: lightGreen,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.password, color: green),
+                SizedBox(width: 8),
+                Text(
+                  'Delivery code',
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: Text(
+                code,
+                style: const TextStyle(
+                  fontSize: 36,
+                  letterSpacing: 14,
+                  fontWeight: FontWeight.w900,
+                  color: green,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Give this code to the rider only after you have checked your '
+              'items. Never share it over the phone.',
+              style: TextStyle(color: muted, height: 1.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Lets the buyer close the loop on a delivered order: confirm the items
+/// arrived, or report that they did not.
+class _ReceiptActions extends StatefulWidget {
+  const _ReceiptActions({required this.session, required this.order});
+
+  final AppSession session;
+  final AgriOrder order;
+
+  @override
+  State<_ReceiptActions> createState() => _ReceiptActionsState();
+}
+
+class _ReceiptActionsState extends State<_ReceiptActions> {
+  bool _busy = false;
+
+  Future<void> _run(Future<void> Function() action, String done) async {
+    setState(() => _busy = true);
+    try {
+      await action();
+      widget.session.bump();
+      if (!mounted) return;
+      if (done.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(done)),
+        );
+      }
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _confirm() => _run(
+        () => authService.database.confirmReceived(widget.order.id),
+        'Thanks! Receipt confirmed.',
+      );
+
+  Future<void> _report() => _run(() async {
+        final order = widget.order;
+        final filed = await showReportSheet(
+          context,
+          session: widget.session,
+          farmerId: order.farmerId,
+          farmerName: order.farmerName,
+          cropId: order.cropId,
+          orderId: order.id,
+          riderId: order.riderId,
+          riderName: order.riderName,
+        );
+        if (filed) await authService.database.markDeliveryDisputed(order.id);
+      }, '');
+
+  @override
+  Widget build(BuildContext context) {
+    final order = widget.order;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!order.isReceiptConfirmed && !order.isDisputed)
+          FilledButton.icon(
+            onPressed: _busy ? null : _confirm,
+            icon: const Icon(Icons.check_circle_outline),
+            label: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('I received my order'),
+            ),
+          ),
+        if (!order.isDisputed) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _busy ? null : _report,
+            icon: const Icon(Icons.report_outlined),
+            label: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                order.isReceiptConfirmed
+                    ? 'Report a problem with this order'
+                    : 'Not received / problem with delivery',
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
   }
 }
 
