@@ -632,6 +632,18 @@ class _ProductDetailsState extends State<ProductDetails> {
             onPressed: !_canOrder
                 ? null
                 : () {
+                    final inCart = widget.cart.lineFor(crop.id)?.quantityKg ?? 0;
+                    if (inCart + quantity > crop.quantityKg) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Only ${crop.quantityKg} kg available and you '
+                            'already have $inCart kg in your cart.',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
                     widget.cart.add(crop, quantity);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -677,6 +689,11 @@ class _CartSheetState extends State<CartSheet> {
 
   /// Set only after the worker confirms Xendit marked the invoice paid.
   PaymentInvoice? _paidInvoice;
+
+  /// An invoice the buyer was sent to but has not finished paying. Reused on
+  /// the next tap so they are never asked to pay the same cart twice.
+  PaymentInvoice? _openInvoice;
+  int _openInvoiceAmount = 0;
   final _payments = PaymentService();
 
   /// Every order is paid before it is created. Cash on delivery is not
@@ -692,6 +709,9 @@ class _CartSheetState extends State<CartSheet> {
 
   bool _useWallet = false;
   int? _walletBalance;
+
+  /// Once Xendit has the money the cart must not change under it.
+  bool get _locked => _placing || _paidInvoice != null;
 
   @override
   void initState() {
@@ -775,6 +795,19 @@ class _CartSheetState extends State<CartSheet> {
       _placing = true;
       _error = null;
     });
+    // Nothing is charged until the cart still matches the farms' listings.
+    if (_paidInvoice == null) {
+      final problem = await _verifyCart();
+      if (problem != null) {
+        if (mounted) {
+          setState(() {
+            _error = problem;
+            _placing = false;
+          });
+        }
+        return;
+      }
+    }
     final total = _grandTotal();
     String? walletReference;
     var written = 0;
@@ -855,9 +888,13 @@ class _CartSheetState extends State<CartSheet> {
                 paid ? OrderStatus.preparing.wire : OrderStatus.placed.wire,
           });
           written += line.subtotal + fee;
+          // Off the cart the moment it exists, so a retry after a dropped
+          // connection only places what is still missing.
+          widget.cart.remove(crop.id);
           await authService.database.reduceCropStock(crop.id, line.quantityKg);
         }
       }
+      _paidInvoice = null;
       widget.cart.clear();
       widget.session.bump();
       if (!mounted) return;
@@ -868,21 +905,79 @@ class _CartSheetState extends State<CartSheet> {
         ),
       );
     } catch (error) {
-      // Wallet money for orders that never got written goes straight back.
-      if (walletReference != null && total > written) {
+      // Money already taken for orders that never got written goes to the
+      // wallet, whether it came from the wallet or from Xendit, so nothing is
+      // lost if the buyer gives up and nothing is charged twice if they retry.
+      final paidReference = walletReference ?? _paidInvoice?.reference;
+      var returned = 0;
+      if (paidReference != null && total > written) {
         try {
           await authService.database.reverseWalletPayment(
             userId: user.id,
-            reference: walletReference,
+            reference: paidReference,
             amount: total - written,
           );
+          returned = total - written;
+          if (_paidInvoice != null) {
+            _paidInvoice = null;
+            _useWallet = true;
+          }
         } catch (_) {}
       }
+      await _loadWallet();
       if (!mounted) return;
       setState(() {
-        _error = '$error'.replaceFirst('Exception: ', '');
+        final reason = '$error'.replaceFirst('Exception: ', '');
+        _error = [
+          if (written > 0)
+            'Some orders were placed before the connection dropped; they are '
+                'under Orders.'
+          else
+            reason,
+          if (returned > 0)
+            '${formatPeso(returned)} for the rest is in your AgriLink wallet. '
+                'Pay with Wallet to finish.',
+        ].join(' ');
         _placing = false;
       });
+    }
+  }
+
+  /// Re-reads every listing in the cart. Returns why checkout cannot go
+  /// ahead, or null when stock and prices still hold.
+  Future<String?> _verifyCart() async {
+    try {
+      for (final line in widget.cart.lines) {
+        final fresh = await authService.database.getDocument(
+          'mobileCrops',
+          line.crop.id,
+        );
+        if (fresh == null) {
+          widget.cart.remove(line.crop.id);
+          return '${line.crop.name} is no longer listed and was removed '
+              'from your cart.';
+        }
+        final crop = CropListing.fromMap(fresh);
+        if (!crop.inStock || crop.quantityKg < crop.moqKg) {
+          widget.cart.remove(line.crop.id);
+          return '${line.crop.name} just sold out and was removed from your '
+              'cart.';
+        }
+        if (crop.quantityKg < line.quantityKg) {
+          widget.cart.refresh(crop);
+          return 'Only ${crop.quantityKg} kg of ${crop.name} is left. '
+              'Lower the quantity to continue.';
+        }
+        if (crop.pricePerKg != line.crop.pricePerKg) {
+          widget.cart.refresh(crop);
+          return '${crop.name} is now ₱${crop.pricePerKg}/kg. Check the new '
+              'total, then place the order again.';
+        }
+      }
+      return null;
+    } catch (error) {
+      return 'Could not check the latest stock. '
+          '${'$error'.replaceFirst('Exception: ', '')}';
     }
   }
 
@@ -893,18 +988,36 @@ class _CartSheetState extends State<CartSheet> {
   /// triggers another check.
   Future<bool> _collectPayment() async {
     final total = _grandTotal();
-    final reference = 'AGRILINK-${DateTime.now().millisecondsSinceEpoch}';
     final PaymentInvoice invoice;
-    try {
-      invoice = await _payments.createInvoice(
-        amount: total,
-        reference: reference,
-        description: 'AgriLink order \u2022 ${widget.cart.lines.length} item'
-            '${widget.cart.lines.length == 1 ? '' : 's'}',
-      );
-    } on PaymentException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-      return false;
+    final reusable = _openInvoice;
+    if (reusable != null && _openInvoiceAmount == total) {
+      invoice = reusable;
+    } else {
+      final reference = 'AGRILINK-${DateTime.now().millisecondsSinceEpoch}';
+      try {
+        invoice = await _payments.createInvoice(
+          amount: total,
+          reference: reference,
+          description:
+              'AgriLink order \u2022 ${widget.cart.lines.length} item'
+              '${widget.cart.lines.length == 1 ? '' : 's'}',
+        );
+      } on PaymentException catch (error) {
+        if (mounted) setState(() => _error = error.message);
+        return false;
+      }
+      _openInvoice = invoice;
+      _openInvoiceAmount = total;
+      // If the buyer pays after giving up on this screen, the money is not
+      // lost: the wallet credits any recorded invoice Xendit reports paid.
+      try {
+        await authService.database.recordCashInRequest(
+          userId: widget.session.user.id,
+          invoiceId: invoice.id,
+          amount: total,
+          reference: reference,
+        );
+      } catch (_) {}
     }
 
     final opened = await launchUrl(
@@ -929,8 +1042,20 @@ class _CartSheetState extends State<CartSheet> {
         onChannel: _recordChannel,
       ),
     );
-    if (confirmed != true) return false;
+    if (confirmed != true) {
+      if (mounted) {
+        setState(() => _error = 'Payment not confirmed yet. Tap Place order '
+            'to check again. If you pay after leaving, the amount goes to '
+            'your AgriLink wallet.');
+      }
+      return false;
+    }
+    // Paid for this order, so the wallet must not credit it as well.
+    try {
+      await authService.database.closeCashInRequest(invoice.id, 'used');
+    } catch (_) {}
     _paidInvoice = invoice;
+    _openInvoice = null;
     return true;
   }
 
@@ -1061,12 +1186,20 @@ class _CartSheetState extends State<CartSheet> {
                         ),
                         IconButton(
                           tooltip: 'Remove',
-                          onPressed: () => widget.cart.remove(line.crop.id),
+                          onPressed: _locked
+                              ? null
+                              : () => widget.cart.remove(line.crop.id),
                           icon: const Icon(Icons.close, size: 18),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    _QuantityStepper(
+                      line: line,
+                      enabled: !_locked,
+                      onChanged: (kg) =>
+                          widget.cart.setQuantity(line.crop.id, kg),
+                    ),
+                    const SizedBox(height: 10),
                   ],
                   const Divider(height: 24),
                   MoneyRow(label: 'Subtotal', value: formatPeso(subtotal)),
@@ -1247,7 +1380,11 @@ class _CartSheetState extends State<CartSheet> {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: _placing ? null : _placeOrder,
+                      onPressed: _placing ||
+                              (_useWallet &&
+                                  (_walletBalance ?? 0) < subtotal + delivery)
+                          ? null
+                          : _placeOrder,
                       child: Padding(
                         padding: const EdgeInsets.all(14),
                         child: Text(
@@ -1267,6 +1404,54 @@ class _CartSheetState extends State<CartSheet> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Changes a cart line in steps of the farm's minimum order, never below it
+/// and never past the stock the listing had when it was added.
+class _QuantityStepper extends StatelessWidget {
+  const _QuantityStepper({
+    required this.line,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final CartLine line;
+  final bool enabled;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final crop = line.crop;
+    final step = crop.moqKg > 0 ? crop.moqKg : 1;
+    final kg = line.quantityKg;
+    return Row(
+      children: [
+        const SizedBox(width: 64),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          tooltip: 'Less',
+          onPressed: enabled && kg - step >= crop.moqKg
+              ? () => onChanged(kg - step)
+              : null,
+          icon: const Icon(Icons.remove_circle_outline, size: 22),
+        ),
+        Text('$kg kg', style: const TextStyle(fontWeight: FontWeight.w800)),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          tooltip: 'More',
+          onPressed: enabled && kg + step <= crop.quantityKg
+              ? () => onChanged(kg + step)
+              : null,
+          icon: const Icon(Icons.add_circle_outline, size: 22),
+        ),
+        const Spacer(),
+        Text(
+          '${crop.quantityKg} kg left',
+          style: const TextStyle(color: muted, fontSize: 11),
+        ),
+      ],
     );
   }
 }
