@@ -473,6 +473,14 @@ class AgriOrder {
   /// The photo the rider took at the drop-off, in `mobileDeliveryProofs`.
   String get deliveryProofId => '${raw['deliveryProofId'] ?? ''}';
 
+  /// The photo the rider took when collecting at the farm.
+  String get pickupProofId => '${raw['pickupProofId'] ?? ''}';
+
+  /// The rider confirmed away from the pin after GPS kept failing.
+  bool get deliveredOutsidePin => raw['deliveredOutsidePin'] == true;
+  bool get pickupOutsidePin => raw['pickupOutsidePin'] == true;
+  double? get pickupDistanceMetres => _toDouble(raw['pickupDistanceMetres']);
+
   /// How far the rider was from the buyer's pin when they confirmed.
   double? get deliveredDistanceMetres =>
       _toDouble(raw['deliveredDistanceMetres']);

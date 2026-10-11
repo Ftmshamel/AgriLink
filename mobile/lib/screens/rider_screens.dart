@@ -1161,6 +1161,149 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
 
   List<AgriOrder> _liveOrders = const [];
 
+  /// When each stop first refused this rider's position, for the GPS
+  /// override.
+  final Map<String, DateTime> _firstMiss = {};
+
+  String _stopKey(TripStop stop) =>
+      '${stop.kind.name}-${stop.orders.map((order) => order.id).join(',')}';
+
+  /// Checks the rider is at [stop] with a fresh, non-mocked GPS fix.
+  ///
+  /// Returns where they are and the result, or null when they may not confirm
+  /// yet (the reason has been shown). After [DeliveryProof.gpsOverrideAfter]
+  /// of being refused at the same stop they may confirm anyway, and the stop
+  /// is marked as confirmed outside the pin.
+  Future<({LatLng? here, GeofenceResult geofence})?> _checkPosition(
+    TripStop stop,
+  ) async {
+    final key = _stopKey(stop);
+    Position? fix;
+    String problem;
+    try {
+      fix = await GeoService.freshFix();
+      problem = '';
+    } on TimeoutException {
+      problem = 'Could not get a GPS fix. Step outside or near a window and '
+          'try again.';
+    } catch (error) {
+      problem = '$error'.replaceFirst('Exception: ', '');
+    }
+    LatLng? here;
+    GeofenceResult? result;
+    if (fix != null) {
+      here = LatLng(fix.latitude, fix.longitude);
+      _devicePoint = here;
+      result = DeliveryProof.checkGeofence(
+        rider: here,
+        drop: stop.point,
+        mocked: fix.isMocked,
+        pickup: stop.isPickup,
+      );
+      if (result.allowed) {
+        _firstMiss.remove(key);
+        return (here: here, geofence: result);
+      }
+      if (result.mocked) {
+        _fail(result.message);
+        return null;
+      }
+      problem = result.message;
+    }
+
+    final now = DateTime.now();
+    final firstMiss = _firstMiss.putIfAbsent(key, () => now);
+    if (!DeliveryProof.canOverride(firstMiss, now)) {
+      final wait = DeliveryProof.gpsOverrideAfter - now.difference(firstMiss);
+      _fail('$problem If GPS is wrong here, you can confirm anyway in '
+          '${wait.inMinutes + 1} min.');
+      return null;
+    }
+    if (!mounted) return null;
+    setState(() => _busy = false);
+    final what = stop.isPickup ? 'pickup' : 'delivery';
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('GPS still can\'t place you here'),
+        content: Text(
+          '$problem\n\nConfirm anyway? The ${stop.isPickup ? 'farm' : 'buyer'} '
+          'and AgriLink support will see that this $what was confirmed '
+          'outside the pin.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Confirm anyway'),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true) return null;
+    return (
+      here: here ?? _devicePoint,
+      geofence: DeliveryProof.overridden(result?.distanceMetres),
+    );
+  }
+
+  /// A camera photo for the proof; null if the rider backs out.
+  Future<Uint8List?> _takeProofPhoto() async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 55,
+      maxWidth: 1280,
+    );
+    if (file == null) return null;
+    final bytes = await file.readAsBytes();
+    if (bytes.length > 750000) {
+      _fail('That photo is too large. Take it again a little further back.');
+      return null;
+    }
+    return bytes;
+  }
+
+  /// A pickup counts once the rider is at the farm and has photographed the
+  /// load, so the farm can see what left with whom.
+  Future<void> _confirmPickup(
+    TripStop stop,
+    List<AgriOrder> allOrders,
+  ) async {
+    setState(() => _busy = true);
+    final checked = await _checkPosition(stop);
+    if (checked == null || !mounted) return;
+    setState(() => _busy = false);
+    final photo = await _takeProofPhoto();
+    if (photo == null || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final here = checked.here;
+      final geofence = checked.geofence;
+      final proofId = await authService.database.uploadDeliveryProof(
+        orderIds: stop.orders.map((order) => order.id).toList(),
+        riderId: widget.session.user.id,
+        photo: photo,
+        latitude: here?.latitude,
+        longitude: here?.longitude,
+        distanceMetres: geofence.distanceMetres,
+        kind: 'pickup',
+        outsidePin: geofence.overridden,
+      );
+      await _completeStop(stop, allOrders, extra: {
+        'pickupProofId': proofId,
+        if (geofence.distanceMetres != null)
+          'pickupDistanceMetres': geofence.distanceMetres,
+        if (geofence.overridden) 'pickupOutsidePin': true,
+      });
+    } catch (error) {
+      _fail('$error'.replaceFirst('Exception: ', ''));
+    }
+  }
+
   /// A drop-off only counts once the rider proves three things: they are at
   /// the buyer's pin (fresh, non-mocked GPS), the buyer handed over their code,
   /// and there is a photo of the items at the door.
@@ -1169,29 +1312,10 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
     List<AgriOrder> allOrders,
   ) async {
     setState(() => _busy = true);
-    Position fix;
-    try {
-      fix = await GeoService.freshFix();
-    } on TimeoutException {
-      _fail('Could not get a GPS fix. Step outside or near a window and '
-          'try again.');
-      return;
-    } catch (error) {
-      _fail('$error'.replaceFirst('Exception: ', ''));
-      return;
-    }
-    final here = LatLng(fix.latitude, fix.longitude);
-    _devicePoint = here;
-    final geofence = DeliveryProof.checkGeofence(
-      rider: here,
-      drop: stop.point,
-      mocked: fix.isMocked,
-    );
-    if (!geofence.allowed) {
-      _fail(geofence.message);
-      return;
-    }
-    if (!mounted) return;
+    final checked = await _checkPosition(stop);
+    if (checked == null || !mounted) return;
+    final here = checked.here;
+    final geofence = checked.geofence;
     setState(() => _busy = false);
 
     final proof = await showDialog<Uint8List>(
@@ -1207,16 +1331,18 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
         orderIds: stop.orders.map((order) => order.id).toList(),
         riderId: widget.session.user.id,
         photo: proof,
-        latitude: here.latitude,
-        longitude: here.longitude,
+        latitude: here?.latitude,
+        longitude: here?.longitude,
         distanceMetres: geofence.distanceMetres,
+        outsidePin: geofence.overridden,
       );
       await _completeStop(stop, allOrders, extra: {
         'deliveryProofId': proofId,
-        'deliveredLatitude': here.latitude,
-        'deliveredLongitude': here.longitude,
+        if (here != null) 'deliveredLatitude': here.latitude,
+        if (here != null) 'deliveredLongitude': here.longitude,
         if (geofence.distanceMetres != null)
           'deliveredDistanceMetres': geofence.distanceMetres,
+        if (geofence.overridden) 'deliveredOutsidePin': true,
         'deliveryCodeVerified': DeliveryProof.requiresCode(stop.orders),
       });
     } catch (error) {
@@ -1578,13 +1704,29 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                   const SizedBox(height: 10),
                 ],
                 const SizedBox(height: 6),
+                if (!stop.isComplete && !(!stop.isPickup && pickupsLeft > 0))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      stop.isPickup
+                          ? 'Tapping below checks you are within '
+                              '${DeliveryProof.geofenceMetres.round()} m of '
+                              'the farm and opens the camera for a photo of '
+                              'the load.'
+                          : 'Tapping below checks you are within '
+                              '${DeliveryProof.geofenceMetres.round()} m of '
+                              'the buyer, then asks for their code and a '
+                              'photo.',
+                      style: const TextStyle(color: muted, fontSize: 12),
+                    ),
+                  ),
                 FilledButton.icon(
                   onPressed: _busy || stop.isComplete
                       ? null
                       : !stop.isPickup && pickupsLeft > 0
                           ? null
                           : stop.isPickup
-                              ? () => _completeStop(stop, orders)
+                              ? () => _confirmPickup(stop, orders)
                               : () => _confirmDelivery(stop, orders),
                   icon: const Icon(Icons.check_circle_outline),
                   label: Padding(

@@ -127,7 +127,8 @@ class PaymentService {
     final body = await _send(
       () => _client
           .get(
-            Uri.parse('$baseUrl/invoice?id=${Uri.encodeQueryComponent(invoiceId)}'),
+            Uri.parse(
+                '$baseUrl/invoice?id=${Uri.encodeQueryComponent(invoiceId)}'),
             headers: _headers,
           )
           .timeout(_timeout),
@@ -175,8 +176,15 @@ class PaymentService {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      // The worker forwards Xendit's own wording, which says far more than the
-      // status code does.
+      // A misconfigured or unreachable worker is our problem, not the buyer's,
+      // and its wording ("XENDIT_SECRET is not set") means nothing to them.
+      if (response.statusCode >= 500 || response.statusCode == 403) {
+        throw const PaymentException(
+          'Payment is temporarily unavailable. Please try again in a moment.',
+        );
+      }
+      // Anything else is about this request - a bad amount, a repeated
+      // reference - and Xendit's own wording says far more than a code does.
       final detail = '${decoded['error'] ?? ''}'.trim();
       throw PaymentException(
         detail.isEmpty

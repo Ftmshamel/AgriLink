@@ -69,6 +69,41 @@ void main() {
       expect(result.message, contains('mock-location'));
     });
 
+    test('checks pickups against the farm pin', () {
+      final result = DeliveryProof.checkGeofence(
+        rider: const LatLng(15.4900, 120.9734),
+        drop: drop,
+        pickup: true,
+      );
+      expect(result.allowed, isFalse);
+      expect(result.message, contains("the farm's pin"));
+      expect(result.message, contains('confirm pickup'));
+    });
+
+    test('a mock location is flagged so it can never be overridden', () {
+      final result =
+          DeliveryProof.checkGeofence(rider: drop, drop: drop, mocked: true);
+      expect(result.mocked, isTrue);
+    });
+
+    test('a rider stuck outside the pin may confirm after three minutes', () {
+      final first = DateTime(2026, 10, 11, 9);
+      expect(DeliveryProof.canOverride(null, first), isFalse);
+      expect(
+        DeliveryProof.canOverride(first, first.add(const Duration(minutes: 2))),
+        isFalse,
+      );
+      expect(
+        DeliveryProof.canOverride(first, first.add(const Duration(minutes: 3))),
+        isTrue,
+      );
+      final overridden = DeliveryProof.overridden(420);
+      expect(overridden.allowed, isTrue);
+      expect(overridden.overridden, isTrue);
+      expect(overridden.message, contains('420 m'));
+      expect(DeliveryProof.overridden(null).message, contains('without a GPS'));
+    });
+
     test('allows an unpinned buyer but records no distance', () {
       final result = DeliveryProof.checkGeofence(rider: drop, drop: null);
       expect(result.allowed, isTrue);
@@ -175,6 +210,22 @@ void main() {
       expect(delivered.deliveredDistanceMetres, closeTo(14.2, 0.01));
       expect(delivered.deliveryCodeVerified, isTrue);
       expect(delivered.isReceiptConfirmed, isFalse);
+    });
+
+    test('a pickup photo is stored with its kind and override flag',
+        () async {
+      final proofId = await db.uploadDeliveryProof(
+        orderIds: const ['order-1'],
+        riderId: 'rider-1',
+        photo: Uint8List.fromList(List.generate(16, (i) => i)),
+        kind: 'pickup',
+        outsidePin: true,
+      );
+      final proof = (await db.getDeliveryProof(proofId))!;
+      expect(proof['kind'], 'pickup');
+      expect(proof['outsidePin'], isTrue);
+      expect(proof.containsKey('latitude'), isFalse,
+          reason: 'no GPS fix means no position is invented');
     });
 
     test('an oversized delivery photo is refused', () async {

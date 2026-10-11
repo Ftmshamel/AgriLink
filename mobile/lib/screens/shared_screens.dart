@@ -496,13 +496,23 @@ class _DeliveryProofCardState extends State<DeliveryProofCard> {
                 },
               ),
             const SizedBox(height: 12),
-            _ProofLine(
-              icon: Icons.where_to_vote_outlined,
-              text: distance == null
-                  ? 'No pinned location to measure against'
-                  : 'Confirmed ${DeliveryProof.formatMetres(distance)} '
-                      'from the delivery pin',
-            ),
+            if (order.deliveredOutsidePin)
+              _ProofLine(
+                icon: Icons.wrong_location_outlined,
+                color: orange,
+                text: distance == null
+                    ? 'Confirmed without a GPS fix after GPS kept failing'
+                    : 'Confirmed ${DeliveryProof.formatMetres(distance)} from '
+                        'the delivery pin after GPS kept failing',
+              )
+            else
+              _ProofLine(
+                icon: Icons.where_to_vote_outlined,
+                text: distance == null
+                    ? 'No pinned location to measure against'
+                    : 'Confirmed ${DeliveryProof.formatMetres(distance)} '
+                        'from the delivery pin',
+              ),
             _ProofLine(
               icon: order.deliveryCodeVerified
                   ? Icons.verified_user_outlined
@@ -529,6 +539,76 @@ class _DeliveryProofCardState extends State<DeliveryProofCard> {
                 text: 'Buyer reported a problem with this delivery',
                 color: orange,
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The photo the rider took when collecting at the farm, with where it was
+/// taken, for the farm's order details.
+class PickupProofCard extends StatelessWidget {
+  const PickupProofCard({super.key, required this.order});
+
+  final AgriOrder order;
+
+  @override
+  Widget build(BuildContext context) {
+    final distance = order.pickupDistanceMetres;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Proof of pickup',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            FutureBuilder<Map<String, dynamic>?>(
+              future:
+                  authService.database.getDeliveryProof(order.pickupProofId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const SizedBox(
+                    height: 160,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                final photo = '${snapshot.data?['photoBase64'] ?? ''}';
+                if (photo.isEmpty) {
+                  return const Text(
+                    'The pickup photo could not be loaded.',
+                    style: TextStyle(color: muted),
+                  );
+                }
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    base64Decode(photo),
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 6),
+            _ProofLine(
+              icon: order.pickupOutsidePin
+                  ? Icons.wrong_location_outlined
+                  : Icons.where_to_vote_outlined,
+              color: order.pickupOutsidePin ? orange : green,
+              text: distance == null
+                  ? order.pickupOutsidePin
+                      ? 'Collected without a GPS fix after GPS kept failing'
+                      : 'No farm pin to measure against'
+                  : 'Collected ${DeliveryProof.formatMetres(distance)} from '
+                      'the farm pin'
+                      '${order.pickupOutsidePin ? ' after GPS kept failing' : ''}',
+            ),
           ],
         ),
       ),

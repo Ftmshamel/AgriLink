@@ -1487,6 +1487,10 @@ class FarmerOrderDetails extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 ..._timeline(order),
+                if (order.pickupProofId.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  PickupProofCard(order: order),
+                ],
               ],
             ),
           );

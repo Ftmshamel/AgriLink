@@ -804,7 +804,7 @@ class CloudDatabase {
 
   // --------------------------------------------------------- delivery proof
 
-  /// Stores the drop-off photo with where and when it was taken.
+  /// Stores a pickup or drop-off photo with where and when it was taken.
   ///
   /// Kept in its own collection, like verification files, so the order list
   /// every screen polls does not drag a base64 image along with it.
@@ -812,12 +812,14 @@ class CloudDatabase {
     required List<String> orderIds,
     required String riderId,
     required Uint8List photo,
-    required double latitude,
-    required double longitude,
+    double? latitude,
+    double? longitude,
     double? distanceMetres,
+    String kind = 'delivery',
+    bool outsidePin = false,
   }) async {
     if (photo.length > 750000) {
-      throw Exception('The delivery photo must be smaller than 750 KB.');
+      throw Exception('The $kind photo must be smaller than 750 KB.');
     }
     final now = DateTime.now();
     final id = 'proof-${now.millisecondsSinceEpoch}-${_token(5)}';
@@ -825,11 +827,13 @@ class CloudDatabase {
       'id': id,
       'orderIds': orderIds,
       'riderId': riderId,
+      'kind': kind,
       'photoBase64': base64Encode(photo),
       'size': photo.length,
-      'latitude': latitude,
-      'longitude': longitude,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
       if (distanceMetres != null) 'distanceMetres': distanceMetres,
+      if (outsidePin) 'outsidePin': true,
       'createdAt': now.toUtc().toIso8601String(),
     });
     return id;
