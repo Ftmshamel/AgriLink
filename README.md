@@ -217,7 +217,15 @@ storeFile=C:\\Users\\<you>\\agrilink-release.jks
 ```
 
 Then `flutter build apk --release`. Without `key.properties` the release
-build is signed with the debug key. GitHub Actions
+build is signed with the debug key.
+
+The APK that GitHub Actions builds takes its payment and email settings from
+the repository's **Settings → Secrets and variables → Actions**:
+`AGRILINK_PAYMENTS_URL`, `AGRILINK_PAYMENTS_TOKEN` (the Xendit worker),
+`AGRILINK_GCASH_NUMBER`, `AGRILINK_EMAIL_PROVIDER`, `AGRILINK_EMAIL_API_KEY`,
+`AGRILINK_EMAIL_SENDER`, and for EmailJS `AGRILINK_EMAILJS_SERVICE_ID`,
+`AGRILINK_EMAILJS_TEMPLATE_ID`, `AGRILINK_EMAILJS_PUBLIC_KEY`. After changing
+them, run the workflow from the Actions tab (**Run workflow**) for a new APK. GitHub Actions
 (`.github/workflows/mobile.yml`) runs `flutter analyze`, `flutter test` and a
 release build on every push that touches `mobile/`, and keeps the APK as a
 download.
