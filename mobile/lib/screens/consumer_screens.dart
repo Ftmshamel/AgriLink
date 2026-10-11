@@ -11,9 +11,12 @@ import '../services/payment_service.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
+import '../services/notifications.dart';
 import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
+import 'auth_screens.dart';
 import 'shared_screens.dart';
 
 class ConsumerShell extends StatefulWidget {
@@ -168,6 +171,14 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                       ],
                     ),
                   ),
+                  NotificationBell(
+                    session: widget.session,
+                    load: () async => NoticeFeed.forConsumer(
+                      await authService.database
+                          .listAgriOrders(buyerId: widget.session.user.id),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   ListenableBuilder(
                     listenable: widget.cart,
                     builder: (context, _) => Badge(
@@ -761,7 +772,28 @@ class _CartSheetState extends State<CartSheet> {
     if (mounted) setState(() => _rates = rates);
   }
 
-  String get _area => AgriOrder.areaOf(widget.session.user.location);
+  /// A one-off drop-off for this order, e.g. a second branch. Null means the
+  /// address pinned on the profile.
+  LocationSelection? _dropOverride;
+
+  LatLng? get _dropPoint => _dropOverride?.point ?? widget.session.user.point;
+  String get _dropAddress =>
+      _dropOverride?.address ?? widget.session.user.location;
+
+  Future<void> _pickAddress() async {
+    final result = await Navigator.push<LocationSelection>(
+      context,
+      MaterialPageRoute(builder: (_) => const LocationPickerPage()),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _dropOverride = result;
+      _poolOrders = null;
+    });
+    _loadPool();
+  }
+
+  String get _area => AgriOrder.areaOf(_dropAddress);
 
   Future<void> _loadPool() async {
     try {
@@ -801,8 +833,8 @@ class _CartSheetState extends State<CartSheet> {
           'quantityKg': entry.value
               .fold<int>(0, (sum, line) => sum + line.quantityKg),
           'deliveryFee': fees[entry.key] ?? DeliveryPricing.fallbackFee,
-          'deliveryLatitude': user.latitude,
-          'deliveryLongitude': user.longitude,
+          'deliveryLatitude': _dropPoint?.latitude,
+          'deliveryLongitude': _dropPoint?.longitude,
           'farmLatitude': entry.value.first.crop.latitude,
           'farmLongitude': entry.value.first.crop.longitude,
         }),
@@ -963,7 +995,7 @@ class _CartSheetState extends State<CartSheet> {
 
   /// Straight-line distance from each farm in the cart to the buyer.
   Map<String, ({String farm, double km})> _farmDistances() {
-    final buyer = widget.session.user.point;
+    final buyer = _dropPoint;
     final result = <String, ({String farm, double km})>{};
     for (final line in widget.cart.lines) {
       final farm = line.crop.point;
@@ -982,7 +1014,7 @@ class _CartSheetState extends State<CartSheet> {
 
   /// One delivery fee per farm, based on that farm's distance to the buyer.
   Map<String, int> _feesByFarm() {
-    final buyer = widget.session.user.point;
+    final buyer = _dropPoint;
     final fees = <String, int>{};
     final grouped = <String, List<CartLine>>{};
     for (final line in widget.cart.lines) {
@@ -1002,7 +1034,7 @@ class _CartSheetState extends State<CartSheet> {
 
   Future<void> _placeOrder() async {
     final user = widget.session.user;
-    if (user.point == null || user.location.isEmpty) {
+    if (_dropPoint == null || _dropAddress.isEmpty) {
       setState(() => _error =
           'Add a delivery address in your profile before checking out.');
       return;
@@ -1107,9 +1139,9 @@ class _CartSheetState extends State<CartSheet> {
             'pricePerKg': crop.pricePerKg,
             'totalPrice': line.subtotal,
             'deliveryFee': fee,
-            'deliveryAddress': user.location,
-            'deliveryLatitude': user.latitude,
-            'deliveryLongitude': user.longitude,
+            'deliveryAddress': _dropAddress,
+            'deliveryLatitude': _dropPoint!.latitude,
+            'deliveryLongitude': _dropPoint!.longitude,
             'farmLocation': crop.farmLocation,
             'farmLatitude': crop.latitude,
             'farmLongitude': crop.longitude,
@@ -1488,24 +1520,59 @@ class _CartSheetState extends State<CartSheet> {
                   ),
                   const SizedBox(height: 18),
                   Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.location_on_outlined, color: green),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              widget.session.user.location.isEmpty
-                                  ? 'No delivery address pinned yet'
-                                  : widget.session.user.location,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: _locked ? null : _pickAddress,
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.location_on_outlined,
+                              color: green,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _dropAddress.isEmpty
+                                        ? 'No delivery address pinned yet'
+                                        : _dropAddress,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    _dropOverride == null
+                                        ? 'Saved address • tap to deliver '
+                                            'somewhere else'
+                                        : 'For this order only',
+                                    style: const TextStyle(
+                                      color: muted,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            if (_dropOverride != null && !_locked)
+                              IconButton(
+                                tooltip: 'Use saved address',
+                                onPressed: () => setState(() {
+                                  _dropOverride = null;
+                                  _poolOrders = null;
+                                  _loadPool();
+                                }),
+                                icon: const Icon(Icons.undo, size: 20),
+                              )
+                            else
+                              const Icon(Icons.edit_location_alt_outlined,
+                                  color: muted),
+                          ],
+                        ),
                       ),
                     ),
                   ),
