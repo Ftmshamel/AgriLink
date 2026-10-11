@@ -1600,6 +1600,24 @@ class DeliveryTracking extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 ..._timeline(order),
+                if (order.deliveryPhotoBase64 != null &&
+                    order.deliveryPhotoBase64!.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Proof of delivery',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.memory(
+                      base64Decode(order.deliveryPhotoBase64!),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 220,
+                    ),
+                  ),
+                ],
               ],
             ),
           );

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1067,10 +1069,39 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
   bool _busy = false;
   DateTime? _lastBroadcast;
   LatLng? _devicePoint;
+  final Map<String, DateTime> _stopWaitStart = {};
 
   /// Publishing every GPS tick would hammer Firestore; once every 12 seconds
   /// is smooth enough for a buyer watching the pin.
   static const _broadcastGap = Duration(seconds: 12);
+
+  /// How close the rider's GPS fix must be before a stop can be confirmed.
+  static const _confirmRadiusKm = 0.15;
+
+  /// A rider stuck outside that radius this long unlocks the button anyway —
+  /// farms and rural drop-offs can leave GPS stuck on a stale or missing fix,
+  /// and that shouldn't be able to strand a real delivery.
+  static const _confirmOverride = Duration(minutes: 3);
+
+  String _stopKey(TripStop stop) =>
+      '${stop.kind}-${stop.orders.map((order) => order.id).join(',')}';
+
+  /// Whether [stop] is close enough to confirm right now, either because the
+  /// rider's GPS fix is within [_confirmRadiusKm] or because they've been
+  /// stuck outside it long enough that a bad fix is more likely than a
+  /// skipped stop.
+  bool _canConfirm(TripStop stop) {
+    if (stop.point == null) return true;
+    final key = _stopKey(stop);
+    final distance =
+        _devicePoint == null ? null : GeoService.distanceKm(_devicePoint!, stop.point!);
+    if (distance != null && distance <= _confirmRadiusKm) {
+      _stopWaitStart.remove(key);
+      return true;
+    }
+    final since = _stopWaitStart.putIfAbsent(key, DateTime.now);
+    return DateTime.now().difference(since) >= _confirmOverride;
+  }
 
   Future<List<AgriOrder>> _loadOrders() async {
     final mine = await authService.database.listAgriOrders(
@@ -1114,11 +1145,37 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
 
   List<AgriOrder> _liveOrders = const [];
 
+  /// Opens the camera for a proof-of-pickup/delivery photo. Returns null if
+  /// the rider backs out or the shot is too large, in which case the stop is
+  /// left unconfirmed — a photo is required, not optional.
+  Future<String?> _captureProof(TripStop stop) async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 55,
+      maxWidth: 1280,
+    );
+    if (file == null || !mounted) return null;
+    final bytes = await file.readAsBytes();
+    if (bytes.length > 900000) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('That photo is too large. Try again.')),
+        );
+      }
+      return null;
+    }
+    return base64Encode(bytes);
+  }
+
   Future<void> _completeStop(TripStop stop, List<AgriOrder> allOrders) async {
+    final proof = await _captureProof(stop);
+    if (proof == null || !mounted) return;
     setState(() => _busy = true);
     try {
       final next =
           stop.isPickup ? OrderStatus.pickedUp : OrderStatus.delivered;
+      final proofField =
+          stop.isPickup ? 'pickupPhotoBase64' : 'deliveryPhotoBase64';
       for (final order in stop.orders) {
         await authService.database.advanceOrder(
           order.id,
@@ -1129,6 +1186,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
             if (_devicePoint != null)
               'riderLongitude': _devicePoint!.longitude,
             'riderUpdatedAt': DateTime.now().toUtc().toIso8601String(),
+            proofField: proof,
           },
         );
       }
@@ -1267,6 +1325,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
           final pickupsLeft = stops
               .where((s) => s.isPickup && !s.isComplete)
               .length;
+          final canConfirm = _canConfirm(stop);
 
           return LiveRefreshView(
             loading: data.loading,
@@ -1455,12 +1514,29 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                   const SizedBox(height: 10),
                 ],
                 const SizedBox(height: 6),
+                if (!stop.isComplete &&
+                    !(!stop.isPickup && pickupsLeft > 0)) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      canConfirm
+                          ? 'Tapping below opens your camera for a proof photo.'
+                          : 'Move within 150 m of the '
+                              '${stop.isPickup ? 'farm' : 'address'} to unlock '
+                              'this. Stuck on GPS? It unlocks on its own after '
+                              'a few minutes.',
+                      style: const TextStyle(color: muted, fontSize: 12),
+                    ),
+                  ),
+                ],
                 FilledButton.icon(
                   onPressed: _busy || stop.isComplete
                       ? null
                       : !stop.isPickup && pickupsLeft > 0
                           ? null
-                          : () => _completeStop(stop, orders),
+                          : !canConfirm
+                              ? null
+                              : () => _completeStop(stop, orders),
                   icon: const Icon(Icons.check_circle_outline),
                   label: Padding(
                     padding: const EdgeInsets.all(14),
@@ -1470,9 +1546,11 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                           : !stop.isPickup && pickupsLeft > 0
                               ? 'Finish $pickupsLeft pickup'
                                   '${pickupsLeft == 1 ? '' : 's'} first'
-                              : stop.isPickup
-                                  ? 'Confirm pickup & continue'
-                                  : 'Confirm delivery & continue',
+                              : !canConfirm
+                                  ? 'Get closer to confirm'
+                                  : stop.isPickup
+                                      ? 'Confirm pickup & continue'
+                                      : 'Confirm delivery & continue',
                     ),
                   ),
                 ),

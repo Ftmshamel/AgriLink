@@ -288,6 +288,8 @@ class AgriOrder {
     required this.riderLatitude,
     required this.riderLongitude,
     required this.riderUpdatedAt,
+    required this.pickupPhotoBase64,
+    required this.deliveryPhotoBase64,
     required this.tripId,
     required this.createdAt,
     required this.timeline,
@@ -336,6 +338,11 @@ class AgriOrder {
       riderLatitude: _toDouble(map['riderLatitude']),
       riderLongitude: _toDouble(map['riderLongitude']),
       riderUpdatedAt: _toDate(map['riderUpdatedAt']),
+      pickupPhotoBase64:
+          map['pickupPhotoBase64'] is String ? map['pickupPhotoBase64'] : null,
+      deliveryPhotoBase64: map['deliveryPhotoBase64'] is String
+          ? map['deliveryPhotoBase64']
+          : null,
       tripId: '${map['tripId'] ?? ''}',
       createdAt: _toDate(map['createdAt']),
       timeline: timeline,
@@ -388,6 +395,8 @@ class AgriOrder {
   final double? riderLatitude;
   final double? riderLongitude;
   final DateTime? riderUpdatedAt;
+  final String? pickupPhotoBase64;
+  final String? deliveryPhotoBase64;
   final String tripId;
   final DateTime? createdAt;
   final Map<String, DateTime> timeline;
