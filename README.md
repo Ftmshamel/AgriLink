@@ -16,6 +16,7 @@ riders, and superadministrators in one agricultural marketplace.
 - Verified proof of delivery: geofence, buyer code, photo, and buyer receipt
 - AgriLink Wallet: cash in through Xendit, pay from the balance, get refunds
 - Same-day or scheduled delivery, with cancellation up to 5 days before
+- In-app notification inbox for every role
 - Cloud-backed account and marketplace data
 
 ## API integration
@@ -49,7 +50,8 @@ the balance is the sum of its entries, which are never edited or deleted.
 - Without `AGRILINK_PAYMENTS_URL`, cash-in adds clearly labelled demo funds so
   the flow can be shown without a payment gateway.
 
-At checkout the buyer picks **Same day** or a **scheduled date** (up to 60
+The checkout delivers to the address pinned on the profile, or the buyer can
+pin another one for that order only. At checkout the buyer picks **Same day** or a **scheduled date** (up to 60
 days ahead). Riders deliver from 6:00 AM, and the same-day cutoff is 6:00 PM:
 an order placed from 6:00 PM to midnight is delivered the next day, while one
 placed between midnight and 6:00 AM is still same-day, starting at 6:00 AM.
@@ -186,6 +188,39 @@ AgriLink/
 
 The root `flutter/` directory, when present locally, contains the Flutter SDK
 used by the development environment and is not part of the application source.
+
+## Notifications
+
+Each role has a bell on its home screen with an unread count: buyers hear
+about every step of their orders (including their delivery code and refunds),
+farms about new orders, ratings and payouts, riders about packed orders
+waiting and payouts, and superadmins about applications and disputes. The
+inbox is built from the orders' own timelines, so it needs no server; true
+push notifications to a closed app need Firebase Cloud Messaging and a sender
+such as a Cloud Function.
+
+## Release build
+
+The app installs as `ph.agrilink.mobile`. To sign a release APK, create a
+keystore and `mobile/android/key.properties` (both are git-ignored):
+
+```powershell
+keytool -genkey -v -keystore $env:USERPROFILE\agrilink-release.jks `
+  -keyalg RSA -keysize 2048 -validity 10000 -alias agrilink
+```
+
+```properties
+storePassword=<password>
+keyPassword=<password>
+keyAlias=agrilink
+storeFile=C:\\Users\\<you>\\agrilink-release.jks
+```
+
+Then `flutter build apk --release`. Without `key.properties` the release
+build is signed with the debug key. GitHub Actions
+(`.github/workflows/mobile.yml`) runs `flutter analyze`, `flutter test` and a
+release build on every push that touches `mobile/`, and keeps the APK as a
+download.
 
 ## Run the application
 

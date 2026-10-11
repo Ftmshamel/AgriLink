@@ -1,0 +1,51 @@
+name: Mobile app
+
+on:
+  push:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile.yml'
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile.yml'
+
+jobs:
+  check:
+    name: Analyze, test, and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install packages
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      # No keystore on CI, so this signs with the debug key; it proves the
+      # release configuration still builds.
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: agrilink-apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
