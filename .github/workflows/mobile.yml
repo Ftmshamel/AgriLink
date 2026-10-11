@@ -9,6 +9,8 @@ on:
     paths:
       - 'mobile/**'
       - '.github/workflows/mobile.yml'
+  # Build a fresh APK by hand, e.g. after changing the secrets below.
+  workflow_dispatch:
 
 jobs:
   check:
@@ -39,10 +41,46 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      # No keystore on CI, so this signs with the debug key; it proves the
-      # release configuration still builds.
+      # No keystore on CI, so this signs with the debug key. Payment and
+      # email settings come from the repository's Actions secrets; any that
+      # are not set stay empty and the app falls back to its offline modes
+      # (manual reference numbers, demo wallet funds, reset code on screen).
       - name: Build release APK
-        run: flutter build apk --release
+        env:
+          PAYMENTS_URL: ${{ secrets.AGRILINK_PAYMENTS_URL }}
+          PAYMENTS_TOKEN: ${{ secrets.AGRILINK_PAYMENTS_TOKEN }}
+          GCASH_NUMBER: ${{ secrets.AGRILINK_GCASH_NUMBER }}
+          EMAIL_PROVIDER: ${{ secrets.AGRILINK_EMAIL_PROVIDER }}
+          EMAIL_API_KEY: ${{ secrets.AGRILINK_EMAIL_API_KEY }}
+          EMAIL_SENDER: ${{ secrets.AGRILINK_EMAIL_SENDER }}
+          EMAILJS_SERVICE_ID: ${{ secrets.AGRILINK_EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.AGRILINK_EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.AGRILINK_EMAILJS_PUBLIC_KEY }}
+        # Only settings that are set are passed: an empty --dart-define would
+        # replace the app's own default (the sender address, for one).
+        run: |
+          args=()
+          add() { if [ -n "$2" ]; then args+=("--dart-define=$1=$2"); fi; }
+          add AGRILINK_PAYMENTS_URL "$PAYMENTS_URL"
+          add AGRILINK_PAYMENTS_TOKEN "$PAYMENTS_TOKEN"
+          add AGRILINK_GCASH_NUMBER "$GCASH_NUMBER"
+          add AGRILINK_EMAIL_PROVIDER "$EMAIL_PROVIDER"
+          add AGRILINK_EMAIL_API_KEY "$EMAIL_API_KEY"
+          add AGRILINK_EMAIL_SENDER "$EMAIL_SENDER"
+          add AGRILINK_EMAILJS_SERVICE_ID "$EMAILJS_SERVICE_ID"
+          add AGRILINK_EMAILJS_TEMPLATE_ID "$EMAILJS_TEMPLATE_ID"
+          add AGRILINK_EMAILJS_PUBLIC_KEY "$EMAILJS_PUBLIC_KEY"
+          flutter build apk --release "${args[@]}"
+
+      - name: Report which services this build includes
+        run: |
+          for name in PAYMENTS_URL EMAIL_PROVIDER GCASH_NUMBER; do
+            if [ -n "${!name}" ]; then echo "$name: set"; else echo "$name: not set"; fi
+          done
+        env:
+          PAYMENTS_URL: ${{ secrets.AGRILINK_PAYMENTS_URL }}
+          EMAIL_PROVIDER: ${{ secrets.AGRILINK_EMAIL_PROVIDER }}
+          GCASH_NUMBER: ${{ secrets.AGRILINK_GCASH_NUMBER }}
 
       - uses: actions/upload-artifact@v4
         with:
