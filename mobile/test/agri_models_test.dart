@@ -101,14 +101,42 @@ void main() {
     });
   });
 
-  group('DeliveryPricing', () {
+  group('DeliveryRates', () {
+    test('the per-km rate covers round-trip diesel plus the rider margin', () {
+      const rates = DeliveryRates(
+        dieselPerLitre: 95,
+        kmPerLitre: 10,
+        riderMarginPerKm: 5,
+      );
+      expect(rates.roundTripFuelPerKm, 19);
+      expect(rates.riderPerKm, 24);
+      expect(rates.perKilometre, 30);
+    });
+
     test('charges base fare plus distance and handling', () {
-      final fee = DeliveryPricing.fee(distanceKm: 10, quantityKg: 20);
-      expect(fee, 80 + 150 + 30);
+      const rates = DeliveryRates();
+      final fee = rates.fee(distanceKm: 10, quantityKg: 20);
+      expect(fee, 250 + 300 + 30);
+    });
+
+    test('follows the diesel price', () {
+      const cheap = DeliveryRates(dieselPerLitre: 60);
+      const dear = DeliveryRates(dieselPerLitre: 95);
+      expect(
+        dear.fee(distanceKm: 45, quantityKg: 10),
+        greaterThan(cheap.fee(distanceKm: 45, quantityKg: 10)),
+      );
     });
 
     test('uses a default distance when nothing is pinned', () {
-      expect(DeliveryPricing.fee(distanceKm: 0, quantityKg: 0), 155);
+      expect(const DeliveryRates().fee(distanceKm: 0, quantityKg: 0),
+          250 + 150);
+    });
+
+    test('ignores missing or nonsense saved values', () {
+      final rates = DeliveryRates.fromMap({'dieselPerLitre': 0, 'kmPerLitre': 8});
+      expect(rates.dieselPerLitre, 95);
+      expect(rates.kmPerLitre, 8);
     });
 
     test('pays the rider the agreed share of the fee', () {

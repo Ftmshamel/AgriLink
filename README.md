@@ -75,9 +75,19 @@ buyer to the wallet instead.
 
 ## Delivery pricing, payouts, and ratings
 
-Delivery is charged once per farm: ₱80 base + ₱15/km + ₱1.50/kg. Riders drive
-four-wheelers and return empty, so their 80% share (₱12/km) is set to cover
-round-trip diesel. The constants live in `DeliveryPricing`.
+Riders drive four-wheelers from farm to town and usually return empty, so the
+per-kilometre rate follows the price of diesel: the rider's 80% share covers
+diesel both ways plus a margin. With diesel at ₱95/L and a van doing 10 km/L
+that is ₱19/km of fuel, ₱24/km to the rider, ₱30/km to the buyer, plus a ₱250
+base fare and ₱1.50/kg. The superadmin updates these under **Delivery
+pricing** as pump prices move; orders already placed keep their fee.
+
+Every buyer pays the full solo trip fee at checkout, and checkout says
+whether other orders are already heading to the same town on that day (and
+suggests days that have some). When a rider takes a pooled trip, it is priced
+once and split in proportion to what each buyer paid; nobody pays more than
+they were charged, and the difference goes back to each buyer's wallet. The
+rider is paid their share of that one trip.
 
 The superadmin's **Payouts** page lists what each farmer (produce price) and
 rider (delivery share) is owed for delivered orders; after sending the money

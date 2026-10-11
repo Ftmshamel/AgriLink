@@ -739,6 +739,12 @@ class _CartSheetState extends State<CartSheet> {
   bool _useWallet = false;
   int? _walletBalance;
 
+  DeliveryRates _rates = DeliveryRates.current;
+
+  /// Open orders already heading to this buyer's town, not yet with a rider,
+  /// for the shared-trip notice. Null while loading.
+  List<AgriOrder>? _poolOrders;
+
   /// Once Xendit has the money the cart must not change under it.
   bool get _locked => _placing || _paidInvoice != null;
 
@@ -746,6 +752,168 @@ class _CartSheetState extends State<CartSheet> {
   void initState() {
     super.initState();
     _loadWallet();
+    _loadRates();
+    _loadPool();
+  }
+
+  Future<void> _loadRates() async {
+    final rates = await authService.database.loadDeliveryRates();
+    if (mounted) setState(() => _rates = rates);
+  }
+
+  String get _area => AgriOrder.areaOf(widget.session.user.location);
+
+  Future<void> _loadPool() async {
+    try {
+      final orders = await authService.database.listAgriOrders();
+      final mine = widget.session.user.id;
+      if (!mounted) return;
+      setState(() => _poolOrders = orders
+          .where((order) =>
+              order.status.isOpen &&
+              !order.hasRider &&
+              order.buyerId != mine &&
+              order.dropArea == _area)
+          .toList());
+    } catch (_) {
+      if (mounted) setState(() => _poolOrders = const []);
+    }
+  }
+
+  /// The day this cart would be delivered.
+  DateTime? get _targetDate =>
+      _scheduled ? _deliveryDate : DeliveryHours.sameDayDate(DateTime.now());
+
+  /// This cart as the orders it would become, so it can be priced alongside
+  /// the orders it would share a trip with.
+  List<AgriOrder> _draftOrders(Map<String, int> fees) {
+    final user = widget.session.user;
+    final grouped = <String, List<CartLine>>{};
+    for (final line in widget.cart.lines) {
+      grouped.putIfAbsent(line.crop.farmerId, () => []).add(line);
+    }
+    return [
+      for (final entry in grouped.entries)
+        AgriOrder.fromMap({
+          'id': 'draft-${entry.key}',
+          'buyerId': user.id,
+          'farmerId': entry.key,
+          'quantityKg': entry.value
+              .fold<int>(0, (sum, line) => sum + line.quantityKg),
+          'deliveryFee': fees[entry.key] ?? DeliveryPricing.fallbackFee,
+          'deliveryLatitude': user.latitude,
+          'deliveryLongitude': user.longitude,
+          'farmLatitude': entry.value.first.crop.latitude,
+          'farmLongitude': entry.value.first.crop.longitude,
+        }),
+    ];
+  }
+
+  Widget _poolNotice(Map<String, int> fees) {
+    final all = _poolOrders;
+    final date = _targetDate;
+    if (all == null || date == null || _area == 'Unassigned area') {
+      return const SizedBox.shrink();
+    }
+    final mates = all.where((order) => order.dueDate == date).toList();
+    final soloTotal = fees.values.fold<int>(0, (sum, fee) => sum + fee);
+    final firstSchedulable = DeliveryHours.firstScheduleDate(DateTime.now());
+
+    // Other days a trip to this town is already forming.
+    final otherDays = <DateTime, int>{};
+    for (final order in all) {
+      final day = order.dueDate;
+      if (day == date || day.isBefore(firstSchedulable)) continue;
+      otherDays[day] = (otherDays[day] ?? 0) + 1;
+    }
+    final suggestions = otherDays.keys.toList()..sort();
+
+    final shared = mates.isNotEmpty;
+    var sharedFee = soloTotal;
+    if (shared) {
+      final drafts = _draftOrders(fees);
+      final shares = PoolPricing.shares([...drafts, ...mates], _rates);
+      sharedFee = drafts.fold<int>(
+        0,
+        (sum, draft) => sum + (shares[draft.id] ?? draft.deliveryFee),
+      );
+    }
+    final saving = soloTotal - sharedFee;
+    final day = formatDeliveryDate(date);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: shared ? lightGreen : const Color(0xFFFFF1DD),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                shared ? Icons.groups_2_outlined : Icons.person_outline,
+                color: shared ? green : orange,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  shared
+                      ? 'Shared trip: ${plural(mates.length, 'other order')} '
+                          'to $_area on $day'
+                      : 'No shared trip to $_area on $day yet',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            shared && saving > 0
+                ? 'You pay ${formatPeso(soloTotal)} delivery now. Sharing the '
+                    'trip should bring it down to about '
+                    '${formatPeso(sharedFee)}; the ${formatPeso(saving)} '
+                    'difference goes back to your AgriLink wallet when a '
+                    'rider takes the trip.'
+                : 'You pay the full trip fee of ${formatPeso(soloTotal)}. If '
+                    'other buyers in $_area book the same day, the trip is '
+                    'shared and the difference goes back to your AgriLink '
+                    'wallet.',
+            style: const TextStyle(fontSize: 12, height: 1.4),
+          ),
+          if (!shared && suggestions.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Trips already going to $_area:',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (final option in suggestions.take(4))
+                  ActionChip(
+                    avatar: const Icon(Icons.event, size: 16),
+                    label: Text(
+                      '${formatDeliveryDate(option)} • '
+                      '${plural(otherDays[option]!, 'order')}',
+                    ),
+                    onPressed: _locked
+                        ? null
+                        : () => setState(() {
+                              _scheduled = true;
+                              _deliveryDate = option;
+                            }),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Future<void> _loadWallet() async {
@@ -827,7 +995,7 @@ class _CartSheetState extends State<CartSheet> {
           : 0.0;
       final kilos = lines.fold<int>(0, (sum, line) => sum + line.quantityKg);
       fees[farmerId] =
-          DeliveryPricing.fee(distanceKm: distance, quantityKg: kilos);
+          _rates.fee(distanceKm: distance, quantityKg: kilos);
     });
     return fees;
   }
@@ -909,7 +1077,7 @@ class _CartSheetState extends State<CartSheet> {
       }
       for (final entry in grouped.entries) {
         final lines = entry.value;
-        final farmFee = fees[entry.key] ?? DeliveryPricing.baseFare;
+        final farmFee = fees[entry.key] ?? DeliveryPricing.fallbackFee;
         // Listings published before farms carried a contact number need a
         // lookup, otherwise the rider has nobody to call at the pickup.
         var farmerPhone = lines.first.crop.farmerPhone;
@@ -1300,11 +1468,12 @@ class _CartSheetState extends State<CartSheet> {
                     ),
                   const SizedBox(height: 4),
                   Text(
-                    'A four-wheel delivery costs '
-                    '${formatPeso(DeliveryPricing.baseFare)} plus '
-                    '${formatPeso(DeliveryPricing.perKilometre)}/km and '
-                    '₱${DeliveryPricing.perKiloHandling}/kg, once per farm. '
-                    'Ordering more from the same farm spreads that cost.',
+                    'A four-wheel trip costs ${formatPeso(_rates.baseFare)} '
+                    'plus ${formatPeso(_rates.perKilometre)}/km and '
+                    '₱${_rates.perKiloHandling}/kg, once per farm. The '
+                    'per-km rate follows diesel at '
+                    '${formatPeso(_rates.dieselPerLitre)}/L, since vans '
+                    'return empty.',
                     style: const TextStyle(
                       color: muted,
                       fontSize: 11,
@@ -1379,6 +1548,8 @@ class _CartSheetState extends State<CartSheet> {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 10),
+                  _poolNotice(fees),
                   const SizedBox(height: 8),
                   Text(
                     _cancelPolicy(),
@@ -2587,6 +2758,16 @@ class DeliveryTracking extends StatelessWidget {
                           label: 'Delivery',
                           value: formatPeso(order.deliveryFee),
                         ),
+                        if (order.poolRebate > 0)
+                          Text(
+                            'Shared trip: ${formatPeso(order.poolRebate)} of '
+                            'your delivery fee went back to your wallet.',
+                            style: const TextStyle(
+                              color: green,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         MoneyRow(
                           label: 'Total',
                           value: formatPeso(order.grandTotal),

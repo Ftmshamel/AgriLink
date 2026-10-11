@@ -56,29 +56,140 @@ enum OrderStatus {
       };
 }
 
-/// Fee model shared by checkout (what the buyer pays) and the rider pool
-/// (what the trip is worth). Keeping it in one place stops the two sides of
-/// the app from quoting different numbers for the same delivery.
+/// What a delivery costs, worked out from the price of diesel.
 ///
-/// Riders drive four-wheelers (L300, FB vans) and return empty, so the
-/// per-kilometre rate is set to cover the round trip: such a van does roughly
-/// 10 km per litre of diesel, about ₱6/km each way, and the rider's 80% share
-/// of ₱15/km is ₱12/km. The base fare covers loading at the farm.
-class DeliveryPricing {
-  static const baseFare = 80;
-  static const perKilometre = 15;
-  static const perKiloHandling = 1.5;
-  static const riderShare = 0.8;
+/// Riders drive four-wheelers (L300, FB vans) from the farm to town and
+/// usually come back empty, so the per-kilometre rate has to cover diesel both
+/// ways plus something for the rider's time and the van's upkeep. The
+/// superadmin updates the diesel price as it moves; everything else follows.
+/// The rider keeps [DeliveryPricing.riderShare] of every fee.
+class DeliveryRates {
+  const DeliveryRates({
+    this.dieselPerLitre = 95,
+    this.kmPerLitre = 10,
+    this.riderMarginPerKm = 5,
+    this.baseFare = 250,
+    this.perKiloHandling = 1.5,
+  });
 
-  static int fee({required double distanceKm, required num quantityKg}) {
+  factory DeliveryRates.fromMap(Map<String, dynamic>? map) {
+    if (map == null) return const DeliveryRates();
+    double read(String key, double fallback) {
+      final value = _toDouble(map[key]);
+      return value == null || value <= 0 ? fallback : value;
+    }
+
+    const defaults = DeliveryRates();
+    return DeliveryRates(
+      dieselPerLitre: read('dieselPerLitre', defaults.dieselPerLitre),
+      kmPerLitre: read('kmPerLitre', defaults.kmPerLitre),
+      riderMarginPerKm: read('riderMarginPerKm', defaults.riderMarginPerKm),
+      baseFare: read('baseFare', defaults.baseFare),
+      perKiloHandling: read('perKiloHandling', defaults.perKiloHandling),
+    );
+  }
+
+  /// The rates in force, refreshed whenever a screen loads them.
+  static DeliveryRates current = const DeliveryRates();
+
+  final double dieselPerLitre;
+  final double kmPerLitre;
+  final double riderMarginPerKm;
+  final double baseFare;
+  final double perKiloHandling;
+
+  /// Diesel for one kilometre out and one back.
+  double get roundTripFuelPerKm => dieselPerLitre / kmPerLitre * 2;
+
+  /// What the rider takes home per kilometre: round-trip diesel plus margin.
+  double get riderPerKm => roundTripFuelPerKm + riderMarginPerKm;
+
+  /// What the buyer is charged per kilometre so the rider's share is
+  /// [riderPerKm].
+  double get perKilometre => riderPerKm / DeliveryPricing.riderShare;
+
+  /// One trip of [distanceKm] carrying [quantityKg].
+  int fee({required double distanceKm, required num quantityKg}) {
     final distance = distanceKm.isFinite && distanceKm > 0 ? distanceKm : 5;
-    return (baseFare +
-            distance * perKilometre +
-            quantityKg * perKiloHandling)
+    return (baseFare + distance * perKilometre + quantityKg * perKiloHandling)
         .round();
   }
 
+  Map<String, dynamic> toMap() => {
+        'dieselPerLitre': dieselPerLitre,
+        'kmPerLitre': kmPerLitre,
+        'riderMarginPerKm': riderMarginPerKm,
+        'baseFare': baseFare,
+        'perKiloHandling': perKiloHandling,
+      };
+}
+
+class DeliveryPricing {
+  static const riderShare = 0.8;
+
+  /// Fee used when an old order carries none.
+  static const fallbackFee = 250;
+
   static int riderPayout(num deliveryFee) => (deliveryFee * riderShare).round();
+}
+
+/// Shares one trip's cost between the orders riding on it.
+///
+/// Every buyer pays the full solo fee at checkout because nobody knows yet
+/// who else will be on the trip. When a rider takes a pooled trip, the trip is
+/// priced once — one base fare, the real route, the total load — and split in
+/// proportion to what each buyer paid. Nobody's share is ever more than they
+/// paid; the difference goes back to their wallet.
+class PoolPricing {
+  /// Straight-line length of farms then drop-offs, in visiting order.
+  static double routeKm(List<AgriOrder> orders) {
+    final stops = <LatLng>[];
+    for (final order in orders) {
+      final pickup = order.pickupPoint;
+      if (pickup != null && !stops.contains(pickup)) stops.add(pickup);
+    }
+    for (final order in orders) {
+      final drop = order.dropPoint;
+      if (drop != null && !stops.contains(drop)) stops.add(drop);
+    }
+    var total = 0.0;
+    const distance = Distance();
+    for (var index = 0; index < stops.length - 1; index++) {
+      total += distance.as(LengthUnit.Kilometer, stops[index], stops[index + 1]);
+    }
+    return total;
+  }
+
+  /// What one trip carrying all of [orders] costs at [rates].
+  static int tripCost(List<AgriOrder> orders, DeliveryRates rates) {
+    final kilos = orders.fold<int>(0, (sum, order) => sum + order.quantityKg);
+    return rates.fee(distanceKm: routeKm(orders), quantityKg: kilos);
+  }
+
+  /// Each order's share of the trip, keyed by order id.
+  static Map<String, int> shares(List<AgriOrder> orders, DeliveryRates rates) {
+    if (orders.isEmpty) return const {};
+    final paid = {
+      for (final order in orders)
+        order.id: order.deliveryFee > 0
+            ? order.deliveryFee
+            : DeliveryPricing.fallbackFee,
+    };
+    final totalPaid = paid.values.fold<int>(0, (sum, fee) => sum + fee);
+    if (orders.length == 1 || totalPaid == 0) return paid;
+    final cost = tripCost(orders, rates);
+    if (cost >= totalPaid) return paid;
+    return {
+      for (final entry in paid.entries)
+        entry.key: (cost * entry.value / totalPaid).round().clamp(0, entry.value),
+    };
+  }
+
+  /// What the rider earns for taking all of [orders] as one trip.
+  static int riderPayout(List<AgriOrder> orders, DeliveryRates rates) =>
+      DeliveryPricing.riderPayout(
+        shares(orders, rates).values.fold<int>(0, (sum, fee) => sum + fee),
+      );
 }
 
 /// The produce categories used by the market filter chips.
@@ -434,14 +545,17 @@ class AgriOrder {
   /// Gateway and wallet payments are confirmed money. A manually submitted
   /// reference only counts once the farm accepted the order, which is the
   /// farm saying it saw the payment.
-  int get refundableAmount {
-    if (paymentStatus == 'paid') return grandTotal;
-    if (paymentStatus == 'submitted' &&
-        timeline.containsKey(OrderStatus.preparing.wire)) {
-      return grandTotal;
-    }
-    return 0;
-  }
+  int get refundableAmount => isPaymentSecured ? grandTotal : 0;
+
+  /// The buyer's money is really in: confirmed by the gateway or the wallet,
+  /// or a manual reference the farm accepted.
+  bool get isPaymentSecured =>
+      paymentStatus == 'paid' ||
+      (paymentStatus == 'submitted' &&
+          timeline.containsKey(OrderStatus.preparing.wire));
+
+  /// What came back to the buyer when the trip was shared.
+  int get poolRebate => _toInt(raw['poolRebate']);
 
   // Buyer ratings, 1–5, left after confirming receipt. 0 means not rated.
   int get farmerRating => _toInt(raw['farmerRating']);
@@ -458,7 +572,7 @@ class AgriOrder {
 
   bool get hasRider => riderId.isNotEmpty;
   int get riderPayout => DeliveryPricing.riderPayout(
-        deliveryFee > 0 ? deliveryFee : DeliveryPricing.baseFare,
+        deliveryFee > 0 ? deliveryFee : DeliveryPricing.fallbackFee,
       );
   int get grandTotal => totalPrice + deliveryFee;
 
@@ -484,6 +598,9 @@ class AgriOrder {
   /// Short town name used to group orders into pooled batches.
   String get dropArea => _area(deliveryAddress);
   String get pickupArea => _area(farmLocation);
+
+  /// The town an address belongs to, the key orders are pooled by.
+  static String areaOf(String address) => _area(address);
 
   static String _area(String address) {
     if (address.trim().isEmpty) return 'Unassigned area';
@@ -683,8 +800,9 @@ class PooledBatch {
   int get farmCount => orders.map((order) => order.farmerId).toSet().length;
   int get totalKg =>
       orders.fold<int>(0, (total, order) => total + order.quantityKg);
-  int get payout =>
-      orders.fold<int>(0, (total, order) => total + order.riderPayout);
+  /// What the rider earns: the trip is priced once and shared, not the sum
+  /// of every buyer's solo fee.
+  int get payout => PoolPricing.riderPayout(orders, DeliveryRates.current);
 
   String get route {
     final origins = orders.map((order) => order.pickupArea).toSet().toList();

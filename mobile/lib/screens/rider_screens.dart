@@ -166,6 +166,8 @@ class RiderSnapshot {
       authService.database.listAgriOrders(),
       authService.database.listTrips(riderId: riderId),
       GeoService.tryCurrentPoint(),
+      // Batch payouts are priced from these, so load them with the pool.
+      authService.database.loadDeliveryRates(),
     ]);
     final all = results[0] as List<AgriOrder>;
     return RiderSnapshot(
@@ -889,8 +891,9 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
   List<AgriOrder> get _chosen =>
       widget.batch.orders.where((order) => _selected.contains(order.id)).toList();
 
-  int get _payout =>
-      _chosen.fold<int>(0, (total, order) => total + order.riderPayout);
+  /// The chosen orders priced as one shared trip, which is what accepting
+  /// them pays.
+  int get _payout => PoolPricing.riderPayout(_chosen, DeliveryRates.current);
 
   int get _kilos =>
       _chosen.fold<int>(0, (total, order) => total + order.quantityKg);
@@ -1031,8 +1034,13 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
                   'From ${order.farmerName} → ${order.dropArea}',
                 ),
                 isThreeLine: true,
+                // This order's part of the shared trip, not its solo fee.
                 secondary: Text(
-                  formatPeso(order.riderPayout),
+                  formatPeso(DeliveryPricing.riderPayout(
+                    PoolPricing.shares(_chosen, DeliveryRates.current)[
+                            order.id] ??
+                        order.deliveryFee,
+                  )),
                   style: const TextStyle(
                     color: green,
                     fontWeight: FontWeight.w900,

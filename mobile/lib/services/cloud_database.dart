@@ -503,6 +503,9 @@ class CloudDatabase {
   }) async {
     final now = DateTime.now();
     final tripId = 'trip-${now.millisecondsSinceEpoch}-${_token(5)}';
+    // Price the trip once and split it; each buyer paid a solo fee up front.
+    final rates = await loadDeliveryRates();
+    final shares = PoolPricing.shares(orders, rates);
     await _create('mobileTrips', tripId, {
       'id': tripId,
       'riderId': riderId,
@@ -511,7 +514,7 @@ class CloudDatabase {
       'orderIds': orders.map((order) => order.id).toList(),
       'orderCount': orders.length,
       'totalKg': orders.fold<int>(0, (sum, order) => sum + order.quantityKg),
-      'payout': orders.fold<int>(0, (sum, order) => sum + order.riderPayout),
+      'payout': PoolPricing.riderPayout(orders, rates),
       'status': 'active',
       'startedAt': now.toUtc().toIso8601String(),
       'createdAt': now.toUtc().toIso8601String(),
@@ -524,11 +527,18 @@ class CloudDatabase {
         '${order.buyerId}|${order.deliveryAddress}',
         () => _numericCode(DeliveryProof.codeLength),
       );
+      final share = shares[order.id] ?? order.deliveryFee;
+      final rebate = order.deliveryFee - share;
       await advanceOrder(
         order.id,
         OrderStatus.riderAssigned,
         existingTimeline: order.timeline,
         extra: {
+          if (rebate > 0) ...{
+            'soloDeliveryFee': order.deliveryFee,
+            'deliveryFee': share,
+            'poolRebate': rebate,
+          },
           'deliveryCode': code,
           'riderId': riderId,
           'riderName': riderName,
@@ -538,8 +548,45 @@ class CloudDatabase {
           'riderAssignedAt': now.toUtc().toIso8601String(),
         },
       );
+      if (rebate > 0 && order.isPaymentSecured && order.buyerId.isNotEmpty) {
+        await _createOnce('mobileWalletTransactions', 'pool-${order.id}', {
+          'id': 'pool-${order.id}',
+          'userId': order.buyerId,
+          'type': WalletEntryType.refund.wire,
+          'amount': rebate,
+          'orderId': order.id,
+          'reference': order.reference,
+          'description': 'Shared trip savings for ${order.reference}',
+          'createdAt': now.toUtc().toIso8601String(),
+        });
+      }
     }
     return tripId;
+  }
+
+  // ------------------------------------------------------------ delivery rates
+
+  /// The rates the superadmin set, or the defaults. Also refreshes
+  /// [DeliveryRates.current] so every screen quotes the same numbers.
+  Future<DeliveryRates> loadDeliveryRates() async {
+    try {
+      final saved = await getDocument('agriData', 'deliveryRates');
+      DeliveryRates.current = DeliveryRates.fromMap(saved);
+    } catch (_) {
+      // Keep the last known rates rather than failing a checkout.
+    }
+    return DeliveryRates.current;
+  }
+
+  Future<void> saveDeliveryRates(DeliveryRates rates) async {
+    final fields = {
+      ...rates.toMap(),
+      'updatedAt': DateTime.now().toUtc().toIso8601String(),
+    };
+    final created = await _createOnce(
+        'agriData', 'deliveryRates', {'id': 'deliveryRates', ...fields});
+    if (!created) await updateDocument('agriData', 'deliveryRates', fields);
+    DeliveryRates.current = rates;
   }
 
   Future<List<Map<String, dynamic>>> listTrips({String? riderId}) async {
@@ -645,8 +692,8 @@ class CloudDatabase {
       limit: 1000,
     );
     final entries = rows.map(WalletTransaction.fromMap).toList();
-    entries.sort((a, b) =>
-        (b.createdAt ?? DateTime(1970)).compareTo(a.createdAt ?? DateTime(1970)));
+    entries.sort((a, b) => (b.createdAt ?? DateTime(1970))
+        .compareTo(a.createdAt ?? DateTime(1970)));
     return entries;
   }
 
@@ -818,8 +865,8 @@ class CloudDatabase {
     if (id.isEmpty) return const RatingSummary(0, 0);
     final rows = await _queryEquals('mobileOrders', field, id, limit: 1000);
     final orders = rows.map(AgriOrder.fromMap);
-    return RatingSummary.of(orders.map((order) =>
-        farmerId != null ? order.farmerRating : order.riderRating));
+    return RatingSummary.of(orders.map(
+        (order) => farmerId != null ? order.farmerRating : order.riderRating));
   }
 
   /// Flags an order the buyer has reported, so the rider's "delivered" is
@@ -951,8 +998,8 @@ class CloudDatabase {
   Future<List<WalletTransaction>> listAllWalletTransactions() async {
     final rows = await listCollection('mobileWalletTransactions');
     final entries = rows.map(WalletTransaction.fromMap).toList();
-    entries.sort((a, b) =>
-        (b.createdAt ?? DateTime(1970)).compareTo(a.createdAt ?? DateTime(1970)));
+    entries.sort((a, b) => (b.createdAt ?? DateTime(1970))
+        .compareTo(a.createdAt ?? DateTime(1970)));
     return entries;
   }
 

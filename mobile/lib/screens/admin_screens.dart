@@ -143,6 +143,7 @@ class PlatformSnapshot {
       authService.database.listAccounts(),
       authService.database.listAgriOrders(),
       authService.database.listReports(),
+      authService.database.loadDeliveryRates(),
     ]);
     return PlatformSnapshot(
       accounts: results[0] as List<Map<String, dynamic>>,
@@ -297,6 +298,23 @@ class SuperadminOverview extends StatelessWidget {
                         : '${formatPeso(snapshot.owedToFarmers)} to farmers • '
                             '${formatPeso(snapshot.owedToRiders)} to riders',
                     badge: 'OWED',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DeliveryRatesPage(session: session),
+                    ),
+                  ),
+                  child: ActionCard(
+                    icon: Icons.local_gas_station_outlined,
+                    title: 'Delivery pricing',
+                    subtitle: 'Diesel ${formatPeso(DeliveryRates.current.dieselPerLitre)}/L • '
+                        '${formatPeso(DeliveryRates.current.perKilometre)}/km',
+                    badge: 'RATES',
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -1901,6 +1919,167 @@ class WalletLedgerPage extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Where the superadmin keeps delivery fees in step with the pump price.
+class DeliveryRatesPage extends StatefulWidget {
+  const DeliveryRatesPage({super.key, required this.session});
+
+  final AppSession session;
+
+  @override
+  State<DeliveryRatesPage> createState() => _DeliveryRatesPageState();
+}
+
+class _DeliveryRatesPageState extends State<DeliveryRatesPage> {
+  final _diesel = TextEditingController();
+  final _kmPerLitre = TextEditingController();
+  final _margin = TextEditingController();
+  final _base = TextEditingController();
+  final _handling = TextEditingController();
+  bool _loading = true;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    authService.database.loadDeliveryRates().then((rates) {
+      if (!mounted) return;
+      setState(() {
+        _fill(rates);
+        _loading = false;
+      });
+    });
+  }
+
+  void _fill(DeliveryRates rates) {
+    String text(double value) => value == value.roundToDouble()
+        ? '${value.round()}'
+        : '$value';
+    _diesel.text = text(rates.dieselPerLitre);
+    _kmPerLitre.text = text(rates.kmPerLitre);
+    _margin.text = text(rates.riderMarginPerKm);
+    _base.text = text(rates.baseFare);
+    _handling.text = text(rates.perKiloHandling);
+  }
+
+  DeliveryRates get _draft => DeliveryRates.fromMap({
+        'dieselPerLitre': double.tryParse(_diesel.text.trim()),
+        'kmPerLitre': double.tryParse(_kmPerLitre.text.trim()),
+        'riderMarginPerKm': double.tryParse(_margin.text.trim()),
+        'baseFare': double.tryParse(_base.text.trim()),
+        'perKiloHandling': double.tryParse(_handling.text.trim()),
+      });
+
+  @override
+  void dispose() {
+    for (final controller in [_diesel, _kmPerLitre, _margin, _base, _handling]) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await authService.database.saveDeliveryRates(_draft);
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Delivery rates updated for new orders.'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Widget _field(TextEditingController controller, String label,
+          {String prefix = '', String suffix = ''}) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: label,
+            prefixText: prefix,
+            suffixText: suffix,
+          ),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final rates = _draft;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Delivery pricing')),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                const Text(
+                  'Update the diesel price when it moves. The per-km rate is '
+                  'set so the rider\'s share covers diesel both ways plus '
+                  'their margin. Orders already placed keep the fee they '
+                  'were quoted.',
+                  style: TextStyle(color: muted, height: 1.4),
+                ),
+                const SizedBox(height: 18),
+                _field(_diesel, 'Diesel price', prefix: '₱', suffix: '/L'),
+                _field(_kmPerLitre, 'Van fuel economy', suffix: 'km/L'),
+                _field(_margin, 'Rider margin', prefix: '₱', suffix: '/km'),
+                _field(_base, 'Base fare per trip', prefix: '₱'),
+                _field(_handling, 'Handling', prefix: '₱', suffix: '/kg'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        MoneyRow(
+                          label: 'Diesel, there and back',
+                          value: '${formatPeso(rates.roundTripFuelPerKm)}/km',
+                        ),
+                        MoneyRow(
+                          label: 'Rider earns',
+                          value: '${formatPeso(rates.riderPerKm)}/km',
+                        ),
+                        MoneyRow(
+                          label: 'Buyer pays',
+                          value: '${formatPeso(rates.perKilometre)}/km',
+                          strong: true,
+                        ),
+                        const Divider(height: 22),
+                        MoneyRow(
+                          label: 'Example: 45 km, 100 kg',
+                          value: formatPeso(
+                            rates.fee(distanceKm: 45, quantityKg: 100),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                FilledButton(
+                  onPressed: _saving ? null : _save,
+                  child: const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: Text('Save rates'),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }
