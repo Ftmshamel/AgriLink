@@ -39,9 +39,21 @@ class PaymentInvoice {
 
 /// What Xendit says about an invoice right now.
 class PaymentStatus {
-  const PaymentStatus({required this.paid, required this.channel});
+  const PaymentStatus({
+    required this.paid,
+    required this.channel,
+    this.amount = 0,
+    this.expired = false,
+  });
 
   final bool paid;
+
+  /// The invoice lapsed unpaid and can no longer be paid.
+  final bool expired;
+
+  /// Pesos on the invoice as Xendit has it. A wallet cash-in credits this,
+  /// never the figure the app asked for.
+  final int amount;
 
   /// The channel the buyer actually used - GCash, a card, a bank. Empty until
   /// they have paid, which is why the app cannot ask for it up front.
@@ -115,7 +127,8 @@ class PaymentService {
     final body = await _send(
       () => _client
           .get(
-            Uri.parse('$baseUrl/invoice?id=${Uri.encodeQueryComponent(invoiceId)}'),
+            Uri.parse(
+                '$baseUrl/invoice?id=${Uri.encodeQueryComponent(invoiceId)}'),
             headers: _headers,
           )
           .timeout(_timeout),
@@ -125,6 +138,8 @@ class PaymentService {
     return PaymentStatus(
       paid: body['paid'] == true,
       channel: channel.isNotEmpty ? channel : method,
+      amount: (body['amount'] as num?)?.round() ?? 0,
+      expired: '${body['status'] ?? ''}'.toUpperCase() == 'EXPIRED',
     );
   }
 
@@ -161,8 +176,15 @@ class PaymentService {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      // The worker forwards Xendit's own wording, which says far more than the
-      // status code does.
+      // A misconfigured or unreachable worker is our problem, not the buyer's,
+      // and its wording ("XENDIT_SECRET is not set") means nothing to them.
+      if (response.statusCode >= 500 || response.statusCode == 403) {
+        throw const PaymentException(
+          'Payment is temporarily unavailable. Please try again in a moment.',
+        );
+      }
+      // Anything else is about this request - a bad amount, a repeated
+      // reference - and Xendit's own wording says far more than a code does.
       final detail = '${decoded['error'] ?? ''}'.trim();
       throw PaymentException(
         detail.isEmpty

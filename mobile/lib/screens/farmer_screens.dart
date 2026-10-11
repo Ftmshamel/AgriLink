@@ -8,10 +8,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../app.dart';
 import '../models/agri_models.dart';
 import '../services/geo.dart';
+import '../services/notifications.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
+import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
 import '../widgets/weather_card.dart';
 import 'shared_screens.dart';
@@ -136,17 +139,38 @@ class FarmerDashboard extends StatelessWidget {
       builder: (context, data) {
         final snapshot =
             data.value ?? const FarmerSnapshot(crops: [], orders: []);
-        final attention = [...snapshot.newOrders, ...snapshot.packing];
+        final attention = [...snapshot.newOrders, ...snapshot.packing]
+          ..sort(AgriOrder.byDueDate);
+        final lowStock =
+            snapshot.crops.where((crop) => crop.isLowStock).toList();
+        final soldOut = snapshot.crops
+            .where((crop) => !crop.inStock && crop.status == 'sold_out')
+            .toList();
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              PageHeader(
-                eyebrow: 'FARMER DASHBOARD',
-                title: 'Good day, ${session.user.name}',
-                subtitle: 'Manage today’s harvest and incoming bulk orders.',
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: PageHeader(
+                      eyebrow: 'FARMER DASHBOARD',
+                      title: 'Good day, ${session.user.name}',
+                      subtitle:
+                          'Manage today’s harvest and incoming bulk orders.',
+                    ),
+                  ),
+                  NotificationBell(
+                    session: session,
+                    load: () async => NoticeFeed.forFarmer(
+                      await authService.database
+                          .listAgriOrders(farmerId: session.user.id),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               Row(
@@ -216,17 +240,21 @@ class FarmerDashboard extends StatelessWidget {
                     icon: Icons.restaurant,
                     title: '${order.buyerName} • ${order.quantityKg} kg',
                     subtitle:
-                        '${order.cropName} • ${formatPeso(order.totalPrice)}',
-                    badge:
-                        order.status == OrderStatus.placed ? 'NEW' : 'PACKING',
+                        '${order.cropName} • ${formatPeso(order.totalPrice)}'
+                        '\n${deliveryScheduleLabel(order)}',
+                    badge: order.status == OrderStatus.placed
+                        ? 'NEW'
+                        : order.isDueBy(DateTime.now())
+                            ? 'DUE TODAY'
+                            : 'PACKING',
                   ),
                   const SizedBox(height: 10),
                 ],
               const SizedBox(height: 14),
               SectionTitle(
-                title: 'Harvest catalog',
-                action: 'Manage',
-                onAction: onOpenCrops,
+                title: 'Deliveries',
+                action: 'View',
+                onAction: onOpenOrders,
               ),
               const SizedBox(height: 10),
               Row(
@@ -248,6 +276,29 @@ class FarmerDashboard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (lowStock.isNotEmpty || soldOut.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                SectionTitle(
+                  title: 'Stock alerts',
+                  action: 'Manage',
+                  onAction: onOpenCrops,
+                ),
+                const SizedBox(height: 10),
+                for (final crop in [...soldOut, ...lowStock]) ...[
+                  ActionCard(
+                    icon: crop.inStock
+                        ? Icons.trending_down
+                        : Icons.remove_shopping_cart_outlined,
+                    title: crop.name,
+                    subtitle: crop.inStock
+                        ? 'Only ${crop.quantityKg} kg left • '
+                            'minimum order ${crop.moqKg} kg'
+                        : 'Sold out — hidden from the market',
+                    badge: crop.inStock ? 'LOW' : 'SOLD OUT',
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
             ],
           ),
         );
@@ -329,14 +380,7 @@ class FarmerInventory extends StatelessWidget {
                         child: SizedBox(
                           width: 52,
                           height: 52,
-                          child: crop.photoBase64 != null &&
-                                  crop.photoBase64!.isNotEmpty
-                              ? Image.memory(
-                                  base64Decode(crop.photoBase64!),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => _emojiBox(crop),
-                                )
-                              : _emojiBox(crop),
+                          child: CropPhoto(photoBase64: crop.photoBase64),
                         ),
                       ),
                       title: Text(
@@ -344,8 +388,9 @@ class FarmerInventory extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w900),
                       ),
                       subtitle: Text(
-                        '${crop.quantityKg} kg • ₱${crop.pricePerKg}/kg\n'
-                        'MOQ ${crop.moqKg} kg${crop.harvestDate.isEmpty ? '' : ' • Harvest ${crop.harvestDate}'}',
+                        '${crop.quantityKg} kg • ₱${crop.pricePerKg}/kg'
+                        '${crop.isLowStock ? ' • LOW STOCK' : !crop.inStock ? ' • SOLD OUT' : ''}\n'
+                        'MOQ ${crop.moqKg} kg${crop.harvestDate.isEmpty ? '' : ' • Harvest ${formatHarvestDate(crop.harvestDate)}'}',
                       ),
                       isThreeLine: true,
                       trailing: IconButton(
@@ -364,11 +409,6 @@ class FarmerInventory extends StatelessWidget {
     );
   }
 
-  Widget _emojiBox(CropListing crop) => Container(
-        color: lightGreen,
-        alignment: Alignment.center,
-        child: Text(crop.emoji, style: const TextStyle(fontSize: 24)),
-      );
 
   Future<void> _openEditor(BuildContext context, CropListing? crop) async {
     final saved = await Navigator.push<bool>(
@@ -610,7 +650,14 @@ class _CropEditorPageState extends State<CropEditorPage> {
                   .map(
                     (category) => DropdownMenuItem(
                       value: category,
-                      child: Text('${category.emoji}  ${category.label}'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(category.icon, size: 20, color: green),
+                          const SizedBox(width: 10),
+                          Text(category.label),
+                        ],
+                      ),
                     ),
                   )
                   .toList(),
@@ -802,7 +849,9 @@ class _FarmerFulfillmentState extends State<FarmerFulfillment> {
           authService.database.listAgriOrders(farmerId: widget.session.user.id),
       builder: (context, data) {
         final orders = data.value ?? const <AgriOrder>[];
-        final open = orders.where((order) => order.status.isOpen).toList();
+        // What has to go out first sits on top, not whatever was ordered last.
+        final open = orders.where((order) => order.status.isOpen).toList()
+          ..sort(AgriOrder.byDueDate);
         final done = orders.where((order) => !order.status.isOpen).toList();
 
         // Only packed-and-confirmed orders can be sent out, and pooling is
@@ -935,7 +984,7 @@ class _FarmerFulfillmentState extends State<FarmerFulfillment> {
                 for (final order in done) ...[
                   PastOrderCard(
                     id: order.reference,
-                    emoji: order.emoji,
+                    thumb: CropThumb(cropId: order.cropId),
                     name: order.cropName,
                     detail: '${order.quantityKg} kg \u2022 ${order.buyerName}',
                     price: formatPeso(order.totalPrice),
@@ -1024,13 +1073,10 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Cancel this order?'),
         content: Text(
-          widget.order.paymentStatus == 'paid'
-              // Refunds are not handled in the app, so the farm has to settle
-              // with the buyer directly. Saying so here is the only warning
-              // they get.
-              ? 'The buyer has already paid for this order. Cancelling does '
-                  'not refund them — you will have to return the money '
-                  'yourself. Do this only if you cannot supply the harvest.'
+          widget.order.refundableAmount > 0
+              ? 'The buyer gets ${formatPeso(widget.order.refundableAmount)} '
+                  'back in their AgriLink wallet. Do this only if you cannot '
+                  'supply the harvest.'
               : 'The buyer will see it as cancelled. Do this only if you '
                   'cannot supply the harvest.',
         ),
@@ -1046,7 +1092,33 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
         ],
       ),
     );
-    if (confirmed == true) await _advance(OrderStatus.cancelled);
+    if (confirmed != true) return;
+    setState(() => _busy = true);
+    try {
+      final refunded = await authService.database.cancelOrder(
+        widget.order.id,
+        cancelledBy: 'farmer',
+      );
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            refunded > 0
+                ? 'Order cancelled. ${formatPeso(refunded)} refunded to the '
+                    'buyer\'s wallet.'
+                : 'Order cancelled.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
@@ -1111,6 +1183,35 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                     : order.deliveryAddress,
                 style: const TextStyle(color: muted, fontSize: 12, height: 1.4),
               ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(
+                    order.isScheduled ? Icons.event : Icons.bolt,
+                    color: order.isScheduled ? green : orange,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    deliveryScheduleLabel(order),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  // Only while the farm still has to act on it.
+                  if ((order.status == OrderStatus.placed ||
+                          order.status == OrderStatus.preparing) &&
+                      order.isDueBy(DateTime.now())) ...[
+                    const SizedBox(width: 8),
+                    const Pill(
+                      icon: Icons.priority_high,
+                      text: 'DUE TODAY',
+                      color: orange,
+                    ),
+                  ],
+                ],
+              ),
               if (order.status == OrderStatus.readyForPickup) ...[
                 const SizedBox(height: 12),
                 Container(
@@ -1119,14 +1220,25 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                     color: canvas,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.inventory_2_outlined, color: green, size: 19),
-                      SizedBox(width: 8),
+                      const Icon(
+                        Icons.inventory_2_outlined,
+                        color: green,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Waiting for a rider to accept this pickup',
-                          style: TextStyle(
+                          order.isDueForPickup(DateTime.now())
+                              ? 'Waiting for a rider to accept this pickup'
+                              : dateOnly(order.deliveryDate!) ==
+                                      dateOnly(DateTime.now())
+                                  ? 'Riders will see this from 6:00 AM'
+                                  : 'Riders will see this on '
+                                      '${formatDeliveryDate(order.deliveryDate!)}'
+                                      ' from 6:00 AM',
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -1143,7 +1255,7 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                     const CircleAvatar(
                       radius: 16,
                       backgroundColor: Color(0xFFFFF1DD),
-                      child: Icon(Icons.two_wheeler, color: orange, size: 18),
+                      child: Icon(Icons.local_shipping, color: orange, size: 18),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -1342,7 +1454,7 @@ class FarmerOrderDetails extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LineItem(
-                          emoji: order.emoji,
+                          thumb: CropThumb(cropId: order.cropId),
                           name: order.cropName,
                           detail:
                               '${order.quantityKg} kg \u2022 ${order.reference}',
@@ -1375,6 +1487,10 @@ class FarmerOrderDetails extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 ..._timeline(order),
+                if (order.pickupProofId.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  PickupProofCard(order: order),
+                ],
               ],
             ),
           );
@@ -1427,7 +1543,7 @@ class FarmerOrderDetails extends StatelessWidget {
               children: [
                 const CircleAvatar(
                   backgroundColor: Color(0xFFFFF1DD),
-                  child: Icon(Icons.two_wheeler, color: orange),
+                  child: Icon(Icons.local_shipping, color: orange),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1639,6 +1755,11 @@ class FarmerProfile extends StatelessWidget {
             .toList();
         final revenue =
             delivered.fold<int>(0, (sum, order) => sum + order.totalPrice);
+        final paidOut = delivered
+            .where((order) => order.isFarmerPaid)
+            .fold<int>(0, (sum, order) => sum + order.totalPrice);
+        final rating =
+            RatingSummary.of(snapshot.orders.map((o) => o.farmerRating));
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
@@ -1689,6 +1810,19 @@ class FarmerProfile extends StatelessWidget {
                     ? 'Add your GCash / Maya number'
                     : user.payoutNumber,
                 onTap: () => openProfileEditor(context, session),
+              ),
+              ProfileTile(
+                icon: Icons.request_quote_outlined,
+                title: 'Payouts',
+                subtitle: '${formatPeso(paidOut)} paid • '
+                    '${formatPeso(revenue - paidOut)} awaiting payout',
+                onTap: () {},
+              ),
+              ProfileTile(
+                icon: Icons.star_outline,
+                title: 'Buyer rating',
+                subtitle: rating.label,
+                onTap: () {},
               ),
               ProfileTile(
                 icon: Icons.eco_outlined,

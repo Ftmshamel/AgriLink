@@ -62,6 +62,22 @@ class GeoService {
     return _remember(LatLng(position.latitude, position.longitude));
   }
 
+  /// A fresh, full GPS fix for proving where the device is right now.
+  ///
+  /// Unlike [currentPoint] this never reuses a cached fix and keeps the whole
+  /// [Position], because the caller needs `isMocked` and the fix time.
+  static Future<Position> freshFix() async {
+    await ensurePermission();
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        timeLimit: Duration(seconds: 15),
+      ),
+    ).timeout(const Duration(seconds: 17));
+    _remember(LatLng(position.latitude, position.longitude));
+    return position;
+  }
+
   static DateTime? _retryAfter;
 
   /// Best-effort position that returns null instead of throwing, for screens
@@ -285,6 +301,26 @@ String formatPeso(num value) {
     buffer.write(digits[index]);
   }
   return '${rounded < 0 ? '-' : ''}₱$buffer';
+}
+
+/// "2026-10-20" as "Oct 20, 2026"; anything unparseable is shown as stored.
+String formatHarvestDate(String raw) {
+  final date = DateTime.tryParse(raw.trim());
+  if (date == null) return raw;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+      'Sep', 'Oct', 'Nov', 'Dec'];
+  return '${months[date.month - 1]} ${date.day}, ${date.year}';
+}
+
+/// "1 farmer", "2 farmers".
+String plural(int count, String noun, [String? many]) =>
+    '$count ${count == 1 ? noun : many ?? '${noun}s'}';
+
+String formatDeliveryDate(DateTime date) {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+      'Sep', 'Oct', 'Nov', 'Dec'];
+  return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
 }
 
 String formatClock(DateTime time) {

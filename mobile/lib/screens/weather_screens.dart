@@ -261,7 +261,7 @@ class _ForecastRow extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
             ),
           ),
-          Text(day.condition.emoji, style: const TextStyle(fontSize: 21)),
+          Icon(day.condition.icon, color: green, size: 21),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

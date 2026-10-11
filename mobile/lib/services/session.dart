@@ -77,6 +77,16 @@ class CartController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Swaps in the latest copy of a listing, keeping the quantity, so the
+  /// cart prices and stock match what the farm has now.
+  void refresh(CropListing crop) {
+    final line = lineFor(crop.id);
+    if (line == null) return;
+    final index = _lines.indexOf(line);
+    _lines[index] = CartLine(crop: crop, quantityKg: line.quantityKg);
+    notifyListeners();
+  }
+
   void remove(String cropId) {
     _lines.removeWhere((line) => line.crop.id == cropId);
     notifyListeners();

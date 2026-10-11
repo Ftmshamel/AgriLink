@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
 /// Every state an order can be in, from checkout to hand-off.
@@ -55,37 +56,153 @@ enum OrderStatus {
       };
 }
 
-/// Fee model shared by checkout (what the buyer pays) and the rider pool
-/// (what the trip is worth). Keeping it in one place stops the two sides of
-/// the app from quoting different numbers for the same delivery.
-class DeliveryPricing {
-  static const baseFare = 60;
-  static const perKilometre = 8;
-  static const perKiloHandling = 1.5;
-  static const riderShare = 0.8;
+/// What a delivery costs, worked out from the price of diesel.
+///
+/// Riders drive four-wheelers (L300, FB vans) from the farm to town and
+/// usually come back empty, so the per-kilometre rate has to cover diesel both
+/// ways plus something for the rider's time and the van's upkeep. The
+/// superadmin updates the diesel price as it moves; everything else follows.
+/// The rider keeps [DeliveryPricing.riderShare] of every fee.
+class DeliveryRates {
+  const DeliveryRates({
+    this.dieselPerLitre = 95,
+    this.kmPerLitre = 10,
+    this.riderMarginPerKm = 5,
+    this.baseFare = 250,
+    this.perKiloHandling = 1.5,
+  });
 
-  static int fee({required double distanceKm, required num quantityKg}) {
+  factory DeliveryRates.fromMap(Map<String, dynamic>? map) {
+    if (map == null) return const DeliveryRates();
+    double read(String key, double fallback) {
+      final value = _toDouble(map[key]);
+      return value == null || value <= 0 ? fallback : value;
+    }
+
+    const defaults = DeliveryRates();
+    return DeliveryRates(
+      dieselPerLitre: read('dieselPerLitre', defaults.dieselPerLitre),
+      kmPerLitre: read('kmPerLitre', defaults.kmPerLitre),
+      riderMarginPerKm: read('riderMarginPerKm', defaults.riderMarginPerKm),
+      baseFare: read('baseFare', defaults.baseFare),
+      perKiloHandling: read('perKiloHandling', defaults.perKiloHandling),
+    );
+  }
+
+  /// The rates in force, refreshed whenever a screen loads them.
+  static DeliveryRates current = const DeliveryRates();
+
+  final double dieselPerLitre;
+  final double kmPerLitre;
+  final double riderMarginPerKm;
+  final double baseFare;
+  final double perKiloHandling;
+
+  /// Diesel for one kilometre out and one back.
+  double get roundTripFuelPerKm => dieselPerLitre / kmPerLitre * 2;
+
+  /// What the rider takes home per kilometre: round-trip diesel plus margin.
+  double get riderPerKm => roundTripFuelPerKm + riderMarginPerKm;
+
+  /// What the buyer is charged per kilometre so the rider's share is
+  /// [riderPerKm].
+  double get perKilometre => riderPerKm / DeliveryPricing.riderShare;
+
+  /// One trip of [distanceKm] carrying [quantityKg].
+  int fee({required double distanceKm, required num quantityKg}) {
     final distance = distanceKm.isFinite && distanceKm > 0 ? distanceKm : 5;
-    return (baseFare +
-            distance * perKilometre +
-            quantityKg * perKiloHandling)
+    return (baseFare + distance * perKilometre + quantityKg * perKiloHandling)
         .round();
   }
+
+  Map<String, dynamic> toMap() => {
+        'dieselPerLitre': dieselPerLitre,
+        'kmPerLitre': kmPerLitre,
+        'riderMarginPerKm': riderMarginPerKm,
+        'baseFare': baseFare,
+        'perKiloHandling': perKiloHandling,
+      };
+}
+
+class DeliveryPricing {
+  static const riderShare = 0.8;
+
+  /// Fee used when an old order carries none.
+  static const fallbackFee = 250;
 
   static int riderPayout(num deliveryFee) => (deliveryFee * riderShare).round();
 }
 
+/// Shares one trip's cost between the orders riding on it.
+///
+/// Every buyer pays the full solo fee at checkout because nobody knows yet
+/// who else will be on the trip. When a rider takes a pooled trip, the trip is
+/// priced once — one base fare, the real route, the total load — and split in
+/// proportion to what each buyer paid. Nobody's share is ever more than they
+/// paid; the difference goes back to their wallet.
+class PoolPricing {
+  /// Straight-line length of farms then drop-offs, in visiting order.
+  static double routeKm(List<AgriOrder> orders) {
+    final stops = <LatLng>[];
+    for (final order in orders) {
+      final pickup = order.pickupPoint;
+      if (pickup != null && !stops.contains(pickup)) stops.add(pickup);
+    }
+    for (final order in orders) {
+      final drop = order.dropPoint;
+      if (drop != null && !stops.contains(drop)) stops.add(drop);
+    }
+    var total = 0.0;
+    const distance = Distance();
+    for (var index = 0; index < stops.length - 1; index++) {
+      total += distance.as(LengthUnit.Kilometer, stops[index], stops[index + 1]);
+    }
+    return total;
+  }
+
+  /// What one trip carrying all of [orders] costs at [rates].
+  static int tripCost(List<AgriOrder> orders, DeliveryRates rates) {
+    final kilos = orders.fold<int>(0, (sum, order) => sum + order.quantityKg);
+    return rates.fee(distanceKm: routeKm(orders), quantityKg: kilos);
+  }
+
+  /// Each order's share of the trip, keyed by order id.
+  static Map<String, int> shares(List<AgriOrder> orders, DeliveryRates rates) {
+    if (orders.isEmpty) return const {};
+    final paid = {
+      for (final order in orders)
+        order.id: order.deliveryFee > 0
+            ? order.deliveryFee
+            : DeliveryPricing.fallbackFee,
+    };
+    final totalPaid = paid.values.fold<int>(0, (sum, fee) => sum + fee);
+    if (orders.length == 1 || totalPaid == 0) return paid;
+    final cost = tripCost(orders, rates);
+    if (cost >= totalPaid) return paid;
+    return {
+      for (final entry in paid.entries)
+        entry.key: (cost * entry.value / totalPaid).round().clamp(0, entry.value),
+    };
+  }
+
+  /// What the rider earns for taking all of [orders] as one trip.
+  static int riderPayout(List<AgriOrder> orders, DeliveryRates rates) =>
+      DeliveryPricing.riderPayout(
+        shares(orders, rates).values.fold<int>(0, (sum, fee) => sum + fee),
+      );
+}
+
 /// The produce categories used by the market filter chips.
 enum CropCategory {
-  leafy('Leafy', '🥬'),
-  vegetables('Vegetables', '🍅'),
-  fruits('Fruits', '🥭'),
-  grains('Grains', '🌾');
+  leafy('Leafy', Icons.eco),
+  vegetables('Vegetables', Icons.yard),
+  fruits('Fruits', Icons.local_florist),
+  grains('Grains', Icons.grass);
 
-  const CropCategory(this.label, this.emoji);
+  const CropCategory(this.label, this.icon);
 
   final String label;
-  final String emoji;
+  final IconData icon;
 
   static CropCategory parse(Object? value) {
     final raw = '${value ?? ''}'.trim().toLowerCase();
@@ -109,54 +226,6 @@ enum CropCategory {
     if (grains.any(name.contains)) return CropCategory.grains;
     return CropCategory.vegetables;
   }
-}
-
-/// Emoji stand-in used by the market tiles when a listing has no photo.
-String cropEmoji(String cropName) {
-  final name = cropName.toLowerCase();
-  const table = {
-    'pechay': '🥬',
-    'cabbage': '🥬',
-    'repolyo': '🥬',
-    'lettuce': '🥬',
-    'kangkong': '🥬',
-    'tomato': '🍅',
-    'kamatis': '🍅',
-    'onion': '🧅',
-    'sibuyas': '🧅',
-    'garlic': '🧄',
-    'bawang': '🧄',
-    'carrot': '🥕',
-    'potato': '🥔',
-    'patatas': '🥔',
-    'eggplant': '🍆',
-    'talong': '🍆',
-    'corn': '🌽',
-    'mais': '🌽',
-    'rice': '🌾',
-    'palay': '🌾',
-    'mango': '🥭',
-    'banana': '🍌',
-    'saging': '🍌',
-    'papaya': '🍈',
-    'pineapple': '🍍',
-    'watermelon': '🍉',
-    'chili': '🌶️',
-    'sili': '🌶️',
-    'pepper': '🫑',
-    'cucumber': '🥒',
-    'pipino': '🥒',
-    'squash': '🎃',
-    'kalabasa': '🎃',
-    'ampalaya': '🥒',
-    'okra': '🌱',
-    'ginger': '🫚',
-    'luya': '🫚',
-  };
-  for (final entry in table.entries) {
-    if (name.contains(entry.key)) return entry.value;
-  }
-  return '🌱';
 }
 
 double? _toDouble(Object? value) {
@@ -240,8 +309,10 @@ class CropListing {
   final String status;
   final DateTime? createdAt;
 
-  String get emoji => cropEmoji(name);
   bool get inStock => quantityKg > 0 && status == 'active';
+
+  /// Enough for fewer than three minimum orders: time to restock or harvest.
+  bool get isLowStock => inStock && quantityKg < moqKg * 3;
   LatLng? get point => latitude != null && longitude != null
       ? LatLng(latitude!, longitude!)
       : null;
@@ -393,10 +464,123 @@ class AgriOrder {
   final Map<String, DateTime> timeline;
   final Map<String, dynamic> raw;
 
-  String get emoji => cropEmoji(cropName);
+  // Proof of delivery. Read straight from [raw] because they are only set on
+  // orders that reach those steps, and older documents never carry them.
+
+  /// Shown to the buyer, typed in by the rider at the door.
+  String get deliveryCode => '${raw['deliveryCode'] ?? ''}';
+
+  /// The photo the rider took at the drop-off, in `mobileDeliveryProofs`.
+  String get deliveryProofId => '${raw['deliveryProofId'] ?? ''}';
+
+  /// The photo the rider took when collecting at the farm.
+  String get pickupProofId => '${raw['pickupProofId'] ?? ''}';
+
+  /// The rider confirmed away from the pin after GPS kept failing.
+  bool get deliveredOutsidePin => raw['deliveredOutsidePin'] == true;
+  bool get pickupOutsidePin => raw['pickupOutsidePin'] == true;
+  double? get pickupDistanceMetres => _toDouble(raw['pickupDistanceMetres']);
+
+  /// How far the rider was from the buyer's pin when they confirmed.
+  double? get deliveredDistanceMetres =>
+      _toDouble(raw['deliveredDistanceMetres']);
+  bool get deliveryCodeVerified => raw['deliveryCodeVerified'] == true;
+  DateTime? get receivedConfirmedAt => _toDate(raw['receivedConfirmedAt']);
+  bool get isReceiptConfirmed => receivedConfirmedAt != null;
+  bool get isDisputed => raw['deliveryDisputed'] == true;
+
+  // Delivery schedule. Orders saved before scheduling existed carry neither
+  // field and are treated as same-day.
+
+  /// How many days ahead of a scheduled delivery the buyer may still cancel.
+  static const cancelNoticeDays = 5;
+
+  bool get isScheduled => raw['deliveryType'] == 'scheduled';
+
+  /// The day it is delivered, at local midnight. Same-day orders carry the
+  /// day [DeliveryHours] assigned at checkout; orders saved before that have
+  /// none.
+  DateTime? get deliveryDate {
+    final parsed = DateTime.tryParse('${raw['deliveryDate'] ?? ''}');
+    return parsed == null ? null : dateOnly(parsed);
+  }
+
+  /// Last day the buyer can cancel, or null when they cannot at all.
+  DateTime? get cancelDeadline => isScheduled
+      ? deliveryDate?.subtract(const Duration(days: cancelNoticeDays))
+      : null;
+
+  /// Same-day orders are committed the moment they are paid. A scheduled
+  /// order can be cancelled up to [cancelNoticeDays] before delivery, as long
+  /// as no rider has taken it.
+  bool canBuyerCancel(DateTime now) {
+    final deadline = cancelDeadline;
+    if (deadline == null || !status.isOpen || hasRider) return false;
+    return !dateOnly(now).isAfter(deadline);
+  }
+
+  /// Riders only see an order once deliveries open on its delivery day: a
+  /// packed order for next week, or one placed at 2 AM, waits until then.
+  bool isDueForPickup(DateTime now) {
+    final date = deliveryDate;
+    return date == null || !now.isBefore(DeliveryHours.opensOn(date));
+  }
+
+  /// The day the farm has to have this out: its delivery date, or the day it
+  /// was placed for orders older than scheduling.
+  DateTime get dueDate =>
+      deliveryDate ?? dateOnly((createdAt ?? DateTime.now()).toLocal());
+
+  bool isDueBy(DateTime now) => !dueDate.isAfter(dateOnly(now));
+
+  /// Soonest delivery first, then oldest order first.
+  static int byDueDate(AgriOrder a, AgriOrder b) {
+    final due = a.dueDate.compareTo(b.dueDate);
+    if (due != 0) return due;
+    return (a.createdAt ?? DateTime(1970)).compareTo(b.createdAt ?? DateTime(1970));
+  }
+
+  /// A same-day order placed after the cutoff that rolled over to tomorrow.
+  bool get isNextDay {
+    final date = deliveryDate;
+    final placed = createdAt;
+    if (isScheduled || date == null || placed == null) return false;
+    return date.isAfter(dateOnly(placed.toLocal()));
+  }
+
+  /// What goes back to the buyer's wallet if this order is cancelled.
+  ///
+  /// Gateway and wallet payments are confirmed money. A manually submitted
+  /// reference only counts once the farm accepted the order, which is the
+  /// farm saying it saw the payment.
+  int get refundableAmount => isPaymentSecured ? grandTotal : 0;
+
+  /// The buyer's money is really in: confirmed by the gateway or the wallet,
+  /// or a manual reference the farm accepted.
+  bool get isPaymentSecured =>
+      paymentStatus == 'paid' ||
+      (paymentStatus == 'submitted' &&
+          timeline.containsKey(OrderStatus.preparing.wire));
+
+  /// What came back to the buyer when the trip was shared.
+  int get poolRebate => _toInt(raw['poolRebate']);
+
+  // Buyer ratings, 1–5, left after confirming receipt. 0 means not rated.
+  int get farmerRating => _toInt(raw['farmerRating']);
+  int get riderRating => _toInt(raw['riderRating']);
+  bool get isRated => raw['ratedAt'] != null;
+
+  // Payouts the superadmin has sent for a delivered order.
+  bool get isFarmerPaid => raw['farmerPaidAt'] != null;
+  bool get isRiderPaid => raw['riderPaidAt'] != null;
+
+  int get refundedAmount => _toInt(raw['refundedAmount']);
+  bool get isRefunded => refundedAmount > 0;
+  String get cancelledBy => '${raw['cancelledBy'] ?? ''}';
+
   bool get hasRider => riderId.isNotEmpty;
   int get riderPayout => DeliveryPricing.riderPayout(
-        deliveryFee > 0 ? deliveryFee : DeliveryPricing.baseFare,
+        deliveryFee > 0 ? deliveryFee : DeliveryPricing.fallbackFee,
       );
   int get grandTotal => totalPrice + deliveryFee;
 
@@ -423,6 +607,9 @@ class AgriOrder {
   String get dropArea => _area(deliveryAddress);
   String get pickupArea => _area(farmLocation);
 
+  /// The town an address belongs to, the key orders are pooled by.
+  static String areaOf(String address) => _area(address);
+
   static String _area(String address) {
     if (address.trim().isEmpty) return 'Unassigned area';
     final parts = address
@@ -442,6 +629,104 @@ class AgriOrder {
     }
     return parts.length >= 2 ? parts[parts.length - 2] : parts.last;
   }
+}
+
+DateTime dateOnly(DateTime time) => DateTime(time.year, time.month, time.day);
+
+/// Average of the 1–5 ratings buyers left, ignoring unrated orders.
+class RatingSummary {
+  const RatingSummary(this.average, this.count);
+
+  factory RatingSummary.of(Iterable<int> ratings) {
+    final given = ratings.where((rating) => rating > 0).toList();
+    if (given.isEmpty) return const RatingSummary(0, 0);
+    return RatingSummary(
+      given.reduce((a, b) => a + b) / given.length,
+      given.length,
+    );
+  }
+
+  final double average;
+  final int count;
+
+  String get label => count == 0
+      ? 'No ratings yet'
+      : '${average.toStringAsFixed(1)} \u2605 (${count == 1 ? '1 rating' : '$count ratings'})';
+}
+
+/// When deliveries run. Riders work from [opensAt]; an order placed at or
+/// after [cutoff] is delivered the next day. Times are the phone's local time.
+class DeliveryHours {
+  static const opensAt = 6;
+  static const cutoff = 18;
+
+  /// The day a same-day order placed at [now] is delivered. Before 6 AM it is
+  /// still today (riders start at 6); from 6 PM it rolls over to tomorrow.
+  static DateTime sameDayDate(DateTime now) {
+    final today = dateOnly(now);
+    return now.hour >= cutoff ? today.add(const Duration(days: 1)) : today;
+  }
+
+  static bool pastCutoff(DateTime now) => now.hour >= cutoff;
+
+  /// The earliest date a scheduled order can be booked for: the day after
+  /// whatever same-day would give.
+  static DateTime firstScheduleDate(DateTime now) =>
+      sameDayDate(now).add(const Duration(days: 1));
+
+  static DateTime opensOn(DateTime date) =>
+      DateTime(date.year, date.month, date.day, opensAt);
+}
+
+/// One movement of money in a buyer's AgriLink wallet.
+///
+/// The wallet has no stored balance: it is the sum of these entries, so every
+/// peso in it can be traced to a cash-in, a payment, or a refund.
+class WalletTransaction {
+  const WalletTransaction({
+    required this.id,
+    this.userId = '',
+    required this.type,
+    required this.amount,
+    required this.description,
+    required this.reference,
+    required this.createdAt,
+  });
+
+  factory WalletTransaction.fromMap(Map<String, dynamic> map) =>
+      WalletTransaction(
+        id: '${map['id'] ?? ''}',
+        userId: '${map['userId'] ?? ''}',
+        type: WalletEntryType.parse(map['type']),
+        amount: _toInt(map['amount']),
+        description: '${map['description'] ?? ''}',
+        reference: '${map['reference'] ?? ''}',
+        createdAt: _toDate(map['createdAt']),
+      );
+
+  final String id;
+  final String userId;
+  final WalletEntryType type;
+
+  /// Signed pesos: positive adds to the balance, negative spends it.
+  final int amount;
+  final String description;
+  final String reference;
+  final DateTime? createdAt;
+}
+
+enum WalletEntryType {
+  cashIn('cash_in', 'Cash in'),
+  payment('payment', 'Payment'),
+  refund('refund', 'Refund');
+
+  const WalletEntryType(this.wire, this.label);
+
+  final String wire;
+  final String label;
+
+  static WalletEntryType parse(Object? value) => WalletEntryType.values
+      .firstWhere((type) => type.wire == value, orElse: () => payment);
 }
 
 /// A crop plus the quantity a buyer wants, held in the market cart.
@@ -523,8 +808,9 @@ class PooledBatch {
   int get farmCount => orders.map((order) => order.farmerId).toSet().length;
   int get totalKg =>
       orders.fold<int>(0, (total, order) => total + order.quantityKg);
-  int get payout =>
-      orders.fold<int>(0, (total, order) => total + order.riderPayout);
+  /// What the rider earns: the trip is priced once and shared, not the sum
+  /// of every buyer's solo fee.
+  int get payout => PoolPricing.riderPayout(orders, DeliveryRates.current);
 
   String get route {
     final origins = orders.map((order) => order.pickupArea).toSet().toList();

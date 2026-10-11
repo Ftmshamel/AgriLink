@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
@@ -12,17 +11,13 @@ import '../services/payment_service.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
+import '../services/notifications.dart';
+import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
+import 'auth_screens.dart';
 import 'shared_screens.dart';
-
-/// Background tint behind a crop tile, matching the original mockup palette.
-Color cropTint(CropCategory category) => switch (category) {
-      CropCategory.leafy => const Color(0xFFE4F3DB),
-      CropCategory.vegetables => const Color(0xFFFFE7E2),
-      CropCategory.fruits => const Color(0xFFFFF1C7),
-      CropCategory.grains => const Color(0xFFF3E3ED),
-    };
 
 class ConsumerShell extends StatefulWidget {
   const ConsumerShell({super.key, required this.session});
@@ -176,6 +171,14 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                       ],
                     ),
                   ),
+                  NotificationBell(
+                    session: widget.session,
+                    load: () async => NoticeFeed.forConsumer(
+                      await authService.database
+                          .listAgriOrders(buyerId: widget.session.user.id),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   ListenableBuilder(
                     listenable: widget.cart,
                     builder: (context, _) => Badge(
@@ -253,7 +256,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                         ],
                       ),
                     ),
-                    Text('🧺', style: TextStyle(fontSize: 66)),
+                    Icon(Icons.shopping_basket, color: Colors.white, size: 66),
                   ],
                 ),
               ),
@@ -270,7 +273,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                   children: [
                     for (final category in CropCategory.values)
                       CategoryChip(
-                        emoji: category.emoji,
+                        icon: category.icon,
                         label: category.label,
                         selected: _category == category,
                         onTap: () => setState(
@@ -349,8 +352,8 @@ class _ConsumerHomeState extends State<ConsumerHome> {
   }
 }
 
-/// Market grid tile. Shows the farmer's photo when there is one and falls back
-/// to the mockup's tinted emoji tile otherwise.
+/// Market grid tile. Shows the farmer's photo, or a plain placeholder until
+/// the farmer uploads one.
 class CropTile extends StatelessWidget {
   const CropTile({
     super.key,
@@ -374,14 +377,7 @@ class CropTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: photo != null && photo.isNotEmpty
-                  ? Image.memory(
-                      base64Decode(photo),
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _emojiTile(),
-                    )
-                  : _emojiTile(),
+              child: CropPhoto(photoBase64: photo, iconSize: 40),
             ),
             Padding(
               padding: const EdgeInsets.all(12),
@@ -426,13 +422,6 @@ class CropTile extends StatelessWidget {
       ),
     );
   }
-
-  Widget _emojiTile() => Container(
-        width: double.infinity,
-        color: cropTint(crop.category),
-        alignment: Alignment.center,
-        child: Text(crop.emoji, style: const TextStyle(fontSize: 62)),
-      );
 }
 
 class ProductDetails extends StatefulWidget {
@@ -455,6 +444,9 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   late int quantity = widget.crop.moqKg;
+  late final Future<RatingSummary> _farmRating = authService.database
+      .ratingFor(farmerId: widget.crop.farmerId)
+      .catchError((_) => const RatingSummary(0, 0));
 
   int get _step => widget.crop.moqKg > 0 ? widget.crop.moqKg : 1;
 
@@ -492,13 +484,7 @@ class _ProductDetailsState extends State<ProductDetails> {
             child: SizedBox(
               height: 250,
               width: double.infinity,
-              child: photo != null && photo.isNotEmpty
-                  ? Image.memory(
-                      base64Decode(photo),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _emojiHero(crop),
-                    )
-                  : _emojiHero(crop),
+              child: CropPhoto(photoBase64: photo, iconSize: 64),
             ),
           ),
           const SizedBox(height: 22),
@@ -571,6 +557,17 @@ class _ProductDetailsState extends State<ProductDetails> {
                             ].join(' • '),
                             style: const TextStyle(color: muted, fontSize: 12),
                           ),
+                          FutureBuilder<RatingSummary>(
+                            future: _farmRating,
+                            builder: (context, snapshot) => Text(
+                              snapshot.data?.label ?? '',
+                              style: const TextStyle(
+                                color: orange,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -588,7 +585,7 @@ class _ProductDetailsState extends State<ProductDetails> {
           const SizedBox(height: 10),
           Text(
             '${crop.quantityKg} kg available for booking. '
-            '${crop.harvestDate.isEmpty ? 'Harvest date to be confirmed.' : 'Harvest on ${crop.harvestDate}.'} '
+            '${crop.harvestDate.isEmpty ? 'Harvest date to be confirmed.' : 'Harvest on ${formatHarvestDate(crop.harvestDate)}.'} '
             'Sorted and packed by the farm for bulk buyers.',
             style: const TextStyle(color: muted, height: 1.55),
           ),
@@ -640,11 +637,22 @@ class _ProductDetailsState extends State<ProductDetails> {
                     : null,
                 icon: const Icon(Icons.remove),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+              TextButton(
+                onPressed: () async {
+                  final typed = await askQuantity(
+                    context,
+                    min: crop.moqKg,
+                    max: crop.quantityKg,
+                    current: quantity,
+                  );
+                  if (typed != null) setState(() => quantity = typed);
+                },
                 child: Text(
                   '$quantity kg',
-                  style: const TextStyle(fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
               IconButton.filledTonal(
@@ -660,6 +668,18 @@ class _ProductDetailsState extends State<ProductDetails> {
             onPressed: !_canOrder
                 ? null
                 : () {
+                    final inCart = widget.cart.lineFor(crop.id)?.quantityKg ?? 0;
+                    if (inCart + quantity > crop.quantityKg) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Only ${crop.quantityKg} kg available and you '
+                            'already have $inCart kg in your cart.',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
                     widget.cart.add(crop, quantity);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -685,12 +705,6 @@ class _ProductDetailsState extends State<ProductDetails> {
       ),
     );
   }
-
-  Widget _emojiHero(CropListing crop) => Container(
-        color: cropTint(crop.category),
-        alignment: Alignment.center,
-        child: Text(crop.emoji, style: const TextStyle(fontSize: 120)),
-      );
 }
 
 /// Cart + checkout. Fees are charged once per farm and split across that
@@ -711,6 +725,11 @@ class _CartSheetState extends State<CartSheet> {
 
   /// Set only after the worker confirms Xendit marked the invoice paid.
   PaymentInvoice? _paidInvoice;
+
+  /// An invoice the buyer was sent to but has not finished paying. Reused on
+  /// the next tap so they are never asked to pay the same cart twice.
+  PaymentInvoice? _openInvoice;
+  int _openInvoiceAmount = 0;
   final _payments = PaymentService();
 
   /// Every order is paid before it is created. Cash on delivery is not
@@ -720,15 +739,282 @@ class _CartSheetState extends State<CartSheet> {
   bool _placing = false;
   String? _error;
 
+  /// Same-day unless the buyer picks a date.
+  bool _scheduled = false;
+  DateTime? _deliveryDate;
+
+  /// The same-day date the buyer was last shown, to catch the 6 PM cutoff
+  /// passing while the sheet is open.
+  DateTime _sameDayShown = DeliveryHours.sameDayDate(DateTime.now());
+
+  bool _useWallet = false;
+  int? _walletBalance;
+
+  DeliveryRates _rates = DeliveryRates.current;
+
+  /// Open orders already heading to this buyer's town, not yet with a rider,
+  /// for the shared-trip notice. Null while loading.
+  List<AgriOrder>? _poolOrders;
+
+  /// Once Xendit has the money the cart must not change under it.
+  bool get _locked => _placing || _paidInvoice != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWallet();
+    _loadRates();
+    _loadPool();
+  }
+
+  Future<void> _loadRates() async {
+    final rates = await authService.database.loadDeliveryRates();
+    if (mounted) setState(() => _rates = rates);
+  }
+
+  /// A one-off drop-off for this order, e.g. a second branch. Null means the
+  /// address pinned on the profile.
+  LocationSelection? _dropOverride;
+
+  LatLng? get _dropPoint => _dropOverride?.point ?? widget.session.user.point;
+  String get _dropAddress =>
+      _dropOverride?.address ?? widget.session.user.location;
+
+  Future<void> _pickAddress() async {
+    final result = await Navigator.push<LocationSelection>(
+      context,
+      MaterialPageRoute(builder: (_) => const LocationPickerPage()),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _dropOverride = result;
+      _poolOrders = null;
+    });
+    _loadPool();
+  }
+
+  String get _area => AgriOrder.areaOf(_dropAddress);
+
+  Future<void> _loadPool() async {
+    try {
+      final orders = await authService.database.listAgriOrders();
+      final mine = widget.session.user.id;
+      if (!mounted) return;
+      setState(() => _poolOrders = orders
+          .where((order) =>
+              order.status.isOpen &&
+              !order.hasRider &&
+              order.buyerId != mine &&
+              order.dropArea == _area)
+          .toList());
+    } catch (_) {
+      if (mounted) setState(() => _poolOrders = const []);
+    }
+  }
+
+  /// The day this cart would be delivered.
+  DateTime? get _targetDate =>
+      _scheduled ? _deliveryDate : DeliveryHours.sameDayDate(DateTime.now());
+
+  /// This cart as the orders it would become, so it can be priced alongside
+  /// the orders it would share a trip with.
+  List<AgriOrder> _draftOrders(Map<String, int> fees) {
+    final user = widget.session.user;
+    final grouped = <String, List<CartLine>>{};
+    for (final line in widget.cart.lines) {
+      grouped.putIfAbsent(line.crop.farmerId, () => []).add(line);
+    }
+    return [
+      for (final entry in grouped.entries)
+        AgriOrder.fromMap({
+          'id': 'draft-${entry.key}',
+          'buyerId': user.id,
+          'farmerId': entry.key,
+          'quantityKg': entry.value
+              .fold<int>(0, (sum, line) => sum + line.quantityKg),
+          'deliveryFee': fees[entry.key] ?? DeliveryPricing.fallbackFee,
+          'deliveryLatitude': _dropPoint?.latitude,
+          'deliveryLongitude': _dropPoint?.longitude,
+          'farmLatitude': entry.value.first.crop.latitude,
+          'farmLongitude': entry.value.first.crop.longitude,
+        }),
+    ];
+  }
+
+  Widget _poolNotice(Map<String, int> fees) {
+    final all = _poolOrders;
+    final date = _targetDate;
+    if (all == null || date == null || _area == 'Unassigned area') {
+      return const SizedBox.shrink();
+    }
+    final mates = all.where((order) => order.dueDate == date).toList();
+    final soloTotal = fees.values.fold<int>(0, (sum, fee) => sum + fee);
+    final firstSchedulable = DeliveryHours.firstScheduleDate(DateTime.now());
+
+    // Other days a trip to this town is already forming.
+    final otherDays = <DateTime, int>{};
+    for (final order in all) {
+      final day = order.dueDate;
+      if (day == date || day.isBefore(firstSchedulable)) continue;
+      otherDays[day] = (otherDays[day] ?? 0) + 1;
+    }
+    final suggestions = otherDays.keys.toList()..sort();
+
+    final shared = mates.isNotEmpty;
+    var sharedFee = soloTotal;
+    if (shared) {
+      final drafts = _draftOrders(fees);
+      final shares = PoolPricing.shares([...drafts, ...mates], _rates);
+      sharedFee = drafts.fold<int>(
+        0,
+        (sum, draft) => sum + (shares[draft.id] ?? draft.deliveryFee),
+      );
+    }
+    final saving = soloTotal - sharedFee;
+    final day = formatDeliveryDate(date);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: shared ? lightGreen : const Color(0xFFFFF1DD),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                shared ? Icons.groups_2_outlined : Icons.person_outline,
+                color: shared ? green : orange,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  shared
+                      ? 'Shared trip: ${plural(mates.length, 'other order')} '
+                          'to $_area on $day'
+                      : 'No shared trip to $_area on $day yet',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            shared && saving > 0
+                ? 'You pay ${formatPeso(soloTotal)} delivery now. Sharing the '
+                    'trip should bring it down to about '
+                    '${formatPeso(sharedFee)}; the ${formatPeso(saving)} '
+                    'difference goes back to your AgriLink wallet when a '
+                    'rider takes the trip.'
+                : 'You pay the full trip fee of ${formatPeso(soloTotal)}. If '
+                    'other buyers in $_area book the same day, the trip is '
+                    'shared and the difference goes back to your AgriLink '
+                    'wallet.',
+            style: const TextStyle(fontSize: 12, height: 1.4),
+          ),
+          if (!shared && suggestions.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Trips already going to $_area:',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (final option in suggestions.take(4))
+                  ActionChip(
+                    avatar: const Icon(Icons.event, size: 16),
+                    label: Text(
+                      '${formatDeliveryDate(option)} • '
+                      '${plural(otherDays[option]!, 'order')}',
+                    ),
+                    onPressed: _locked
+                        ? null
+                        : () => setState(() {
+                              _scheduled = true;
+                              _deliveryDate = option;
+                            }),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _loadWallet() async {
+    try {
+      final balance =
+          await authService.database.walletBalance(widget.session.user.id);
+      if (mounted) setState(() => _walletBalance = balance);
+    } catch (_) {
+      // Without a balance the wallet option simply stays unavailable.
+    }
+  }
+
+  Future<void> _openWallet() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => WalletPage(session: widget.session)),
+    );
+    await _loadWallet();
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final first = DeliveryHours.firstScheduleDate(now);
+    final last = dateOnly(now).add(const Duration(days: 60));
+    final suggested =
+        dateOnly(now).add(const Duration(days: AgriOrder.cancelNoticeDays + 1));
+    final current = _deliveryDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current != null && !current.isBefore(first)
+          ? current
+          : suggested.isBefore(first)
+              ? first
+              : suggested,
+      firstDate: first,
+      lastDate: last,
+      helpText: 'Delivery date',
+    );
+    if (picked != null) setState(() => _deliveryDate = dateOnly(picked));
+  }
+
   @override
   void dispose() {
     _reference.dispose();
     super.dispose();
   }
 
+  /// Straight-line distance from each farm in the cart to the buyer.
+  Map<String, ({String farm, double km})> _farmDistances() {
+    final buyer = _dropPoint;
+    final result = <String, ({String farm, double km})>{};
+    for (final line in widget.cart.lines) {
+      final farm = line.crop.point;
+      result.putIfAbsent(
+        line.crop.farmerId,
+        () => (
+          farm: line.crop.farmerName,
+          km: buyer != null && farm != null
+              ? GeoService.distanceKm(buyer, farm)
+              : 0.0,
+        ),
+      );
+    }
+    return result;
+  }
+
   /// One delivery fee per farm, based on that farm's distance to the buyer.
   Map<String, int> _feesByFarm() {
-    final buyer = widget.session.user.point;
+    final buyer = _dropPoint;
     final fees = <String, int>{};
     final grouped = <String, List<CartLine>>{};
     for (final line in widget.cart.lines) {
@@ -741,19 +1027,42 @@ class _CartSheetState extends State<CartSheet> {
           : 0.0;
       final kilos = lines.fold<int>(0, (sum, line) => sum + line.quantityKg);
       fees[farmerId] =
-          DeliveryPricing.fee(distanceKm: distance, quantityKg: kilos);
+          _rates.fee(distanceKm: distance, quantityKg: kilos);
     });
     return fees;
   }
 
   Future<void> _placeOrder() async {
     final user = widget.session.user;
-    if (user.point == null || user.location.isEmpty) {
+    if (_dropPoint == null || _dropAddress.isEmpty) {
       setState(() => _error =
           'Add a delivery address in your profile before checking out.');
       return;
     }
-    if (!_payingOnline && _reference.text.trim().isEmpty) {
+    final now = DateTime.now();
+    if (_scheduled && _deliveryDate == null) {
+      setState(() => _error = 'Pick a delivery date.');
+      return;
+    }
+    if (_scheduled &&
+        _deliveryDate!.isBefore(DeliveryHours.firstScheduleDate(now))) {
+      setState(() => _error = 'That date is no longer available. Pick a '
+          'later delivery date.');
+      return;
+    }
+    // The screen may have been open since before 6 PM; say so rather than
+    // quietly moving the delivery to tomorrow.
+    final sameDay = DeliveryHours.sameDayDate(now);
+    if (!_scheduled && sameDay != _sameDayShown) {
+      setState(() {
+        _sameDayShown = sameDay;
+        _error = 'It is past 6:00 PM, so this order will be delivered '
+            'tomorrow, ${formatDeliveryDate(sameDay)}. Tap again to confirm.';
+      });
+      return;
+    }
+    final deliveryDate = _scheduled ? _deliveryDate! : sameDay;
+    if (!_useWallet && !_payingOnline && _reference.text.trim().isEmpty) {
       setState(() => _error = 'Enter your $_method reference number.');
       return;
     }
@@ -761,14 +1070,38 @@ class _CartSheetState extends State<CartSheet> {
       _placing = true;
       _error = null;
     });
+    // Nothing is charged until the cart still matches the farms' listings.
+    if (_paidInvoice == null) {
+      final problem = await _verifyCart();
+      if (problem != null) {
+        if (mounted) {
+          setState(() {
+            _error = problem;
+            _placing = false;
+          });
+        }
+        return;
+      }
+    }
+    final total = _grandTotal();
+    String? walletReference;
+    var written = 0;
     try {
-      if (_payingOnline && _paidInvoice == null) {
+      if (_useWallet) {
+        walletReference = await authService.database.payFromWallet(
+          userId: user.id,
+          amount: total,
+          description: 'Order payment \u2022 ${widget.cart.lines.length} '
+              'item${widget.cart.lines.length == 1 ? '' : 's'}',
+        );
+      } else if (_payingOnline && _paidInvoice == null) {
         final settled = await _collectPayment();
         if (!settled) {
           if (mounted) setState(() => _placing = false);
           return;
         }
       }
+      final paid = walletReference != null || _paidInvoice != null;
       final fees = _feesByFarm();
       final grouped = <String, List<CartLine>>{};
       for (final line in widget.cart.lines) {
@@ -776,7 +1109,7 @@ class _CartSheetState extends State<CartSheet> {
       }
       for (final entry in grouped.entries) {
         final lines = entry.value;
-        final farmFee = fees[entry.key] ?? DeliveryPricing.baseFare;
+        final farmFee = fees[entry.key] ?? DeliveryPricing.fallbackFee;
         // Listings published before farms carried a contact number need a
         // lookup, otherwise the rider has nobody to call at the pickup.
         var farmerPhone = lines.first.crop.farmerPhone;
@@ -806,27 +1139,35 @@ class _CartSheetState extends State<CartSheet> {
             'pricePerKg': crop.pricePerKg,
             'totalPrice': line.subtotal,
             'deliveryFee': fee,
-            'deliveryAddress': user.location,
-            'deliveryLatitude': user.latitude,
-            'deliveryLongitude': user.longitude,
+            'deliveryAddress': _dropAddress,
+            'deliveryLatitude': _dropPoint!.latitude,
+            'deliveryLongitude': _dropPoint!.longitude,
             'farmLocation': crop.farmLocation,
             'farmLatitude': crop.latitude,
             'farmLongitude': crop.longitude,
-            'paymentMethod': _method,
-            'paymentReference':
-                _paidInvoice?.reference ?? _reference.text.trim(),
-            'paymentStatus': _paidInvoice != null ? 'paid' : 'submitted',
+            'paymentMethod':
+                walletReference != null ? 'AgriLink Wallet' : _method,
+            'paymentReference': walletReference ??
+                _paidInvoice?.reference ??
+                _reference.text.trim(),
+            'paymentStatus': paid ? 'paid' : 'submitted',
             if (_paidInvoice != null) 'paymentInvoiceId': _paidInvoice!.id,
+            'deliveryType': _scheduled ? 'scheduled' : 'same_day',
+            'deliveryDate': deliveryDate.toIso8601String().substring(0, 10),
             // Money already in means there is nothing left for the farm to
             // accept or refuse, so a paid order arrives confirmed and the
             // farmer's only job is to pack it and book a rider.
-            'status': _paidInvoice != null
-                ? OrderStatus.preparing.wire
-                : OrderStatus.placed.wire,
+            'status':
+                paid ? OrderStatus.preparing.wire : OrderStatus.placed.wire,
           });
+          written += line.subtotal + fee;
+          // Off the cart the moment it exists, so a retry after a dropped
+          // connection only places what is still missing.
+          widget.cart.remove(crop.id);
           await authService.database.reduceCropStock(crop.id, line.quantityKg);
         }
       }
+      _paidInvoice = null;
       widget.cart.clear();
       widget.session.bump();
       if (!mounted) return;
@@ -837,11 +1178,79 @@ class _CartSheetState extends State<CartSheet> {
         ),
       );
     } catch (error) {
+      // Money already taken for orders that never got written goes to the
+      // wallet, whether it came from the wallet or from Xendit, so nothing is
+      // lost if the buyer gives up and nothing is charged twice if they retry.
+      final paidReference = walletReference ?? _paidInvoice?.reference;
+      var returned = 0;
+      if (paidReference != null && total > written) {
+        try {
+          await authService.database.reverseWalletPayment(
+            userId: user.id,
+            reference: paidReference,
+            amount: total - written,
+          );
+          returned = total - written;
+          if (_paidInvoice != null) {
+            _paidInvoice = null;
+            _useWallet = true;
+          }
+        } catch (_) {}
+      }
+      await _loadWallet();
       if (!mounted) return;
       setState(() {
-        _error = '$error'.replaceFirst('Exception: ', '');
+        final reason = '$error'.replaceFirst('Exception: ', '');
+        _error = [
+          if (written > 0)
+            'Some orders were placed before the connection dropped; they are '
+                'under Orders.'
+          else
+            reason,
+          if (returned > 0)
+            '${formatPeso(returned)} for the rest is in your AgriLink wallet. '
+                'Pay with Wallet to finish.',
+        ].join(' ');
         _placing = false;
       });
+    }
+  }
+
+  /// Re-reads every listing in the cart. Returns why checkout cannot go
+  /// ahead, or null when stock and prices still hold.
+  Future<String?> _verifyCart() async {
+    try {
+      for (final line in widget.cart.lines) {
+        final fresh = await authService.database.getDocument(
+          'mobileCrops',
+          line.crop.id,
+        );
+        if (fresh == null) {
+          widget.cart.remove(line.crop.id);
+          return '${line.crop.name} is no longer listed and was removed '
+              'from your cart.';
+        }
+        final crop = CropListing.fromMap(fresh);
+        if (!crop.inStock || crop.quantityKg < crop.moqKg) {
+          widget.cart.remove(line.crop.id);
+          return '${line.crop.name} just sold out and was removed from your '
+              'cart.';
+        }
+        if (crop.quantityKg < line.quantityKg) {
+          widget.cart.refresh(crop);
+          return 'Only ${crop.quantityKg} kg of ${crop.name} is left. '
+              'Lower the quantity to continue.';
+        }
+        if (crop.pricePerKg != line.crop.pricePerKg) {
+          widget.cart.refresh(crop);
+          return '${crop.name} is now ₱${crop.pricePerKg}/kg. Check the new '
+              'total, then place the order again.';
+        }
+      }
+      return null;
+    } catch (error) {
+      return 'Could not check the latest stock. '
+          '${'$error'.replaceFirst('Exception: ', '')}';
     }
   }
 
@@ -852,18 +1261,36 @@ class _CartSheetState extends State<CartSheet> {
   /// triggers another check.
   Future<bool> _collectPayment() async {
     final total = _grandTotal();
-    final reference = 'AGRILINK-${DateTime.now().millisecondsSinceEpoch}';
     final PaymentInvoice invoice;
-    try {
-      invoice = await _payments.createInvoice(
-        amount: total,
-        reference: reference,
-        description: 'AgriLink order \u2022 ${widget.cart.lines.length} item'
-            '${widget.cart.lines.length == 1 ? '' : 's'}',
-      );
-    } on PaymentException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-      return false;
+    final reusable = _openInvoice;
+    if (reusable != null && _openInvoiceAmount == total) {
+      invoice = reusable;
+    } else {
+      final reference = 'AGRILINK-${DateTime.now().millisecondsSinceEpoch}';
+      try {
+        invoice = await _payments.createInvoice(
+          amount: total,
+          reference: reference,
+          description:
+              'AgriLink order \u2022 ${widget.cart.lines.length} item'
+              '${widget.cart.lines.length == 1 ? '' : 's'}',
+        );
+      } on PaymentException catch (error) {
+        if (mounted) setState(() => _error = error.message);
+        return false;
+      }
+      _openInvoice = invoice;
+      _openInvoiceAmount = total;
+      // If the buyer pays after giving up on this screen, the money is not
+      // lost: the wallet credits any recorded invoice Xendit reports paid.
+      try {
+        await authService.database.recordCashInRequest(
+          userId: widget.session.user.id,
+          invoiceId: invoice.id,
+          amount: total,
+          reference: reference,
+        );
+      } catch (_) {}
     }
 
     final opened = await launchUrl(
@@ -888,8 +1315,20 @@ class _CartSheetState extends State<CartSheet> {
         onChannel: _recordChannel,
       ),
     );
-    if (confirmed != true) return false;
+    if (confirmed != true) {
+      if (mounted) {
+        setState(() => _error = 'Payment not confirmed yet. Tap Place order '
+            'to check again. If you pay after leaving, the amount goes to '
+            'your AgriLink wallet.');
+      }
+      return false;
+    }
+    // Paid for this order, so the wallet must not credit it as well.
+    try {
+      await authService.database.closeCashInRequest(invoice.id, 'used');
+    } catch (_) {}
     _paidInvoice = invoice;
+    _openInvoice = null;
     return true;
   }
 
@@ -898,6 +1337,74 @@ class _CartSheetState extends State<CartSheet> {
   void _recordChannel(String channel) {
     if (channel.isEmpty) return;
     _method = channel;
+  }
+
+  String _cancelPolicy() {
+    if (!_scheduled) {
+      final now = DateTime.now();
+      final String when;
+      if (DeliveryHours.pastCutoff(now)) {
+        when = 'Orders after 6:00 PM are delivered tomorrow, '
+            '${formatDeliveryDate(DeliveryHours.sameDayDate(now))}, '
+            'from 6:00 AM.';
+      } else if (now.hour < DeliveryHours.opensAt) {
+        when = 'Delivered today. Riders start at 6:00 AM.';
+      } else {
+        when = 'Delivered today. Order before 6:00 PM for same-day delivery.';
+      }
+      return '$when This order is final once placed and cannot be cancelled.';
+    }
+    final date = _deliveryDate;
+    if (date == null) {
+      return 'You can cancel a scheduled order up to '
+          '${AgriOrder.cancelNoticeDays} days before delivery for a full '
+          'refund to your wallet.';
+    }
+    final deadline =
+        date.subtract(const Duration(days: AgriOrder.cancelNoticeDays));
+    if (deadline.isBefore(dateOnly(DateTime.now()))) {
+      return 'This date is less than ${AgriOrder.cancelNoticeDays} days away, '
+          'so the order will be final once placed.';
+    }
+    return 'Free cancellation until ${formatDeliveryDate(deadline)}. '
+        'Refunds go to your AgriLink wallet.';
+  }
+
+  Widget _walletNotice(int total) {
+    final balance = _walletBalance;
+    final short = balance != null && balance < total;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: short ? const Color(0xFFFFF1DD) : canvas,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            short ? Icons.warning_amber_rounded : Icons.lock_outline,
+            color: short ? orange : green,
+            size: 19,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              balance == null
+                  ? 'Loading your wallet balance\u2026'
+                  : short
+                      ? 'Your wallet has ${formatPeso(balance)}. Cash in '
+                          '${formatPeso(total - balance)} more to pay for '
+                          'this order.'
+                      : 'Paid instantly from your wallet. '
+                          '${formatPeso(balance - total)} left after this.',
+              style: const TextStyle(fontSize: 11.5, height: 1.4),
+            ),
+          ),
+          if (short)
+            TextButton(onPressed: _openWallet, child: const Text('Cash in')),
+        ],
+      ),
+    );
   }
 
   /// What the buyer owes for the whole cart, items plus every farm's fee.
@@ -952,7 +1459,9 @@ class _CartSheetState extends State<CartSheet> {
                       children: [
                         Expanded(
                           child: LineItem(
-                            emoji: line.crop.emoji,
+                            thumb: CropThumb(
+                              photoBase64: line.crop.photoBase64,
+                            ),
                             name: line.crop.name,
                             detail:
                                 '${line.quantityKg} kg × ₱${line.crop.pricePerKg}',
@@ -961,12 +1470,20 @@ class _CartSheetState extends State<CartSheet> {
                         ),
                         IconButton(
                           tooltip: 'Remove',
-                          onPressed: () => widget.cart.remove(line.crop.id),
+                          onPressed: _locked
+                              ? null
+                              : () => widget.cart.remove(line.crop.id),
                           icon: const Icon(Icons.close, size: 18),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    _QuantityStepper(
+                      line: line,
+                      enabled: !_locked,
+                      onChanged: (kg) =>
+                          widget.cart.setQuantity(line.crop.id, kg),
+                    ),
+                    const SizedBox(height: 10),
                   ],
                   const Divider(height: 24),
                   MoneyRow(label: 'Subtotal', value: formatPeso(subtotal)),
@@ -974,6 +1491,26 @@ class _CartSheetState extends State<CartSheet> {
                     label: 'Pooled delivery (${fees.length} farm'
                         '${fees.length == 1 ? '' : 's'})',
                     value: formatPeso(delivery),
+                  ),
+                  for (final entry in _farmDistances().entries)
+                    Text(
+                      '${entry.value.farm} • ${formatKm(entry.value.km)} away '
+                      '• ${formatPeso(fees[entry.key] ?? 0)}',
+                      style: const TextStyle(color: muted, fontSize: 11.5),
+                    ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'A four-wheel trip costs ${formatPeso(_rates.baseFare)} '
+                    'plus ${formatPeso(_rates.perKilometre)}/km and '
+                    '₱${_rates.perKiloHandling}/kg, once per farm. The '
+                    'per-km rate follows diesel at '
+                    '${formatPeso(_rates.dieselPerLitre)}/L, since vans '
+                    'return empty.',
+                    style: const TextStyle(
+                      color: muted,
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   MoneyRow(
@@ -983,28 +1520,140 @@ class _CartSheetState extends State<CartSheet> {
                   ),
                   const SizedBox(height: 18),
                   Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.location_on_outlined, color: green),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              widget.session.user.location.isEmpty
-                                  ? 'No delivery address pinned yet'
-                                  : widget.session.user.location,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: _locked ? null : _pickAddress,
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.location_on_outlined,
+                              color: green,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _dropAddress.isEmpty
+                                        ? 'No delivery address pinned yet'
+                                        : _dropAddress,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    _dropOverride == null
+                                        ? 'Saved address • tap to deliver '
+                                            'somewhere else'
+                                        : 'For this order only',
+                                    style: const TextStyle(
+                                      color: muted,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            if (_dropOverride != null && !_locked)
+                              IconButton(
+                                tooltip: 'Use saved address',
+                                onPressed: () => setState(() {
+                                  _dropOverride = null;
+                                  _poolOrders = null;
+                                  _loadPool();
+                                }),
+                                icon: const Icon(Icons.undo, size: 20),
+                              )
+                            else
+                              const Icon(Icons.edit_location_alt_outlined,
+                                  color: muted),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Delivery',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<bool>(
+                    segments: [
+                      ButtonSegment(
+                        value: false,
+                        icon: const Icon(Icons.bolt),
+                        label: Text(
+                          DeliveryHours.pastCutoff(DateTime.now())
+                              ? 'Tomorrow'
+                              : 'Same day',
+                        ),
+                      ),
+                      const ButtonSegment(
+                        value: true,
+                        icon: Icon(Icons.event),
+                        label: Text('Schedule'),
+                      ),
+                    ],
+                    selected: {_scheduled},
+                    onSelectionChanged: (value) =>
+                        setState(() => _scheduled = value.first),
+                  ),
+                  if (_scheduled) ...[
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: _pickDate,
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: Text(
+                        _deliveryDate == null
+                            ? 'Pick a delivery date'
+                            : formatDeliveryDate(_deliveryDate!),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  _poolNotice(fees),
+                  const SizedBox(height: 8),
+                  Text(
+                    _cancelPolicy(),
+                    style: const TextStyle(
+                      color: muted,
+                      fontSize: 11.5,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Payment',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                        value: false,
+                        icon: Icon(Icons.phone_iphone),
+                        label: Text('GCash'),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        icon: Icon(Icons.account_balance_wallet_outlined),
+                        label: Text('Wallet'),
+                      ),
+                    ],
+                    selected: {_useWallet},
+                    onSelectionChanged: _paidInvoice != null
+                        ? null
+                        : (value) => setState(() => _useWallet = value.first),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_useWallet)
+                    _walletNotice(subtotal + delivery)
+                  else ...[
                   if (!PaymentService.enabled)
                     DropdownButtonFormField<String>(
                       initialValue: _method,
@@ -1053,6 +1702,11 @@ class _CartSheetState extends State<CartSheet> {
                     ),
                   ] else if (_method != 'Cash on delivery') ...[
                     const SizedBox(height: 12),
+                    _ManualPayTo(
+                      method: _method,
+                      amount: subtotal + delivery,
+                    ),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: _reference,
                       decoration: const InputDecoration(
@@ -1060,6 +1714,7 @@ class _CartSheetState extends State<CartSheet> {
                         prefixIcon: Icon(Icons.confirmation_number_outlined),
                       ),
                     ),
+                  ],
                   ],
                   if (_error != null) ...[
                     const SizedBox(height: 12),
@@ -1075,11 +1730,20 @@ class _CartSheetState extends State<CartSheet> {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: _placing ? null : _placeOrder,
+                      onPressed: _placing ||
+                              (_useWallet &&
+                                  (_walletBalance ?? 0) < subtotal + delivery)
+                          ? null
+                          : _placeOrder,
                       child: Padding(
                         padding: const EdgeInsets.all(14),
                         child: Text(
-                          _placing ? 'Placing order…' : 'Place order',
+                          _placing
+                              ? 'Placing order…'
+                              : _useWallet
+                                  ? 'Pay ${formatPeso(subtotal + delivery)} '
+                                      'from wallet'
+                                  : 'Place order',
                         ),
                       ),
                     ),
@@ -1090,6 +1754,192 @@ class _CartSheetState extends State<CartSheet> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Where to send money when there is no payment gateway, so the buyer is not
+/// asked for a reference number without being told who to pay.
+class _ManualPayTo extends StatelessWidget {
+  const _ManualPayTo({required this.method, required this.amount});
+
+  final String method;
+  final int amount;
+
+  static const number = String.fromEnvironment('AGRILINK_GCASH_NUMBER');
+  static const name = String.fromEnvironment(
+    'AGRILINK_GCASH_NAME',
+    defaultValue: 'AgriLink',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final configured = number.isNotEmpty;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: configured ? lightGreen : const Color(0xFFFFF1DD),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            configured ? Icons.send_to_mobile : Icons.warning_amber_rounded,
+            color: configured ? green : orange,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: configured
+                ? Text.rich(
+                    TextSpan(
+                      style: const TextStyle(fontSize: 12, height: 1.45),
+                      children: [
+                        TextSpan(text: 'Send ${formatPeso(amount)} via '),
+                        TextSpan(
+                          text: method,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: ' to '),
+                        const TextSpan(
+                          text: '$name • $number',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(
+                          text: ', then enter the reference number from '
+                              'your receipt. The farm confirms it before '
+                              'packing.',
+                        ),
+                      ],
+                    ),
+                  )
+                : const Text(
+                    'No payment account is set up in this build, so there '
+                    'is nowhere to send money. Pay with your AgriLink Wallet '
+                    'instead.',
+                    style: TextStyle(fontSize: 12, height: 1.45),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Lets a bulk buyer type a quantity instead of tapping + dozens of times.
+Future<int?> askQuantity(
+  BuildContext context, {
+  required int min,
+  required int max,
+  required int current,
+}) async {
+  final controller = TextEditingController(text: '$current');
+  String? error;
+  final result = await showDialog<int>(
+    context: context,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext, setDialogState) {
+        void submit() {
+          final value = int.tryParse(controller.text.trim());
+          if (value == null || value < min || value > max) {
+            setDialogState(() => error = 'Enter $min to $max kg.');
+            return;
+          }
+          Navigator.pop(dialogContext, value);
+        }
+
+        return AlertDialog(
+          title: const Text('Quantity'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            onSubmitted: (_) => submit(),
+            decoration: InputDecoration(
+              suffixText: 'kg',
+              helperText: 'Minimum $min kg • $max kg available',
+              errorText: error,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(onPressed: submit, child: const Text('Set')),
+          ],
+        );
+      },
+    ),
+  );
+  controller.dispose();
+  return result;
+}
+
+/// Changes a cart line in steps of the farm's minimum order, never below it
+/// and never past the stock the listing had when it was added.
+class _QuantityStepper extends StatelessWidget {
+  const _QuantityStepper({
+    required this.line,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final CartLine line;
+  final bool enabled;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final crop = line.crop;
+    final step = crop.moqKg > 0 ? crop.moqKg : 1;
+    final kg = line.quantityKg;
+    return Row(
+      children: [
+        const SizedBox(width: 64),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          tooltip: 'Less',
+          onPressed: enabled && kg - step >= crop.moqKg
+              ? () => onChanged(kg - step)
+              : null,
+          icon: const Icon(Icons.remove_circle_outline, size: 22),
+        ),
+        InkWell(
+          onTap: !enabled
+              ? null
+              : () async {
+                  final typed = await askQuantity(
+                    context,
+                    min: crop.moqKg,
+                    max: crop.quantityKg,
+                    current: kg,
+                  );
+                  if (typed != null) onChanged(typed);
+                },
+          child: Text(
+            '$kg kg',
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          tooltip: 'More',
+          onPressed: enabled && kg + step <= crop.quantityKg
+              ? () => onChanged(kg + step)
+              : null,
+          icon: const Icon(Icons.add_circle_outline, size: 22),
+        ),
+        const Spacer(),
+        Text(
+          '${crop.quantityKg} kg left',
+          style: const TextStyle(color: muted, fontSize: 11),
+        ),
+      ],
     );
   }
 }
@@ -1236,6 +2086,372 @@ class _PaymentWaitDialogState extends State<_PaymentWaitDialog> {
   }
 }
 
+/// The buyer's AgriLink wallet: balance, cash-in, and every peso's history.
+///
+/// Cash-ins go through the same Xendit worker as checkout. The invoice is
+/// recorded before the buyer leaves the app, so one paid after they closed the
+/// waiting dialog is still credited the next time this page opens.
+class WalletPage extends StatefulWidget {
+  const WalletPage({super.key, required this.session});
+
+  final AppSession session;
+
+  @override
+  State<WalletPage> createState() => _WalletPageState();
+}
+
+class _WalletPageState extends State<WalletPage> {
+  final _payments = PaymentService();
+  bool _busy = false;
+
+  static const minCashIn = 100;
+  static const maxCashIn = 50000;
+
+  String get _userId => widget.session.user.id;
+
+  Future<List<WalletTransaction>> _load() async {
+    await _settlePending();
+    return authService.database.listWalletTransactions(_userId);
+  }
+
+  /// Credits any cash-in Xendit has confirmed since it was started.
+  Future<void> _settlePending() async {
+    if (!PaymentService.enabled) return;
+    try {
+      final pending = await authService.database.listPendingCashIns(_userId);
+      for (final request in pending) {
+        final invoiceId = '${request['id']}';
+        final status = await _payments.check(invoiceId);
+        if (status.paid && status.amount > 0) {
+          await authService.database.creditCashIn(
+            userId: _userId,
+            amount: status.amount,
+            invoiceId: invoiceId,
+            reference: '${request['reference'] ?? ''}',
+            channel: status.channel,
+          );
+          await authService.database.closeCashInRequest(invoiceId, 'credited');
+        } else if (status.expired) {
+          await authService.database.closeCashInRequest(invoiceId, 'expired');
+        }
+      }
+    } catch (_) {
+      // Settling is retried on every refresh; a failed check is not an error
+      // worth showing over the balance.
+    }
+  }
+
+  Future<void> _cashIn() async {
+    final amount = await showDialog<int>(
+      context: context,
+      builder: (_) => const _CashInDialog(min: minCashIn, max: maxCashIn),
+    );
+    if (amount == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final credited = PaymentService.enabled
+          ? await _cashInOnline(amount)
+          : await _cashInDemo(amount);
+      if (!mounted || !credited) return;
+      widget.session.bump();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${formatPeso(amount)} added to your wallet.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<bool> _cashInOnline(int amount) async {
+    final reference = 'AGRILINK-WALLET-${DateTime.now().millisecondsSinceEpoch}';
+    final invoice = await _payments.createInvoice(
+      amount: amount,
+      reference: reference,
+      description: 'AgriLink wallet cash-in',
+    );
+    await authService.database.recordCashInRequest(
+      userId: _userId,
+      invoiceId: invoice.id,
+      amount: amount,
+      reference: reference,
+    );
+    final opened = await launchUrl(
+      Uri.parse(invoice.url),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened) throw Exception('Could not open the payment page.');
+    if (!mounted) return false;
+    var channel = '';
+    final paid = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _PaymentWaitDialog(
+        payments: _payments,
+        invoice: invoice,
+        amount: amount,
+        onChannel: (value) => channel = value,
+      ),
+    );
+    if (paid != true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'If you finish paying later, the money appears here '
+              'automatically.',
+            ),
+          ),
+        );
+      }
+      return false;
+    }
+    // Credit what Xendit says was paid, not what the app asked for.
+    final status = await _payments.check(invoice.id);
+    await authService.database.creditCashIn(
+      userId: _userId,
+      amount: status.amount > 0 ? status.amount : amount,
+      invoiceId: invoice.id,
+      reference: reference,
+      channel: channel,
+    );
+    await authService.database.closeCashInRequest(invoice.id, 'credited');
+    return true;
+  }
+
+  /// Without a payment worker there is nothing to verify a payment against,
+  /// so a development build adds clearly labelled demo funds instead — the
+  /// same approach the password reset takes without an email provider.
+  Future<bool> _cashInDemo(int amount) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Development build'),
+        content: Text(
+          'No payment gateway is configured, so no real money moves. '
+          'Add ${formatPeso(amount)} of demo funds to this wallet?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Add demo funds'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return false;
+    final id = 'demo-${DateTime.now().millisecondsSinceEpoch}';
+    return authService.database.creditCashIn(
+      userId: _userId,
+      amount: amount,
+      invoiceId: id,
+      reference: id,
+      channel: 'demo funds',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('AgriLink Wallet')),
+      body: LiveBuilder<List<WalletTransaction>>(
+        session: widget.session,
+        load: _load,
+        builder: (context, data) {
+          final entries = data.value ?? const <WalletTransaction>[];
+          final balance =
+              entries.fold<int>(0, (sum, entry) => sum + entry.amount);
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                Card(
+                  color: green,
+                  child: Padding(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Available balance',
+                          style: TextStyle(color: Color(0xFFD8EAD1)),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          data.value == null ? '—' : formatPeso(balance),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 34,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: green,
+                          ),
+                          onPressed: _busy ? null : _cashIn,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Cash in'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Pay for orders with your balance. Refunds for cancelled '
+                  'orders always come back here. Wallet funds cannot be '
+                  'withdrawn.',
+                  style: TextStyle(color: muted, fontSize: 12, height: 1.4),
+                ),
+                const SizedBox(height: 22),
+                const SectionTitle(title: 'History', action: ''),
+                const SizedBox(height: 10),
+                if (data.error != null && entries.isEmpty)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  )
+                else if (entries.isEmpty)
+                  const EmptyState(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'No transactions yet',
+                    message: 'Cash in to start paying with your wallet.',
+                  )
+                else
+                  for (final entry in entries)
+                    Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              entry.amount >= 0 ? lightGreen : canvas,
+                          child: Icon(
+                            switch (entry.type) {
+                              WalletEntryType.cashIn => Icons.add_card,
+                              WalletEntryType.payment => Icons.shopping_bag,
+                              WalletEntryType.refund => Icons.undo,
+                            },
+                            color: entry.amount >= 0 ? green : muted,
+                          ),
+                        ),
+                        title: Text(
+                          entry.description.isEmpty
+                              ? entry.type.label
+                              : entry.description,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          [
+                            if (entry.createdAt != null)
+                              '${formatRelativeDay(entry.createdAt!)} • '
+                                  '${formatClock(entry.createdAt!)}',
+                            if (entry.reference.isNotEmpty) entry.reference,
+                          ].join('\n'),
+                        ),
+                        trailing: Text(
+                          '${entry.amount >= 0 ? '+' : ''}'
+                          '${formatPeso(entry.amount)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: entry.amount >= 0 ? green : ink,
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CashInDialog extends StatefulWidget {
+  const _CashInDialog({required this.min, required this.max});
+
+  final int min;
+  final int max;
+
+  @override
+  State<_CashInDialog> createState() => _CashInDialogState();
+}
+
+class _CashInDialogState extends State<_CashInDialog> {
+  final _amount = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final value = int.tryParse(_amount.text.trim());
+    if (value == null || value < widget.min || value > widget.max) {
+      setState(() => _error = 'Enter ${formatPeso(widget.min)} to '
+          '${formatPeso(widget.max)}.');
+      return;
+    }
+    Navigator.pop(context, value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Cash in'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final preset in const [100, 500, 1000, 2000])
+                ActionChip(
+                  label: Text(formatPeso(preset)),
+                  onPressed: () => setState(() {
+                    _amount.text = '$preset';
+                    _error = null;
+                  }),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _amount,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Amount',
+              prefixText: '₱',
+              errorText: _error,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(onPressed: _submit, child: const Text('Continue')),
+      ],
+    );
+  }
+}
+
 class ConsumerOrders extends StatelessWidget {
   const ConsumerOrders({super.key, required this.session});
 
@@ -1291,7 +2507,7 @@ class ConsumerOrders extends StatelessWidget {
               for (final order in past) ...[
                 PastOrderCard(
                   id: order.reference,
-                  emoji: order.emoji,
+                  thumb: CropThumb(cropId: order.cropId),
                   name: order.cropName,
                   detail: '${order.quantityKg} kg • ${order.farmerName}',
                   price: formatPeso(order.grandTotal),
@@ -1360,10 +2576,28 @@ class ActiveOrderCard extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               LineItem(
-                emoji: order.emoji,
+                thumb: CropThumb(cropId: order.cropId),
                 name: order.cropName,
                 detail: '${order.quantityKg} kg • ${order.farmerName}',
                 price: formatPeso(order.grandTotal),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(
+                    order.isScheduled ? Icons.event : Icons.bolt,
+                    color: order.isScheduled ? green : orange,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    deliveryScheduleLabel(order),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
               const Divider(height: 28),
               Row(
@@ -1560,6 +2794,19 @@ class DeliveryTracking extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+                _ScheduleCard(session: session, order: order),
+                if (order.status.isWithRider &&
+                    order.deliveryCode.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _DeliveryCodeCard(code: order.deliveryCode),
+                ],
+                if (order.status == OrderStatus.delivered) ...[
+                  const SizedBox(height: 16),
+                  DeliveryProofCard(order: order),
+                  const SizedBox(height: 12),
+                  _ReceiptActions(session: session, order: order),
+                ],
+                const SizedBox(height: 16),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(18),
@@ -1567,7 +2814,7 @@ class DeliveryTracking extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LineItem(
-                          emoji: order.emoji,
+                          thumb: CropThumb(cropId: order.cropId),
                           name: order.cropName,
                           detail:
                               '${order.quantityKg} kg • ${order.farmerName}',
@@ -1578,6 +2825,16 @@ class DeliveryTracking extends StatelessWidget {
                           label: 'Delivery',
                           value: formatPeso(order.deliveryFee),
                         ),
+                        if (order.poolRebate > 0)
+                          Text(
+                            'Shared trip: ${formatPeso(order.poolRebate)} of '
+                            'your delivery fee went back to your wallet.',
+                            style: const TextStyle(
+                              color: green,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         MoneyRow(
                           label: 'Total',
                           value: formatPeso(order.grandTotal),
@@ -1657,6 +2914,416 @@ class DeliveryTracking extends StatelessWidget {
   }
 }
 
+/// When the order arrives, whether it can still be cancelled, and what was
+/// refunded if it was.
+class _ScheduleCard extends StatefulWidget {
+  const _ScheduleCard({required this.session, required this.order});
+
+  final AppSession session;
+  final AgriOrder order;
+
+  @override
+  State<_ScheduleCard> createState() => _ScheduleCardState();
+}
+
+class _ScheduleCardState extends State<_ScheduleCard> {
+  bool _busy = false;
+
+  Future<void> _cancel() async {
+    final order = widget.order;
+    final refund = order.refundableAmount;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Cancel this order?'),
+        content: Text(
+          refund > 0
+              ? '${formatPeso(refund)} goes back to your AgriLink wallet.'
+              : 'Nothing has been paid yet, so there is nothing to refund.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Keep order'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    setState(() => _busy = true);
+    try {
+      final refunded = await authService.database.cancelOrder(
+        order.id,
+        cancelledBy: 'buyer',
+        restock: true,
+      );
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            refunded > 0
+                ? 'Order cancelled. ${formatPeso(refunded)} is back in your '
+                    'wallet.'
+                : 'Order cancelled.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final order = widget.order;
+    final deadline = order.cancelDeadline;
+    final canCancel = order.canBuyerCancel(DateTime.now());
+    final String policy;
+    if (order.status == OrderStatus.cancelled) {
+      final by = switch (order.cancelledBy) {
+        'buyer' => 'You cancelled this order.',
+        'farmer' => 'The farm cancelled this order.',
+        _ => 'This order was cancelled.',
+      };
+      policy = order.isRefunded
+          ? '$by ${formatPeso(order.refundedAmount)} was refunded to your '
+              'AgriLink wallet.'
+          : by;
+    } else if (!order.status.isOpen) {
+      policy = '';
+    } else if (canCancel) {
+      policy = 'Free cancellation until ${formatDeliveryDate(deadline!)}.';
+    } else if (deadline == null) {
+      policy = 'Same-day orders cannot be cancelled.';
+    } else {
+      policy = 'The cancellation window closed on '
+          '${formatDeliveryDate(deadline)}.';
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  order.isScheduled ? Icons.event : Icons.bolt,
+                  color: order.isScheduled ? green : orange,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  deliveryScheduleLabel(order),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ],
+            ),
+            if (policy.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(policy, style: const TextStyle(color: muted, height: 1.4)),
+            ],
+            if (canCancel) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _busy ? null : _cancel,
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('Cancel order'),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The code the buyer reads out at the door. The rider cannot finish the
+/// drop-off without it, so handing it over is the buyer's signature.
+class _DeliveryCodeCard extends StatelessWidget {
+  const _DeliveryCodeCard({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: lightGreen,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.password, color: green),
+                SizedBox(width: 8),
+                Text(
+                  'Delivery code',
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: Text(
+                code,
+                style: const TextStyle(
+                  fontSize: 36,
+                  letterSpacing: 14,
+                  fontWeight: FontWeight.w900,
+                  color: green,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Give this code to the rider only after you have checked your '
+              'items. Never share it over the phone.',
+              style: TextStyle(color: muted, height: 1.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Lets the buyer close the loop on a delivered order: confirm the items
+/// arrived, or report that they did not.
+class _ReceiptActions extends StatefulWidget {
+  const _ReceiptActions({required this.session, required this.order});
+
+  final AppSession session;
+  final AgriOrder order;
+
+  @override
+  State<_ReceiptActions> createState() => _ReceiptActionsState();
+}
+
+class _ReceiptActionsState extends State<_ReceiptActions> {
+  bool _busy = false;
+
+  Future<void> _run(Future<void> Function() action, String done) async {
+    setState(() => _busy = true);
+    try {
+      await action();
+      widget.session.bump();
+      if (!mounted) return;
+      if (done.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(done)),
+        );
+      }
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _confirm() async {
+    await _run(
+      () => authService.database.confirmReceived(widget.order.id),
+      'Thanks! Receipt confirmed.',
+    );
+    if (mounted) await _rate();
+  }
+
+  Future<void> _rate() async {
+    final order = widget.order;
+    final rating = await showDialog<_Rating>(
+      context: context,
+      builder: (_) => _RatingDialog(
+        farmName: order.farmerName,
+        riderName: order.hasRider ? order.riderName : '',
+      ),
+    );
+    if (rating == null) return;
+    await _run(
+      () => authService.database.rateOrder(
+        order.id,
+        farmerRating: rating.farm,
+        riderRating: rating.rider,
+        comment: rating.comment,
+      ),
+      'Thanks for rating this order.',
+    );
+  }
+
+  Future<void> _report() => _run(() async {
+        final order = widget.order;
+        final filed = await showReportSheet(
+          context,
+          session: widget.session,
+          farmerId: order.farmerId,
+          farmerName: order.farmerName,
+          cropId: order.cropId,
+          orderId: order.id,
+          riderId: order.riderId,
+          riderName: order.riderName,
+        );
+        if (filed) await authService.database.markDeliveryDisputed(order.id);
+      }, '');
+
+  @override
+  Widget build(BuildContext context) {
+    final order = widget.order;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!order.isReceiptConfirmed && !order.isDisputed)
+          FilledButton.icon(
+            onPressed: _busy ? null : _confirm,
+            icon: const Icon(Icons.check_circle_outline),
+            label: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('I received my order'),
+            ),
+          ),
+        if (order.isReceiptConfirmed && !order.isRated)
+          FilledButton.icon(
+            onPressed: _busy ? null : _rate,
+            icon: const Icon(Icons.star_outline),
+            label: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('Rate this order'),
+            ),
+          ),
+        if (order.isRated)
+          Text(
+            'You rated the farm ${order.farmerRating}/5'
+            '${order.riderRating > 0 ? ' and the rider ${order.riderRating}/5' : ''}.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: muted),
+          ),
+        if (!order.isDisputed) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _busy ? null : _report,
+            icon: const Icon(Icons.report_outlined),
+            label: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                order.isReceiptConfirmed
+                    ? 'Report a problem with this order'
+                    : 'Not received / problem with delivery',
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+typedef _Rating = ({int farm, int rider, String comment});
+
+class _RatingDialog extends StatefulWidget {
+  const _RatingDialog({required this.farmName, required this.riderName});
+
+  final String farmName;
+  final String riderName;
+
+  @override
+  State<_RatingDialog> createState() => _RatingDialogState();
+}
+
+class _RatingDialogState extends State<_RatingDialog> {
+  int _farm = 0;
+  int _rider = 0;
+  final _comment = TextEditingController();
+
+  @override
+  void dispose() {
+    _comment.dispose();
+    super.dispose();
+  }
+
+  Widget _stars(int value, ValueChanged<int> onChanged) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var star = 1; star <= 5; star++)
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              tooltip: '$star star${star == 1 ? '' : 's'}',
+              onPressed: () => setState(() => onChanged(star)),
+              icon: Icon(
+                star <= value ? Icons.star : Icons.star_border,
+                color: orange,
+              ),
+            ),
+        ],
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRider = widget.riderName.isNotEmpty;
+    return AlertDialog(
+      title: const Text('Rate this order'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Produce from ${widget.farmName}',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+            _stars(_farm, (value) => _farm = value),
+            if (hasRider) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Delivery by ${widget.riderName}',
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              _stars(_rider, (value) => _rider = value),
+            ],
+            const SizedBox(height: 8),
+            TextField(
+              controller: _comment,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Comment (optional)',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Later'),
+        ),
+        FilledButton(
+          onPressed: _farm == 0 || (hasRider && _rider == 0)
+              ? null
+              : () => Navigator.pop<_Rating>(
+                    context,
+                    (farm: _farm, rider: _rider, comment: _comment.text),
+                  ),
+          child: const Text('Submit'),
+        ),
+      ],
+    );
+  }
+}
+
 class ConsumerProfile extends StatelessWidget {
   const ConsumerProfile({super.key, required this.session});
 
@@ -1691,6 +3358,17 @@ class ConsumerProfile extends StatelessWidget {
                 title: 'Delivery address',
                 subtitle: user.location.isEmpty ? 'Not set yet' : user.location,
                 onTap: () => openProfileEditor(context, session),
+              ),
+              ProfileTile(
+                icon: Icons.account_balance_wallet_outlined,
+                title: 'AgriLink Wallet',
+                subtitle: 'Balance, cash in, and refunds',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => WalletPage(session: session),
+                  ),
+                ),
               ),
               ProfileTile(
                 icon: Icons.payments_outlined,

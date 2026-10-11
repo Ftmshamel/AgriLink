@@ -205,12 +205,12 @@ class Pill extends StatelessWidget {
 class CategoryChip extends StatelessWidget {
   const CategoryChip({
     super.key,
-    required this.emoji,
+    required this.icon,
     required this.label,
     this.selected = false,
     this.onTap,
   });
-  final String emoji;
+  final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback? onTap;
@@ -233,7 +233,7 @@ class CategoryChip extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
+              Icon(icon, size: 20, color: green),
               const SizedBox(width: 7),
               Text(
                 label,
@@ -253,12 +253,13 @@ class CategoryChip extends StatelessWidget {
 class LineItem extends StatelessWidget {
   const LineItem({
     super.key,
-    required this.emoji,
+    this.thumb,
     required this.name,
     required this.detail,
     required this.price,
   });
-  final String emoji;
+  /// Usually the crop's photo; a plain icon tile when omitted.
+  final Widget? thumb;
   final String name;
   final String detail;
   final String price;
@@ -267,16 +268,17 @@ class LineItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            color: lightGreen,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          alignment: Alignment.center,
-          child: Text(emoji, style: const TextStyle(fontSize: 27)),
-        ),
+        thumb ??
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: lightGreen,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(Icons.image_outlined, color: green),
+            ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -334,7 +336,7 @@ class PastOrderCard extends StatelessWidget {
     required this.name,
     required this.detail,
     required this.price,
-    required this.emoji,
+    this.thumb,
     this.statusText = 'DELIVERED',
     this.statusIcon = Icons.check_circle,
     this.statusColor = green,
@@ -344,7 +346,7 @@ class PastOrderCard extends StatelessWidget {
   final String name;
   final String detail;
   final String price;
-  final String emoji;
+  final Widget? thumb;
   final String statusText;
   final IconData statusIcon;
   final Color statusColor;
@@ -360,7 +362,12 @@ class PastOrderCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              LineItem(emoji: emoji, name: name, detail: detail, price: price),
+              LineItem(
+                thumb: thumb,
+                name: name,
+                detail: detail,
+                price: price,
+              ),
               const Divider(height: 26),
               Row(
                 children: [

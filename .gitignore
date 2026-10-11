@@ -11,6 +11,7 @@ android/.gradle/
 android/local.properties
 *.jks
 *.keystore
+key.properties
 
 # Environment files
 .env

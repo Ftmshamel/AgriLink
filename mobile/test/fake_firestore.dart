@@ -22,6 +22,9 @@ class FakeFirestore {
     switch (request.method) {
       case 'POST':
         final id = request.url.queryParameters['documentId']!;
+        if (documents.containsKey('$collection/$id')) {
+          return http.Response('{"error":{"message":"ALREADY_EXISTS"}}', 409);
+        }
         documents['$collection/$id'] =
             _decode(_fields(request.body)).cast<String, dynamic>();
         return _ok({'name': '$collection/$id'});

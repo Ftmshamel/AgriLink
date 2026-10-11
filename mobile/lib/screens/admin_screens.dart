@@ -7,9 +7,12 @@ import '../models/agri_models.dart';
 import '../models/mobile_user.dart';
 import '../services/document_check.dart';
 import '../services/geo.dart';
+import '../services/notifications.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
+import '../widgets/crop_photo.dart';
 import '../widgets/live_data.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
 import 'shared_screens.dart';
 
@@ -123,6 +126,17 @@ class PlatformSnapshot {
         .toList();
   }
 
+  Iterable<AgriOrder> get _delivered =>
+      orders.where((order) => order.status == OrderStatus.delivered);
+
+  int get owedToFarmers => _delivered
+      .where((order) => !order.isFarmerPaid)
+      .fold<int>(0, (sum, order) => sum + order.totalPrice);
+
+  int get owedToRiders => _delivered
+      .where((order) => !order.isRiderPaid && order.hasRider)
+      .fold<int>(0, (sum, order) => sum + order.riderPayout);
+
   int countPending(String role) =>
       pending.where((account) => account['role'] == role).length;
 
@@ -131,6 +145,7 @@ class PlatformSnapshot {
       authService.database.listAccounts(),
       authService.database.listAgriOrders(),
       authService.database.listReports(),
+      authService.database.loadDeliveryRates(),
     ]);
     return PlatformSnapshot(
       accounts: results[0] as List<Map<String, dynamic>>,
@@ -165,11 +180,28 @@ class SuperadminOverview extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              const PageHeader(
-                eyebrow: 'PLATFORM OPERATIONS',
-                title: 'Network Overview',
-                subtitle:
-                    'Live transaction and delivery health across AgriLink.',
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Expanded(
+                    child: PageHeader(
+                      eyebrow: 'PLATFORM OPERATIONS',
+                      title: 'Network Overview',
+                      subtitle:
+                          'Live transaction and delivery health across AgriLink.',
+                    ),
+                  ),
+                  NotificationBell(
+                    session: session,
+                    load: () async {
+                      final results = await Future.wait([
+                        authService.database.listAccounts(),
+                        authService.database.listReports(),
+                      ]);
+                      return NoticeFeed.forAdmin(results[0], results[1]);
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               if (data.error != null && snapshot == null)
@@ -226,9 +258,9 @@ class SuperadminOverview extends StatelessWidget {
                       title:
                           '${snapshot!.pending.length} registration${snapshot.pending.length == 1 ? '' : 's'} pending',
                       subtitle:
-                          '${snapshot.countPending('farmer')} farmers • '
-                          '${snapshot.countPending('consumer')} consumers • '
-                          '${snapshot.countPending('rider')} riders',
+                          '${plural(snapshot.countPending('farmer'), 'farmer')} • '
+                          '${plural(snapshot.countPending('consumer'), 'consumer')} • '
+                          '${plural(snapshot.countPending('rider'), 'rider')}',
                       badge: 'REVIEW',
                     ),
                   ),
@@ -267,7 +299,70 @@ class SuperadminOverview extends StatelessWidget {
                         'No pending registrations, disputes, or delayed orders.',
                   ),
                 const SizedBox(height: 24),
-                const SectionTitle(title: 'Recent orders', action: 'Latest'),
+                const SectionTitle(title: 'Money', action: ''),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PayoutsPage(session: session),
+                    ),
+                  ),
+                  child: ActionCard(
+                    icon: Icons.request_quote_outlined,
+                    title: 'Payouts',
+                    subtitle: snapshot == null
+                        ? 'Loading…'
+                        : '${formatPeso(snapshot.owedToFarmers)} to farmers • '
+                            '${formatPeso(snapshot.owedToRiders)} to riders',
+                    badge: 'OWED',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DeliveryRatesPage(session: session),
+                    ),
+                  ),
+                  child: ActionCard(
+                    icon: Icons.local_gas_station_outlined,
+                    title: 'Delivery pricing',
+                    subtitle: 'Diesel ${formatPeso(DeliveryRates.current.dieselPerLitre)}/L • '
+                        '${formatPeso(DeliveryRates.current.perKilometre)}/km',
+                    badge: 'RATES',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WalletLedgerPage(session: session),
+                    ),
+                  ),
+                  child: const ActionCard(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'Buyer wallets',
+                    subtitle: 'Cash-ins, payments, refunds, and balances',
+                    badge: 'LEDGER',
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SectionTitle(
+                  title: 'Recent orders',
+                  action: 'View all',
+                  onAction: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AllOrdersPage(session: session),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 10),
                 if ((snapshot?.orders.length ?? 0) == 0)
                   const EmptyState(
@@ -279,9 +374,12 @@ class SuperadminOverview extends StatelessWidget {
                   for (final order in snapshot!.orders.take(5)) ...[
                     Card(
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: lightGreen,
-                          child: Text(order.emoji),
+                        leading: ClipOval(
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CropPhoto(cropId: order.cropId),
+                          ),
                         ),
                         title: Text(
                           '${order.reference} • ${order.cropName}',
@@ -384,7 +482,8 @@ class VerificationQueue extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       subtitle: Text(
-                        '${account['role']} • ${account['verificationStatus']}',
+                        '${account['role']} • ${account['verificationStatus']}'
+                        '${'${account['statusReason'] ?? ''}'.isEmpty ? '' : '\n${account['statusReason']}'}',
                       ),
                       trailing: TextButton(
                         onPressed: () => _setStatus(
@@ -417,8 +516,46 @@ class VerificationQueue extends StatelessWidget {
     Map<String, dynamic> account,
     String status,
   ) async {
-    await authService.database
-        .setVerificationStatus('${account['id']}', status);
+    var reason = '';
+    if (status == 'suspended') {
+      final controller = TextEditingController();
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text('Suspend ${account['name']}?'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              labelText: 'Reason',
+              hintText: 'Repeated no-shows, fake documents…',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                controller.text.trim().isNotEmpty,
+              ),
+              child: const Text('Suspend'),
+            ),
+          ],
+        ),
+      );
+      reason = controller.text.trim();
+      controller.dispose();
+      if (confirmed != true || reason.isEmpty) return;
+    }
+    await authService.database.setVerificationStatus(
+      '${account['id']}',
+      status,
+      reason: reason,
+    );
     session.bump();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -491,13 +628,19 @@ class _ApplicantCardState extends State<ApplicantCard> {
   /// Flags an applicant whose upload did not finish, so a missing requirement
   /// is obvious before anyone taps Approve. Accounts registered before this
   /// was recorded simply show nothing.
-  String? _requirementSummary(Map<dynamic, dynamic> profile) {
+  (IconData, String)? _requirementSummary(Map<dynamic, dynamic> profile) {
     final required = int.tryParse('${profile['requiredDocuments'] ?? ''}');
     final submitted = int.tryParse('${profile['submittedDocuments'] ?? ''}');
     if (required == null || submitted == null || required == 0) return null;
     return submitted >= required
-        ? '🗂 $submitted of $required required documents attached'
-        : '⚠️ Only $submitted of $required required documents attached';
+        ? (
+            Icons.folder_outlined,
+            '$submitted of $required required documents attached',
+          )
+        : (
+            Icons.warning_amber_rounded,
+            'Only $submitted of $required required documents attached',
+          );
   }
 
   @override
@@ -516,7 +659,7 @@ class _ApplicantCardState extends State<ApplicantCard> {
                   backgroundColor: lightGreen,
                   child: Icon(
                     account['role'] == 'rider'
-                        ? Icons.two_wheeler
+                        ? Icons.local_shipping
                         : Icons.agriculture,
                     color: green,
                   ),
@@ -545,22 +688,40 @@ class _ApplicantCardState extends State<ApplicantCard> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              [
-                if ('${profile['location'] ?? ''}'.isNotEmpty)
-                  '📍 ${profile['location']}',
-                if ('${profile['vehicle'] ?? ''}'.isNotEmpty)
-                  '🛵 ${profile['vehicle']}',
-                if ('${profile['payoutNumber'] ?? ''}'.isNotEmpty)
-                  '💳 ${profile['payoutNumber']}',
-                if ('${profile['secondaryId'] ?? ''}'.isNotEmpty)
-                  '🪪 ${profile['secondaryId']}',
-                if ('${account['phone'] ?? ''}'.isNotEmpty)
-                  '📞 ${account['phone']}',
-                if (_requirementSummary(profile) case final summary?) summary,
-              ].join('\n'),
-              style: const TextStyle(color: muted, height: 1.6, fontSize: 12),
-            ),
+            for (final (icon, text) in [
+              if ('${profile['location'] ?? ''}'.isNotEmpty)
+                (Icons.location_on_outlined, '${profile['location']}'),
+              if ('${profile['vehicle'] ?? ''}'.isNotEmpty)
+                (Icons.local_shipping_outlined, '${profile['vehicle']}'),
+              if ('${profile['payoutNumber'] ?? ''}'.isNotEmpty)
+                (Icons.account_balance_wallet_outlined,
+                    '${profile['payoutNumber']}'),
+              if ('${profile['secondaryId'] ?? ''}'.isNotEmpty)
+                (Icons.badge_outlined, '${profile['secondaryId']}'),
+              if ('${account['phone'] ?? ''}'.isNotEmpty)
+                (Icons.phone_outlined, '${account['phone']}'),
+              if (_requirementSummary(profile) case final summary?) summary,
+            ])
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, size: 15, color: muted),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          color: muted,
+                          height: 1.4,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () => Navigator.push(
@@ -984,6 +1145,30 @@ class DisputeCenter extends StatelessWidget {
                               style: const TextStyle(height: 1.45),
                             ),
                           ),
+                          if ('${report['riderName'] ?? ''}'.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Rider: ${report['riderName']}',
+                              style: const TextStyle(
+                                color: muted,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                          if ('${report['orderId'] ?? ''}'.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _showProof(
+                                  context,
+                                  '${report['orderId']}',
+                                ),
+                                icon: const Icon(Icons.fact_check_outlined),
+                                label: const Text('View delivery proof'),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
@@ -1014,7 +1199,10 @@ class DisputeCenter extends StatelessWidget {
                         'Against ${report['farmerName'] ?? 'a farmer'}',
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
-                      subtitle: Text('${report['resolution'] ?? 'Resolved'}'),
+                      subtitle: Text(
+                        '${report['resolution'] ?? 'Resolved'}'
+                        '${report['refundAmount'] == null ? '' : ' • refunded ${formatPeso(report['refundAmount'] as num)}'}',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -1032,22 +1220,75 @@ class DisputeCenter extends StatelessWidget {
     return at == null ? '' : '${formatRelativeDay(at)} • ${formatClock(at)}';
   }
 
+  /// Puts the rider's drop-off evidence next to the buyer's complaint.
+  Future<void> _showProof(BuildContext context, String orderId) async {
+    final order = await authService.database.getOrder(orderId);
+    if (!context.mounted) return;
+    if (order == null || order.status != OrderStatus.delivered) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This order has not been marked delivered.'),
+        ),
+      );
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DeliveryProofCard(order: order),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _resolve(
     BuildContext context,
     Map<String, dynamic> report,
   ) async {
     final notes = TextEditingController();
+    final refund = TextEditingController();
+    final hasOrder = '${report['orderId'] ?? ''}'.isNotEmpty;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Resolve dispute'),
-        content: TextField(
-          controller: notes,
-          maxLines: 3,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Resolution notes',
-            hintText: 'What action was taken?',
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: notes,
+                maxLines: 3,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Resolution notes',
+                  hintText: 'What action was taken?',
+                ),
+              ),
+              if (hasOrder) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: refund,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Refund to buyer wallet (optional)',
+                    prefixText: '₱',
+                    helperText: 'e.g. the value of the missing kilos',
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         actions: [
@@ -1062,16 +1303,36 @@ class DisputeCenter extends StatelessWidget {
         ],
       ),
     );
+    final resolution =
+        notes.text.trim().isEmpty ? 'Reviewed by AgriLink' : notes.text.trim();
+    final amount = int.tryParse(refund.text.trim()) ?? 0;
+    notes.dispose();
+    refund.dispose();
     if (confirmed != true) return;
-    await authService.database.resolveReport(
-      '${report['id']}',
-      notes.text.trim().isEmpty ? 'Reviewed by AgriLink' : notes.text.trim(),
-    );
-    session.bump();
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dispute marked as resolved.')),
-    );
+    try {
+      final refunded = await authService.database.resolveReportWithRefund(
+        reportId: '${report['id']}',
+        resolution: resolution,
+        refundAmount: amount,
+      );
+      session.bump();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            refunded > 0
+                ? 'Resolved. ${formatPeso(refunded)} refunded to the buyer\'s '
+                    'wallet.'
+                : 'Dispute marked as resolved.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    }
   }
 }
 
@@ -1160,8 +1421,684 @@ class SuperadminProfile extends StatelessWidget {
     int count(MobileRole role) => snapshot.accounts
         .where((account) => account['role'] == role.name)
         .length;
-    return '${count(MobileRole.consumer)} consumers • '
-        '${count(MobileRole.farmer)} farmers • '
-        '${count(MobileRole.rider)} riders';
+    return '${plural(count(MobileRole.consumer), 'consumer')} • '
+        '${plural(count(MobileRole.farmer), 'farmer')} • '
+        '${plural(count(MobileRole.rider), 'rider')}';
+  }
+}
+
+/// Every order on the network, searchable and filterable by stage.
+class AllOrdersPage extends StatefulWidget {
+  const AllOrdersPage({super.key, required this.session});
+
+  final AppSession session;
+
+  @override
+  State<AllOrdersPage> createState() => _AllOrdersPageState();
+}
+
+enum _OrderFilter {
+  all('All'),
+  open('Open'),
+  withRider('With rider'),
+  delivered('Delivered'),
+  cancelled('Cancelled'),
+  disputed('Disputed');
+
+  const _OrderFilter(this.label);
+  final String label;
+
+  bool matches(AgriOrder order) => switch (this) {
+        all => true,
+        open => order.status.isOpen && !order.status.isWithRider,
+        withRider => order.status.isWithRider,
+        delivered => order.status == OrderStatus.delivered,
+        cancelled => order.status == OrderStatus.cancelled,
+        disputed => order.isDisputed,
+      };
+}
+
+class _AllOrdersPageState extends State<AllOrdersPage> {
+  final _search = TextEditingController();
+  _OrderFilter _filter = _OrderFilter.all;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  bool _matchesSearch(AgriOrder order) {
+    final query = _search.text.trim().toLowerCase();
+    if (query.isEmpty) return true;
+    return [
+      order.reference,
+      order.buyerName,
+      order.farmerName,
+      order.riderName,
+      order.cropName,
+      order.deliveryAddress,
+    ].any((field) => field.toLowerCase().contains(query));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('All orders')),
+      body: LiveBuilder<List<AgriOrder>>(
+        session: widget.session,
+        load: () => authService.database.listAgriOrders(),
+        builder: (context, data) {
+          final orders = (data.value ?? const <AgriOrder>[])
+              .where(_filter.matches)
+              .where(_matchesSearch)
+              .toList();
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                TextField(
+                  controller: _search,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Reference, buyer, farm, rider, crop…',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final filter in _OrderFilter.values)
+                      ChoiceChip(
+                        label: Text(filter.label),
+                        selected: _filter == filter,
+                        onSelected: (_) => setState(() => _filter = filter),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  plural(orders.length, 'order'),
+                  style: const TextStyle(color: muted),
+                ),
+                const SizedBox(height: 8),
+                if (data.error != null && data.value == null)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  )
+                else if (orders.isEmpty)
+                  const EmptyState(
+                    icon: Icons.search_off,
+                    title: 'No matching orders',
+                    message: 'Try another search or filter.',
+                  )
+                else
+                  for (final order in orders)
+                    Card(
+                      child: ListTile(
+                        leading: ClipOval(
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CropPhoto(cropId: order.cropId),
+                          ),
+                        ),
+                        title: Text(
+                          '${order.reference} • ${order.cropName}',
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          '${order.buyerName} ← ${order.farmerName}\n'
+                          '${order.status.label} • ${deliveryScheduleLabel(order)}'
+                          '${order.hasRider ? ' • ${order.riderName}' : ''}'
+                          '${order.isRefunded ? ' • refunded ${formatPeso(order.refundedAmount)}' : ''}',
+                        ),
+                        isThreeLine: true,
+                        trailing: Text(
+                          formatPeso(order.grandTotal),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: green,
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// What AgriLink owes each farmer and rider for delivered orders, and a way
+/// to record that it was sent.
+class PayoutsPage extends StatelessWidget {
+  const PayoutsPage({super.key, required this.session});
+
+  final AppSession session;
+
+  static Future<({List<AgriOrder> orders, Map<String, String> payoutNumbers})>
+      _load() async {
+    final results = await Future.wait([
+      authService.database.listAgriOrders(),
+      authService.database.listAccounts(),
+    ]);
+    final accounts = results[1] as List<Map<String, dynamic>>;
+    return (
+      orders: (results[0] as List<AgriOrder>)
+          .where((order) => order.status == OrderStatus.delivered)
+          .toList(),
+      payoutNumbers: {
+        for (final account in accounts)
+          '${account['id']}':
+              '${(account['profile'] as Map?)?['payoutNumber'] ?? ''}',
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Payouts')),
+      body: LiveBuilder(
+        session: session,
+        load: _load,
+        builder: (context, data) {
+          final value = data.value;
+          final delivered = value?.orders ?? const <AgriOrder>[];
+          final numbers = value?.payoutNumbers ?? const <String, String>{};
+
+          List<_PayoutGroup> group(String payee) {
+            final groups = <String, _PayoutGroup>{};
+            for (final order in delivered) {
+              final farmer = payee == 'farmer';
+              if (farmer ? order.isFarmerPaid : order.isRiderPaid) continue;
+              final id = farmer ? order.farmerId : order.riderId;
+              if (id.isEmpty) continue;
+              final entry = groups.putIfAbsent(
+                id,
+                () => _PayoutGroup(
+                  payee: payee,
+                  name: farmer ? order.farmerName : order.riderName,
+                  number: numbers[id] ?? '',
+                ),
+              );
+              entry.orders.add(order);
+              entry.amount += farmer ? order.totalPrice : order.riderPayout;
+            }
+            return groups.values.toList()
+              ..sort((a, b) => b.amount.compareTo(a.amount));
+          }
+
+          final farmers = group('farmer');
+          final riders = group('rider');
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                const Text(
+                  'Farmers are owed the produce price of each delivered '
+                  'order; riders their share of the delivery fee. Send the '
+                  'money by GCash or Maya, then record the reference here.',
+                  style: TextStyle(color: muted, height: 1.4),
+                ),
+                const SizedBox(height: 18),
+                if (data.error != null && value == null)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  ),
+                for (final (title, groups) in [
+                  ('Farmers', farmers),
+                  ('Riders', riders),
+                ]) ...[
+                  SectionTitle(title: title, action: ''),
+                  const SizedBox(height: 10),
+                  if (groups.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 18),
+                      child: Text(
+                        'Nothing owed right now.',
+                        style: TextStyle(color: muted),
+                      ),
+                    )
+                  else
+                    for (final entry in groups)
+                      _PayoutCard(session: session, group: entry),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PayoutGroup {
+  _PayoutGroup({
+    required this.payee,
+    required this.name,
+    required this.number,
+  });
+
+  final String payee;
+  final String name;
+  final String number;
+  final List<AgriOrder> orders = [];
+  int amount = 0;
+}
+
+class _PayoutCard extends StatefulWidget {
+  const _PayoutCard({required this.session, required this.group});
+
+  final AppSession session;
+  final _PayoutGroup group;
+
+  @override
+  State<_PayoutCard> createState() => _PayoutCardState();
+}
+
+class _PayoutCardState extends State<_PayoutCard> {
+  bool _busy = false;
+
+  Future<void> _markPaid() async {
+    final group = widget.group;
+    final reference = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Paid ${formatPeso(group.amount)} to ${group.name}?'),
+        content: TextField(
+          controller: reference,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'GCash / Maya reference number',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(
+              dialogContext,
+              reference.text.trim().isNotEmpty,
+            ),
+            child: const Text('Mark as paid'),
+          ),
+        ],
+      ),
+    );
+    final value = reference.text.trim();
+    reference.dispose();
+    if (confirmed != true || value.isEmpty) return;
+    setState(() => _busy = true);
+    try {
+      await authService.database.markPayout(
+        orderIds: group.orders.map((order) => order.id).toList(),
+        payee: group.payee,
+        reference: value,
+      );
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payout to ${group.name} recorded.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final group = widget.group;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.name,
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  Text(
+                    '${plural(group.orders.length, 'order')} • '
+                    '${group.number.isEmpty ? 'no payout number' : group.number}',
+                    style: const TextStyle(color: muted, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    formatPeso(group.amount),
+                    style: const TextStyle(
+                      color: green,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            FilledButton(
+              onPressed: _busy || group.number.isEmpty ? null : _markPaid,
+              child: const Text('Mark paid'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Every wallet entry on the network, with what buyers currently hold.
+class WalletLedgerPage extends StatelessWidget {
+  const WalletLedgerPage({super.key, required this.session});
+
+  final AppSession session;
+
+  static Future<
+      ({
+        List<WalletTransaction> entries,
+        int pendingCashIns,
+        Map<String, String> names,
+      })> _load() async {
+    final results = await Future.wait([
+      authService.database.listAllWalletTransactions(),
+      authService.database.listAllPendingCashIns(),
+      authService.database.listAccounts(role: 'consumer'),
+    ]);
+    return (
+      entries: results[0] as List<WalletTransaction>,
+      pendingCashIns: (results[1] as List).length,
+      names: {
+        for (final account in results[2] as List<Map<String, dynamic>>)
+          '${account['id']}': '${account['name']}',
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Buyer wallets')),
+      body: LiveBuilder(
+        session: session,
+        load: _load,
+        builder: (context, data) {
+          final value = data.value;
+          final entries = value?.entries ?? const <WalletTransaction>[];
+          int total(WalletEntryType type) => entries
+              .where((entry) => entry.type == type)
+              .fold<int>(0, (sum, entry) => sum + entry.amount);
+          final held = entries.fold<int>(0, (sum, entry) => sum + entry.amount);
+          final names = value?.names ?? const <String, String>{};
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.savings_outlined,
+                        value: formatPeso(held),
+                        label: 'Held in wallets',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.hourglass_top,
+                        value: '${value?.pendingCashIns ?? 0}',
+                        label: 'Unpaid cash-ins',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.add_card,
+                        value: formatPeso(total(WalletEntryType.cashIn)),
+                        label: 'Cashed in',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.undo,
+                        value: formatPeso(total(WalletEntryType.refund)),
+                        label: 'Refunded',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 22),
+                const SectionTitle(title: 'Latest entries', action: ''),
+                const SizedBox(height: 10),
+                if (data.error != null && value == null)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  )
+                else if (entries.isEmpty)
+                  const EmptyState(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'No wallet activity yet',
+                    message: 'Cash-ins, payments and refunds appear here.',
+                  )
+                else
+                  for (final entry in entries.take(100))
+                    Card(
+                      child: ListTile(
+                        title: Text(
+                          names[entry.userId] ?? 'Buyer',
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          '${entry.description.isEmpty ? entry.type.label : entry.description}'
+                          '${entry.createdAt == null ? '' : '\n${formatRelativeDay(entry.createdAt!)} • ${formatClock(entry.createdAt!)}'}',
+                        ),
+                        trailing: Text(
+                          '${entry.amount >= 0 ? '+' : ''}'
+                          '${formatPeso(entry.amount)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: entry.amount >= 0 ? green : ink,
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Where the superadmin keeps delivery fees in step with the pump price.
+class DeliveryRatesPage extends StatefulWidget {
+  const DeliveryRatesPage({super.key, required this.session});
+
+  final AppSession session;
+
+  @override
+  State<DeliveryRatesPage> createState() => _DeliveryRatesPageState();
+}
+
+class _DeliveryRatesPageState extends State<DeliveryRatesPage> {
+  final _diesel = TextEditingController();
+  final _kmPerLitre = TextEditingController();
+  final _margin = TextEditingController();
+  final _base = TextEditingController();
+  final _handling = TextEditingController();
+  bool _loading = true;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    authService.database.loadDeliveryRates().then((rates) {
+      if (!mounted) return;
+      setState(() {
+        _fill(rates);
+        _loading = false;
+      });
+    });
+  }
+
+  void _fill(DeliveryRates rates) {
+    String text(double value) => value == value.roundToDouble()
+        ? '${value.round()}'
+        : '$value';
+    _diesel.text = text(rates.dieselPerLitre);
+    _kmPerLitre.text = text(rates.kmPerLitre);
+    _margin.text = text(rates.riderMarginPerKm);
+    _base.text = text(rates.baseFare);
+    _handling.text = text(rates.perKiloHandling);
+  }
+
+  DeliveryRates get _draft => DeliveryRates.fromMap({
+        'dieselPerLitre': double.tryParse(_diesel.text.trim()),
+        'kmPerLitre': double.tryParse(_kmPerLitre.text.trim()),
+        'riderMarginPerKm': double.tryParse(_margin.text.trim()),
+        'baseFare': double.tryParse(_base.text.trim()),
+        'perKiloHandling': double.tryParse(_handling.text.trim()),
+      });
+
+  @override
+  void dispose() {
+    for (final controller in [_diesel, _kmPerLitre, _margin, _base, _handling]) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await authService.database.saveDeliveryRates(_draft);
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Delivery rates updated for new orders.'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Widget _field(TextEditingController controller, String label,
+          {String prefix = '', String suffix = ''}) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: label,
+            prefixText: prefix,
+            suffixText: suffix,
+          ),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final rates = _draft;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Delivery pricing')),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                const Text(
+                  'Update the diesel price when it moves. The per-km rate is '
+                  'set so the rider\'s share covers diesel both ways plus '
+                  'their margin. Orders already placed keep the fee they '
+                  'were quoted.',
+                  style: TextStyle(color: muted, height: 1.4),
+                ),
+                const SizedBox(height: 18),
+                _field(_diesel, 'Diesel price', prefix: '₱', suffix: '/L'),
+                _field(_kmPerLitre, 'Van fuel economy', suffix: 'km/L'),
+                _field(_margin, 'Rider margin', prefix: '₱', suffix: '/km'),
+                _field(_base, 'Base fare per trip', prefix: '₱'),
+                _field(_handling, 'Handling', prefix: '₱', suffix: '/kg'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        MoneyRow(
+                          label: 'Diesel, there and back',
+                          value: '${formatPeso(rates.roundTripFuelPerKm)}/km',
+                        ),
+                        MoneyRow(
+                          label: 'Rider earns',
+                          value: '${formatPeso(rates.riderPerKm)}/km',
+                        ),
+                        MoneyRow(
+                          label: 'Buyer pays',
+                          value: '${formatPeso(rates.perKilometre)}/km',
+                          strong: true,
+                        ),
+                        const Divider(height: 22),
+                        MoneyRow(
+                          label: 'Example: 45 km, 100 kg',
+                          value: formatPeso(
+                            rates.fee(distanceKm: 45, quantityKg: 100),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                FilledButton(
+                  onPressed: _saving ? null : _save,
+                  child: const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: Text('Save rates'),
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 }

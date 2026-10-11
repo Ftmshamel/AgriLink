@@ -1,16 +1,22 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app.dart';
 import '../models/agri_models.dart';
+import '../services/delivery_proof.dart';
 import '../services/geo.dart';
+import '../services/notifications.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
 import '../widgets/live_map.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
 import '../widgets/weather_card.dart';
 import 'shared_screens.dart';
@@ -162,12 +168,16 @@ class RiderSnapshot {
       authService.database.listAgriOrders(),
       authService.database.listTrips(riderId: riderId),
       GeoService.tryCurrentPoint(),
+      // Batch payouts are priced from these, so load them with the pool.
+      authService.database.loadDeliveryRates(),
     ]);
     final all = results[0] as List<AgriOrder>;
     return RiderSnapshot(
       pool: all
           .where((order) =>
-              order.status == OrderStatus.readyForPickup && !order.hasRider)
+              order.status == OrderStatus.readyForPickup &&
+              !order.hasRider &&
+              order.isDueForPickup(DateTime.now()))
           .toList(),
       mine: all.where((order) => order.riderId == riderId).toList(),
       trips: results[1] as List<Map<String, dynamic>>,
@@ -263,9 +273,27 @@ class _RiderShellState extends State<RiderShell> {
     if (!mounted || account == null) return;
     final stored = account['riderOnline'];
     if (stored is bool) setState(() => _online = stored);
+    if (widget.session.user.payoutNumber.isEmpty) {
+      setState(() => _online = false);
+    }
   }
 
   Future<void> _setOnline(bool value) async {
+    // A rider with nowhere to be paid would be delivering for free.
+    if (value && widget.session.user.payoutNumber.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Add your GCash or Maya payout number before going online.',
+          ),
+          action: SnackBarAction(
+            label: 'ADD',
+            onPressed: () => openProfileEditor(context, widget.session),
+          ),
+        ),
+      );
+      return;
+    }
     setState(() => _online = value);
     try {
       final point = value ? await GeoService.tryCurrentPoint() : null;
@@ -388,13 +416,14 @@ class RiderDashboard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Badge(
-                    isLabelVisible: batches.isNotEmpty,
-                    label: Text('${batches.length}'),
-                    child: IconButton.filledTonal(
-                      onPressed: onOpenPool,
-                      icon: const Icon(Icons.notifications_none),
-                    ),
+                  NotificationBell(
+                    session: session,
+                    load: () async {
+                      final snapshot = await RiderSnapshot.load(
+                        session.user.id,
+                      );
+                      return NoticeFeed.forRider(snapshot.mine, snapshot.pool);
+                    },
                   ),
                 ],
               ),
@@ -433,7 +462,10 @@ class RiderDashboard extends StatelessWidget {
                           ),
                           Text(
                             online
-                                ? batches.isEmpty
+                                ? tripId != null
+                                    ? 'Finish your current trip to take '
+                                        'another'
+                                    : batches.isEmpty
                                     ? 'Waiting for packed farm orders'
                                     : '${batches.length} pooled route${batches.length == 1 ? '' : 's'} available now'
                                 : 'Go online to receive trips',
@@ -862,8 +894,9 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
   List<AgriOrder> get _chosen =>
       widget.batch.orders.where((order) => _selected.contains(order.id)).toList();
 
-  int get _payout =>
-      _chosen.fold<int>(0, (total, order) => total + order.riderPayout);
+  /// The chosen orders priced as one shared trip, which is what accepting
+  /// them pays.
+  int get _payout => PoolPricing.riderPayout(_chosen, DeliveryRates.current);
 
   int get _kilos =>
       _chosen.fold<int>(0, (total, order) => total + order.quantityKg);
@@ -873,6 +906,15 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
     setState(() => _accepting = true);
     try {
       final user = widget.session.user;
+      if (user.payoutNumber.isEmpty) {
+        throw Exception('Add your GCash or Maya payout number in Profile '
+            'before accepting trips.');
+      }
+      // One trip at a time: the stops, codes and proofs are all per trip.
+      final mine = await authService.database.listAgriOrders(riderId: user.id);
+      if (mine.any((order) => order.status.isOpen)) {
+        throw Exception('Finish your current trip before accepting another.');
+      }
       final tripId = await authService.database.acceptTrip(
         orders: _chosen,
         riderId: user.id,
@@ -995,8 +1037,13 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
                   'From ${order.farmerName} → ${order.dropArea}',
                 ),
                 isThreeLine: true,
+                // This order's part of the shared trip, not its solo fee.
                 secondary: Text(
-                  formatPeso(order.riderPayout),
+                  formatPeso(DeliveryPricing.riderPayout(
+                    PoolPricing.shares(_chosen, DeliveryRates.current)[
+                            order.id] ??
+                        order.deliveryFee,
+                  )),
                   style: const TextStyle(
                     color: green,
                     fontWeight: FontWeight.w900,
@@ -1114,7 +1161,208 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
 
   List<AgriOrder> _liveOrders = const [];
 
-  Future<void> _completeStop(TripStop stop, List<AgriOrder> allOrders) async {
+  /// When each stop first refused this rider's position, for the GPS
+  /// override.
+  final Map<String, DateTime> _firstMiss = {};
+
+  String _stopKey(TripStop stop) =>
+      '${stop.kind.name}-${stop.orders.map((order) => order.id).join(',')}';
+
+  /// Checks the rider is at [stop] with a fresh, non-mocked GPS fix.
+  ///
+  /// Returns where they are and the result, or null when they may not confirm
+  /// yet (the reason has been shown). After [DeliveryProof.gpsOverrideAfter]
+  /// of being refused at the same stop they may confirm anyway, and the stop
+  /// is marked as confirmed outside the pin.
+  Future<({LatLng? here, GeofenceResult geofence})?> _checkPosition(
+    TripStop stop,
+  ) async {
+    final key = _stopKey(stop);
+    Position? fix;
+    String problem;
+    try {
+      fix = await GeoService.freshFix();
+      problem = '';
+    } on TimeoutException {
+      problem = 'Could not get a GPS fix. Step outside or near a window and '
+          'try again.';
+    } catch (error) {
+      problem = '$error'.replaceFirst('Exception: ', '');
+    }
+    LatLng? here;
+    GeofenceResult? result;
+    if (fix != null) {
+      here = LatLng(fix.latitude, fix.longitude);
+      _devicePoint = here;
+      result = DeliveryProof.checkGeofence(
+        rider: here,
+        drop: stop.point,
+        mocked: fix.isMocked,
+        pickup: stop.isPickup,
+      );
+      if (result.allowed) {
+        _firstMiss.remove(key);
+        return (here: here, geofence: result);
+      }
+      if (result.mocked) {
+        _fail(result.message);
+        return null;
+      }
+      problem = result.message;
+    }
+
+    final now = DateTime.now();
+    final firstMiss = _firstMiss.putIfAbsent(key, () => now);
+    if (!DeliveryProof.canOverride(firstMiss, now)) {
+      final wait = DeliveryProof.gpsOverrideAfter - now.difference(firstMiss);
+      _fail('$problem If GPS is wrong here, you can confirm anyway in '
+          '${wait.inMinutes + 1} min.');
+      return null;
+    }
+    if (!mounted) return null;
+    setState(() => _busy = false);
+    final what = stop.isPickup ? 'pickup' : 'delivery';
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('GPS still can\'t place you here'),
+        content: Text(
+          '$problem\n\nConfirm anyway? The ${stop.isPickup ? 'farm' : 'buyer'} '
+          'and AgriLink support will see that this $what was confirmed '
+          'outside the pin.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Confirm anyway'),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true) return null;
+    return (
+      here: here ?? _devicePoint,
+      geofence: DeliveryProof.overridden(result?.distanceMetres),
+    );
+  }
+
+  /// A camera photo for the proof; null if the rider backs out.
+  Future<Uint8List?> _takeProofPhoto() async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 55,
+      maxWidth: 1280,
+    );
+    if (file == null) return null;
+    final bytes = await file.readAsBytes();
+    if (bytes.length > 750000) {
+      _fail('That photo is too large. Take it again a little further back.');
+      return null;
+    }
+    return bytes;
+  }
+
+  /// A pickup counts once the rider is at the farm and has photographed the
+  /// load, so the farm can see what left with whom.
+  Future<void> _confirmPickup(
+    TripStop stop,
+    List<AgriOrder> allOrders,
+  ) async {
+    setState(() => _busy = true);
+    final checked = await _checkPosition(stop);
+    if (checked == null || !mounted) return;
+    setState(() => _busy = false);
+    final photo = await _takeProofPhoto();
+    if (photo == null || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final here = checked.here;
+      final geofence = checked.geofence;
+      final proofId = await authService.database.uploadDeliveryProof(
+        orderIds: stop.orders.map((order) => order.id).toList(),
+        riderId: widget.session.user.id,
+        photo: photo,
+        latitude: here?.latitude,
+        longitude: here?.longitude,
+        distanceMetres: geofence.distanceMetres,
+        kind: 'pickup',
+        outsidePin: geofence.overridden,
+      );
+      await _completeStop(stop, allOrders, extra: {
+        'pickupProofId': proofId,
+        if (geofence.distanceMetres != null)
+          'pickupDistanceMetres': geofence.distanceMetres,
+        if (geofence.overridden) 'pickupOutsidePin': true,
+      });
+    } catch (error) {
+      _fail('$error'.replaceFirst('Exception: ', ''));
+    }
+  }
+
+  /// A drop-off only counts once the rider proves three things: they are at
+  /// the buyer's pin (fresh, non-mocked GPS), the buyer handed over their code,
+  /// and there is a photo of the items at the door.
+  Future<void> _confirmDelivery(
+    TripStop stop,
+    List<AgriOrder> allOrders,
+  ) async {
+    setState(() => _busy = true);
+    final checked = await _checkPosition(stop);
+    if (checked == null || !mounted) return;
+    final here = checked.here;
+    final geofence = checked.geofence;
+    setState(() => _busy = false);
+
+    final proof = await showDialog<Uint8List>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _DeliveryProofDialog(stop: stop, geofence: geofence),
+    );
+    if (proof == null || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final proofId = await authService.database.uploadDeliveryProof(
+        orderIds: stop.orders.map((order) => order.id).toList(),
+        riderId: widget.session.user.id,
+        photo: proof,
+        latitude: here?.latitude,
+        longitude: here?.longitude,
+        distanceMetres: geofence.distanceMetres,
+        outsidePin: geofence.overridden,
+      );
+      await _completeStop(stop, allOrders, extra: {
+        'deliveryProofId': proofId,
+        if (here != null) 'deliveredLatitude': here.latitude,
+        if (here != null) 'deliveredLongitude': here.longitude,
+        if (geofence.distanceMetres != null)
+          'deliveredDistanceMetres': geofence.distanceMetres,
+        if (geofence.overridden) 'deliveredOutsidePin': true,
+        'deliveryCodeVerified': DeliveryProof.requiresCode(stop.orders),
+      });
+    } catch (error) {
+      _fail('$error'.replaceFirst('Exception: ', ''));
+    }
+  }
+
+  void _fail(String message) {
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _completeStop(
+    TripStop stop,
+    List<AgriOrder> allOrders, {
+    Map<String, dynamic> extra = const {},
+  }) async {
     setState(() => _busy = true);
     try {
       final next =
@@ -1129,6 +1377,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
             if (_devicePoint != null)
               'riderLongitude': _devicePoint!.longitude,
             'riderUpdatedAt': DateTime.now().toUtc().toIso8601String(),
+            ...extra,
           },
         );
       }
@@ -1455,12 +1704,30 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                   const SizedBox(height: 10),
                 ],
                 const SizedBox(height: 6),
+                if (!stop.isComplete && !(!stop.isPickup && pickupsLeft > 0))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      stop.isPickup
+                          ? 'Tapping below checks you are within '
+                              '${DeliveryProof.geofenceMetres.round()} m of '
+                              'the farm and opens the camera for a photo of '
+                              'the load.'
+                          : 'Tapping below checks you are within '
+                              '${DeliveryProof.geofenceMetres.round()} m of '
+                              'the buyer, then asks for their code and a '
+                              'photo.',
+                      style: const TextStyle(color: muted, fontSize: 12),
+                    ),
+                  ),
                 FilledButton.icon(
                   onPressed: _busy || stop.isComplete
                       ? null
                       : !stop.isPickup && pickupsLeft > 0
                           ? null
-                          : () => _completeStop(stop, orders),
+                          : stop.isPickup
+                              ? () => _confirmPickup(stop, orders)
+                              : () => _confirmDelivery(stop, orders),
                   icon: const Icon(Icons.check_circle_outline),
                   label: Padding(
                     padding: const EdgeInsets.all(14),
@@ -1472,7 +1739,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                                   '${pickupsLeft == 1 ? '' : 's'} first'
                               : stop.isPickup
                                   ? 'Confirm pickup & continue'
-                                  : 'Confirm delivery & continue',
+                                  : 'Verify & confirm delivery',
                     ),
                   ),
                 ),
@@ -1481,6 +1748,157 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Collects the buyer's code and a photo of the items at the door. Returns
+/// the photo once both check out; the code itself never leaves this dialog.
+class _DeliveryProofDialog extends StatefulWidget {
+  const _DeliveryProofDialog({required this.stop, required this.geofence});
+
+  final TripStop stop;
+  final GeofenceResult geofence;
+
+  @override
+  State<_DeliveryProofDialog> createState() => _DeliveryProofDialogState();
+}
+
+class _DeliveryProofDialogState extends State<_DeliveryProofDialog> {
+  final _code = TextEditingController();
+  Uint8List? _photo;
+  String? _error;
+
+  bool get _needsCode => DeliveryProof.requiresCode(widget.stop.orders);
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _takePhoto() async {
+    // Camera only: a gallery picture could have been taken anywhere, any day.
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 55,
+      maxWidth: 1280,
+    );
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
+    if (!mounted) return;
+    setState(() {
+      if (bytes.length > 750000) {
+        _error = 'That photo is too large. Take it again a little further '
+            'back.';
+      } else {
+        _photo = bytes;
+        _error = null;
+      }
+    });
+  }
+
+  void _submit() {
+    if (_needsCode &&
+        !DeliveryProof.codeMatches(widget.stop.orders, _code.text)) {
+      setState(() => _error = 'That code does not match. Ask '
+          '${widget.stop.contactName} for the code shown in their app.');
+      return;
+    }
+    if (_photo == null) {
+      setState(() => _error = 'Take a photo of the items at the drop-off.');
+      return;
+    }
+    Navigator.pop(context, _photo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Proof of delivery'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.where_to_vote, color: green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.geofence.message,
+                    style: const TextStyle(
+                      color: green,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_needsCode) ...[
+              Text(
+                'Ask ${widget.stop.contactName} for the delivery code in '
+                'their AgriLink app.',
+                style: const TextStyle(height: 1.4),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _code,
+                keyboardType: TextInputType.number,
+                maxLength: DeliveryProof.codeLength,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 26,
+                  letterSpacing: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Delivery code',
+                  counterText: '',
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
+            if (_photo != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(
+                  _photo!,
+                  height: 160,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _takePhoto,
+              icon: const Icon(Icons.photo_camera_outlined),
+              label: Text(
+                _photo == null ? 'Take photo of items' : 'Retake photo',
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.red, height: 1.4),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: const Text('Confirm delivery'),
+        ),
+      ],
     );
   }
 }
@@ -1579,8 +1997,23 @@ class RiderProfile extends StatelessWidget {
         final snapshot = data.value;
         final delivered = snapshot?.delivered.length ?? 0;
         final assigned = snapshot?.mine.length ?? 0;
+        // Trips still on the road are neither completed nor failed yet.
+        final finished = snapshot?.mine
+                .where((order) => !order.status.isOpen)
+                .length ??
+            0;
         final completion =
-            assigned == 0 ? 0 : (delivered / assigned * 100).round();
+            finished == 0 ? 0 : (delivered / finished * 100).round();
+        final earned = snapshot?.delivered ?? const <AgriOrder>[];
+        final paidOut = earned
+            .where((order) => order.isRiderPaid)
+            .fold<int>(0, (sum, order) => sum + order.riderPayout);
+        final unpaid = earned
+            .where((order) => !order.isRiderPaid)
+            .fold<int>(0, (sum, order) => sum + order.riderPayout);
+        final rating = RatingSummary.of(
+          (snapshot?.mine ?? const <AgriOrder>[]).map((o) => o.riderRating),
+        );
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
@@ -1618,7 +2051,7 @@ class RiderProfile extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ProfileTile(
-                icon: Icons.two_wheeler_outlined,
+                icon: Icons.local_shipping_outlined,
                 title: 'Vehicle',
                 subtitle:
                     user.vehicle.isEmpty ? 'Add your vehicle' : user.vehicle,
@@ -1637,7 +2070,22 @@ class RiderProfile extends StatelessWidget {
                 title: 'Performance',
                 subtitle: assigned == 0
                     ? 'No trips yet'
-                    : '$completion% completion • $assigned accepted',
+                    : finished == 0
+                        ? '$assigned accepted • none finished yet'
+                        : '$completion% completed • $assigned accepted',
+                onTap: () {},
+              ),
+              ProfileTile(
+                icon: Icons.request_quote_outlined,
+                title: 'Payouts',
+                subtitle: '${formatPeso(paidOut)} paid • '
+                    '${formatPeso(unpaid)} awaiting payout',
+                onTap: () {},
+              ),
+              ProfileTile(
+                icon: Icons.star_outline,
+                title: 'Buyer rating',
+                subtitle: rating.label,
                 onTap: () {},
               ),
               ProfileTile(

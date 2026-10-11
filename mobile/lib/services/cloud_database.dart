@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/agri_models.dart';
+import 'delivery_proof.dart';
 import 'document_check.dart';
 
 class CloudDatabase {
@@ -125,9 +126,15 @@ class CloudDatabase {
     throw Exception('Invalid platform staff credentials.');
   }
 
-  Future<void> setVerificationStatus(String userId, String status) =>
+  Future<void> setVerificationStatus(
+    String userId,
+    String status, {
+    String reason = '',
+  }) =>
       updateDocument('mobileUsers', userId, {
         'verificationStatus': status,
+        // Why an account was suspended; cleared when it is restored.
+        'statusReason': reason.trim(),
         'updatedAt': DateTime.now().toUtc().toIso8601String(),
       });
 
@@ -496,6 +503,9 @@ class CloudDatabase {
   }) async {
     final now = DateTime.now();
     final tripId = 'trip-${now.millisecondsSinceEpoch}-${_token(5)}';
+    // Price the trip once and split it; each buyer paid a solo fee up front.
+    final rates = await loadDeliveryRates();
+    final shares = PoolPricing.shares(orders, rates);
     await _create('mobileTrips', tripId, {
       'id': tripId,
       'riderId': riderId,
@@ -504,17 +514,32 @@ class CloudDatabase {
       'orderIds': orders.map((order) => order.id).toList(),
       'orderCount': orders.length,
       'totalKg': orders.fold<int>(0, (sum, order) => sum + order.quantityKg),
-      'payout': orders.fold<int>(0, (sum, order) => sum + order.riderPayout),
+      'payout': PoolPricing.riderPayout(orders, rates),
       'status': 'active',
       'startedAt': now.toUtc().toIso8601String(),
       'createdAt': now.toUtc().toIso8601String(),
     });
+    // One code per drop-off: a buyer with several orders on this trip reads
+    // out a single code, and no buyer can open another buyer's stop.
+    final codes = <String, String>{};
     for (final order in orders) {
+      final code = codes.putIfAbsent(
+        '${order.buyerId}|${order.deliveryAddress}',
+        () => _numericCode(DeliveryProof.codeLength),
+      );
+      final share = shares[order.id] ?? order.deliveryFee;
+      final rebate = order.deliveryFee - share;
       await advanceOrder(
         order.id,
         OrderStatus.riderAssigned,
         existingTimeline: order.timeline,
         extra: {
+          if (rebate > 0) ...{
+            'soloDeliveryFee': order.deliveryFee,
+            'deliveryFee': share,
+            'poolRebate': rebate,
+          },
+          'deliveryCode': code,
           'riderId': riderId,
           'riderName': riderName,
           'riderPhone': riderPhone,
@@ -523,8 +548,45 @@ class CloudDatabase {
           'riderAssignedAt': now.toUtc().toIso8601String(),
         },
       );
+      if (rebate > 0 && order.isPaymentSecured && order.buyerId.isNotEmpty) {
+        await _createOnce('mobileWalletTransactions', 'pool-${order.id}', {
+          'id': 'pool-${order.id}',
+          'userId': order.buyerId,
+          'type': WalletEntryType.refund.wire,
+          'amount': rebate,
+          'orderId': order.id,
+          'reference': order.reference,
+          'description': 'Shared trip savings for ${order.reference}',
+          'createdAt': now.toUtc().toIso8601String(),
+        });
+      }
     }
     return tripId;
+  }
+
+  // ------------------------------------------------------------ delivery rates
+
+  /// The rates the superadmin set, or the defaults. Also refreshes
+  /// [DeliveryRates.current] so every screen quotes the same numbers.
+  Future<DeliveryRates> loadDeliveryRates() async {
+    try {
+      final saved = await getDocument('agriData', 'deliveryRates');
+      DeliveryRates.current = DeliveryRates.fromMap(saved);
+    } catch (_) {
+      // Keep the last known rates rather than failing a checkout.
+    }
+    return DeliveryRates.current;
+  }
+
+  Future<void> saveDeliveryRates(DeliveryRates rates) async {
+    final fields = {
+      ...rates.toMap(),
+      'updatedAt': DateTime.now().toUtc().toIso8601String(),
+    };
+    final created = await _createOnce(
+        'agriData', 'deliveryRates', {'id': 'deliveryRates', ...fields});
+    if (!created) await updateDocument('agriData', 'deliveryRates', fields);
+    DeliveryRates.current = rates;
   }
 
   Future<List<Map<String, dynamic>>> listTrips({String? riderId}) async {
@@ -548,6 +610,276 @@ class CloudDatabase {
           'completedAt': DateTime.now().toUtc().toIso8601String(),
         },
       );
+
+  /// Cancels [orderId] and returns the money to the buyer's wallet.
+  ///
+  /// The order is re-read first: a rider may have taken it, or the farm
+  /// cancelled it, since the screen last refreshed. The refund entry's id is
+  /// derived from the order, so a second cancel can never refund twice.
+  /// Returns the pesos refunded.
+  Future<int> cancelOrder(
+    String orderId, {
+    required String cancelledBy,
+    String reason = '',
+    bool restock = false,
+  }) async {
+    final order = await getOrder(orderId);
+    if (order == null) throw Exception('This order no longer exists.');
+    if (order.status == OrderStatus.cancelled) return order.refundedAmount;
+    if (cancelledBy == 'buyer' && !order.canBuyerCancel(DateTime.now())) {
+      throw Exception(order.isScheduled
+          ? 'Scheduled orders can only be cancelled up to '
+              '${AgriOrder.cancelNoticeDays} days before delivery.'
+          : 'Same-day orders cannot be cancelled once placed.');
+    }
+    if (order.status.step >= OrderStatus.pickedUp.step) {
+      throw Exception('The rider already has this order.');
+    }
+
+    final amount = order.refundableAmount;
+    await advanceOrder(
+      order.id,
+      OrderStatus.cancelled,
+      existingTimeline: order.timeline,
+      extra: {
+        'cancelledBy': cancelledBy,
+        if (reason.isNotEmpty) 'cancelReason': reason,
+      },
+    );
+    var refunded = 0;
+    if (amount > 0 && order.buyerId.isNotEmpty) {
+      await _createOnce('mobileWalletTransactions', 'refund-${order.id}', {
+        'id': 'refund-${order.id}',
+        'userId': order.buyerId,
+        'type': WalletEntryType.refund.wire,
+        'amount': amount,
+        'orderId': order.id,
+        'reference': order.reference,
+        'description': 'Refund for ${order.reference} • ${order.cropName}',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+      });
+      refunded = amount;
+      await updateDocument('mobileOrders', order.id, {
+        'refundedAmount': amount,
+        'refundedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+    }
+    if (restock) await restoreCropStock(order.cropId, order.quantityKg);
+    return refunded;
+  }
+
+  /// Puts cancelled kilos back on the listing they came from.
+  Future<void> restoreCropStock(String cropId, int kg) async {
+    if (cropId.isEmpty || kg <= 0) return;
+    final current = await getDocument('mobileCrops', cropId);
+    if (current == null) return;
+    final quantity = ((current['quantityKg'] as num?)?.round() ?? 0) + kg;
+    await updateCrop(cropId, {
+      'quantityKg': quantity,
+      if (current['status'] == 'sold_out') 'status': 'active',
+    });
+  }
+
+  // ------------------------------------------------------------------ wallet
+
+  Future<List<WalletTransaction>> listWalletTransactions(
+    String userId,
+  ) async {
+    final rows = await _queryEquals(
+      'mobileWalletTransactions',
+      'userId',
+      userId,
+      limit: 1000,
+    );
+    final entries = rows.map(WalletTransaction.fromMap).toList();
+    entries.sort((a, b) => (b.createdAt ?? DateTime(1970))
+        .compareTo(a.createdAt ?? DateTime(1970)));
+    return entries;
+  }
+
+  Future<int> walletBalance(String userId) async {
+    final entries = await listWalletTransactions(userId);
+    return entries.fold<int>(0, (sum, entry) => sum + entry.amount);
+  }
+
+  /// Adds a paid Xendit invoice to the wallet. Keyed by the invoice id, so
+  /// checking the same invoice twice credits it once. Returns false when it
+  /// had already been credited.
+  Future<bool> creditCashIn({
+    required String userId,
+    required int amount,
+    required String invoiceId,
+    String reference = '',
+    String channel = '',
+  }) {
+    if (amount <= 0) throw Exception('Cash-in amount must be positive.');
+    final id = 'cashin-$invoiceId';
+    return _createOnce('mobileWalletTransactions', id, {
+      'id': id,
+      'userId': userId,
+      'type': WalletEntryType.cashIn.wire,
+      'amount': amount,
+      'invoiceId': invoiceId,
+      'reference': reference,
+      'description': channel.isEmpty ? 'Cash in' : 'Cash in via $channel',
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
+  /// Remembers a cash-in invoice the buyer was sent to pay, so it can still
+  /// be credited if they close the app before Xendit confirms it.
+  Future<void> recordCashInRequest({
+    required String userId,
+    required String invoiceId,
+    required int amount,
+    required String reference,
+  }) =>
+      _create('mobileCashIns', invoiceId, {
+        'id': invoiceId,
+        'userId': userId,
+        'amount': amount,
+        'reference': reference,
+        'status': 'pending',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  Future<List<Map<String, dynamic>>> listPendingCashIns(String userId) async {
+    final rows =
+        await _queryEquals('mobileCashIns', 'userId', userId, limit: 200);
+    return rows.where((row) => row['status'] == 'pending').toList();
+  }
+
+  Future<void> closeCashInRequest(String invoiceId, String status) =>
+      updateDocument('mobileCashIns', invoiceId, {
+        'status': status,
+        'closedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  /// Spends [amount] from the wallet and returns the entry's reference.
+  Future<String> payFromWallet({
+    required String userId,
+    required int amount,
+    required String description,
+  }) async {
+    if (amount <= 0) throw Exception('Nothing to pay.');
+    final balance = await walletBalance(userId);
+    if (balance < amount) {
+      throw Exception('Not enough wallet balance. You have ₱$balance but '
+          'this order costs ₱$amount.');
+    }
+    final now = DateTime.now();
+    final id = 'pay-${now.millisecondsSinceEpoch}-${_token(5)}';
+    final reference = 'WALLET-${now.millisecondsSinceEpoch}';
+    await _create('mobileWalletTransactions', id, {
+      'id': id,
+      'userId': userId,
+      'type': WalletEntryType.payment.wire,
+      'amount': -amount,
+      'reference': reference,
+      'description': description,
+      'createdAt': now.toUtc().toIso8601String(),
+    });
+    return reference;
+  }
+
+  /// Returns money for a wallet payment whose orders were never written,
+  /// e.g. the connection dropped half way through checkout.
+  Future<void> reverseWalletPayment({
+    required String userId,
+    required String reference,
+    required int amount,
+  }) async {
+    if (amount <= 0) return;
+    final id = 'reversal-$reference';
+    await _createOnce('mobileWalletTransactions', id, {
+      'id': id,
+      'userId': userId,
+      'type': WalletEntryType.refund.wire,
+      'amount': amount,
+      'reference': reference,
+      'description': 'Checkout did not finish — payment returned',
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
+  // --------------------------------------------------------- delivery proof
+
+  /// Stores a pickup or drop-off photo with where and when it was taken.
+  ///
+  /// Kept in its own collection, like verification files, so the order list
+  /// every screen polls does not drag a base64 image along with it.
+  Future<String> uploadDeliveryProof({
+    required List<String> orderIds,
+    required String riderId,
+    required Uint8List photo,
+    double? latitude,
+    double? longitude,
+    double? distanceMetres,
+    String kind = 'delivery',
+    bool outsidePin = false,
+  }) async {
+    if (photo.length > 750000) {
+      throw Exception('The $kind photo must be smaller than 750 KB.');
+    }
+    final now = DateTime.now();
+    final id = 'proof-${now.millisecondsSinceEpoch}-${_token(5)}';
+    await _create('mobileDeliveryProofs', id, {
+      'id': id,
+      'orderIds': orderIds,
+      'riderId': riderId,
+      'kind': kind,
+      'photoBase64': base64Encode(photo),
+      'size': photo.length,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (distanceMetres != null) 'distanceMetres': distanceMetres,
+      if (outsidePin) 'outsidePin': true,
+      'createdAt': now.toUtc().toIso8601String(),
+    });
+    return id;
+  }
+
+  Future<Map<String, dynamic>?> getDeliveryProof(String id) =>
+      getDocument('mobileDeliveryProofs', id);
+
+  /// The buyer's own acknowledgement that the items arrived.
+  Future<void> confirmReceived(String orderId) =>
+      updateDocument('mobileOrders', orderId, {
+        'receivedConfirmedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  /// Saves the buyer's 1–5 ratings for the farm and the rider.
+  Future<void> rateOrder(
+    String orderId, {
+    required int farmerRating,
+    required int riderRating,
+    String comment = '',
+  }) =>
+      updateDocument('mobileOrders', orderId, {
+        'farmerRating': farmerRating.clamp(1, 5),
+        if (riderRating > 0) 'riderRating': riderRating.clamp(1, 5),
+        if (comment.trim().isNotEmpty) 'ratingComment': comment.trim(),
+        'ratedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  /// How buyers rated a farm or a rider across their delivered orders.
+  Future<RatingSummary> ratingFor({String? farmerId, String? riderId}) async {
+    final field = farmerId != null ? 'farmerId' : 'riderId';
+    final id = farmerId ?? riderId ?? '';
+    if (id.isEmpty) return const RatingSummary(0, 0);
+    final rows = await _queryEquals('mobileOrders', field, id, limit: 1000);
+    final orders = rows.map(AgriOrder.fromMap);
+    return RatingSummary.of(orders.map(
+        (order) => farmerId != null ? order.farmerRating : order.riderRating));
+  }
+
+  /// Flags an order the buyer has reported, so the rider's "delivered" is
+  /// visibly contested until support resolves it.
+  Future<void> markDeliveryDisputed(String orderId) =>
+      updateDocument('mobileOrders', orderId, {
+        'deliveryDisputed': true,
+        'deliveryDisputedAt': DateTime.now().toUtc().toIso8601String(),
+      });
 
   /// Publishes the rider's live position onto every order in the trip so the
   /// buyers watching those orders all see the same pin move.
@@ -590,6 +922,94 @@ class CloudDatabase {
       'status': 'open',
       'createdAt': DateTime.now().toUtc().toIso8601String(),
     });
+  }
+
+  /// Closes a dispute and, when support decides the buyer is owed money,
+  /// credits it to their wallet. The credit is keyed by the report, so
+  /// resolving the same report twice cannot pay twice. Returns the pesos
+  /// refunded.
+  Future<int> resolveReportWithRefund({
+    required String reportId,
+    required String resolution,
+    required int refundAmount,
+  }) async {
+    final report = await getDocument('mobileReports', reportId);
+    if (report == null) throw Exception('That report no longer exists.');
+    final orderId = '${report['orderId'] ?? ''}';
+    var refunded = 0;
+    if (refundAmount > 0) {
+      final order = orderId.isEmpty ? null : await getOrder(orderId);
+      if (order == null) {
+        throw Exception('A refund needs the order this report is about.');
+      }
+      final ceiling = order.grandTotal - order.refundedAmount;
+      if (refundAmount > ceiling) {
+        throw Exception('At most ₱$ceiling of this order can still be '
+            'refunded.');
+      }
+      final id = 'dispute-$reportId';
+      final created = await _createOnce('mobileWalletTransactions', id, {
+        'id': id,
+        'userId': order.buyerId,
+        'type': WalletEntryType.refund.wire,
+        'amount': refundAmount,
+        'orderId': order.id,
+        'reference': order.reference,
+        'description': 'Dispute refund for ${order.reference} • '
+            '${order.cropName}',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+      });
+      if (created) {
+        refunded = refundAmount;
+        await updateDocument('mobileOrders', order.id, {
+          'refundedAmount': order.refundedAmount + refundAmount,
+          'refundedAt': DateTime.now().toUtc().toIso8601String(),
+        });
+      }
+    }
+    await updateDocument('mobileReports', reportId, {
+      'status': 'resolved',
+      'resolution': resolution,
+      if (refunded > 0) 'refundAmount': refunded,
+      'resolvedAt': DateTime.now().toUtc().toIso8601String(),
+    });
+    if (orderId.isNotEmpty) {
+      await updateDocument('mobileOrders', orderId, {
+        'deliveryDisputeResolvedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+    }
+    return refunded;
+  }
+
+  // ----------------------------------------------------------------- payouts
+
+  /// Records that AgriLink sent a farmer or rider their share of [orderIds].
+  Future<void> markPayout({
+    required List<String> orderIds,
+    required String payee,
+    required String reference,
+  }) async {
+    assert(payee == 'farmer' || payee == 'rider');
+    final stamp = DateTime.now().toUtc().toIso8601String();
+    for (final orderId in orderIds) {
+      await updateDocument('mobileOrders', orderId, {
+        '${payee}PaidAt': stamp,
+        '${payee}PayoutReference': reference,
+      });
+    }
+  }
+
+  Future<List<WalletTransaction>> listAllWalletTransactions() async {
+    final rows = await listCollection('mobileWalletTransactions');
+    final entries = rows.map(WalletTransaction.fromMap).toList();
+    entries.sort((a, b) => (b.createdAt ?? DateTime(1970))
+        .compareTo(a.createdAt ?? DateTime(1970)));
+    return entries;
+  }
+
+  Future<List<Map<String, dynamic>>> listAllPendingCashIns() async {
+    final rows = await listCollection('mobileCashIns');
+    return rows.where((row) => row['status'] == 'pending').toList();
   }
 
   Future<List<Map<String, dynamic>>> listReports() async {
@@ -716,6 +1136,27 @@ class CloudDatabase {
       body: jsonEncode({'fields': _encodeMap(value)}),
     );
     _ensureSuccess(response);
+  }
+
+  /// Creates [id] unless it already exists. Firestore refuses a create on an
+  /// existing id with 409, which is what makes refunds and cash-ins safe to
+  /// retry. Returns false when the document was already there.
+  Future<bool> _createOnce(
+    String collection,
+    String id,
+    Map<String, dynamic> value,
+  ) async {
+    final uri = Uri.parse('$_base/$collection').replace(
+      queryParameters: {'documentId': id},
+    );
+    final response = await _client.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'fields': _encodeMap(value)}),
+    );
+    if (response.statusCode == 409) return false;
+    _ensureSuccess(response);
+    return true;
   }
 
   void _ensureSuccess(http.Response response) {

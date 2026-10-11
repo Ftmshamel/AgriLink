@@ -52,7 +52,7 @@ Future<void> main() async {
 
   for (final drop in drops) {
     final distanceKm = 52.0;
-    final fee = DeliveryPricing.fee(
+    final fee = const DeliveryRates().fee(
       distanceKm: distanceKm,
       quantityKg: drop.quantity,
     );

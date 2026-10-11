@@ -27,6 +27,29 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Drop-off photos are the evidence in a delivery dispute. A rider writes
+    // one when confirming a stop; nobody may swap or remove it afterwards.
+    match /mobileDeliveryProofs/{proofId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+
+    // The wallet is a ledger: its balance is the sum of these entries, so
+    // they are only ever added. Refund and cash-in ids are derived from the
+    // order or invoice, so a create on an existing id is refused and nothing
+    // can be credited twice.
+    match /mobileWalletTransactions/{entryId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+
+    // Cash-in invoices the buyer was sent to pay, kept until Xendit says they
+    // were paid (then credited above) or they expire.
+    match /mobileCashIns/{invoiceId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+
     // Everything else the app owns stays open, matching how the client reads
     // and writes it today.
     match /mobileUsers/{userId} {
