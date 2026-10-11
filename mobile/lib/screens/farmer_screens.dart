@@ -8,11 +8,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../app.dart';
 import '../models/agri_models.dart';
 import '../services/geo.dart';
+import '../services/notifications.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
 import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
 import '../widgets/weather_card.dart';
 import 'shared_screens.dart';
@@ -150,10 +152,25 @@ class FarmerDashboard extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              PageHeader(
-                eyebrow: 'FARMER DASHBOARD',
-                title: 'Good day, ${session.user.name}',
-                subtitle: 'Manage today’s harvest and incoming bulk orders.',
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: PageHeader(
+                      eyebrow: 'FARMER DASHBOARD',
+                      title: 'Good day, ${session.user.name}',
+                      subtitle:
+                          'Manage today’s harvest and incoming bulk orders.',
+                    ),
+                  ),
+                  NotificationBell(
+                    session: session,
+                    load: () async => NoticeFeed.forFarmer(
+                      await authService.database
+                          .listAgriOrders(farmerId: session.user.id),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               Row(

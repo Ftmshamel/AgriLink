@@ -7,10 +7,12 @@ import '../models/agri_models.dart';
 import '../models/mobile_user.dart';
 import '../services/document_check.dart';
 import '../services/geo.dart';
+import '../services/notifications.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/crop_photo.dart';
 import '../widgets/live_data.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
 import 'shared_screens.dart';
 
@@ -178,11 +180,28 @@ class SuperadminOverview extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              const PageHeader(
-                eyebrow: 'PLATFORM OPERATIONS',
-                title: 'Network Overview',
-                subtitle:
-                    'Live transaction and delivery health across AgriLink.',
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Expanded(
+                    child: PageHeader(
+                      eyebrow: 'PLATFORM OPERATIONS',
+                      title: 'Network Overview',
+                      subtitle:
+                          'Live transaction and delivery health across AgriLink.',
+                    ),
+                  ),
+                  NotificationBell(
+                    session: session,
+                    load: () async {
+                      final results = await Future.wait([
+                        authService.database.listAccounts(),
+                        authService.database.listReports(),
+                      ]);
+                      return NoticeFeed.forAdmin(results[0], results[1]);
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               if (data.error != null && snapshot == null)

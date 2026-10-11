@@ -11,10 +11,12 @@ import '../app.dart';
 import '../models/agri_models.dart';
 import '../services/delivery_proof.dart';
 import '../services/geo.dart';
+import '../services/notifications.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
 import '../widgets/live_map.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
 import '../widgets/weather_card.dart';
 import 'shared_screens.dart';
@@ -414,13 +416,14 @@ class RiderDashboard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Badge(
-                    isLabelVisible: batches.isNotEmpty,
-                    label: Text('${batches.length}'),
-                    child: IconButton.filledTonal(
-                      onPressed: onOpenPool,
-                      icon: const Icon(Icons.notifications_none),
-                    ),
+                  NotificationBell(
+                    session: session,
+                    load: () async {
+                      final snapshot = await RiderSnapshot.load(
+                        session.user.id,
+                      );
+                      return NoticeFeed.forRider(snapshot.mine, snapshot.pool);
+                    },
                   ),
                 ],
               ),
