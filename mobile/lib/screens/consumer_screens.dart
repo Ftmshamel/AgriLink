@@ -16,14 +16,6 @@ import '../widgets/live_map.dart';
 import '../widgets/ui_kit.dart';
 import 'shared_screens.dart';
 
-/// Background tint behind a crop tile, matching the original mockup palette.
-Color cropTint(CropCategory category) => switch (category) {
-      CropCategory.leafy => const Color(0xFFE4F3DB),
-      CropCategory.vegetables => const Color(0xFFFFE7E2),
-      CropCategory.fruits => const Color(0xFFFFF1C7),
-      CropCategory.grains => const Color(0xFFF3E3ED),
-    };
-
 class ConsumerShell extends StatefulWidget {
   const ConsumerShell({super.key, required this.session});
   final AppSession session;
@@ -349,8 +341,8 @@ class _ConsumerHomeState extends State<ConsumerHome> {
   }
 }
 
-/// Market grid tile. Shows the farmer's photo when there is one and falls back
-/// to the mockup's tinted emoji tile otherwise.
+/// Market grid tile. Shows the farmer's photo, or a plain placeholder until
+/// the farmer uploads one.
 class CropTile extends StatelessWidget {
   const CropTile({
     super.key,
@@ -374,14 +366,7 @@ class CropTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: photo != null && photo.isNotEmpty
-                  ? Image.memory(
-                      base64Decode(photo),
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _emojiTile(),
-                    )
-                  : _emojiTile(),
+              child: CropPhoto(photoBase64: photo, iconSize: 40),
             ),
             Padding(
               padding: const EdgeInsets.all(12),
@@ -426,13 +411,89 @@ class CropTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _emojiTile() => Container(
+/// A crop's photo filling its parent, or a plain placeholder when there is
+/// none yet. Order screens only know the crop id, so they pass [cropId] and
+/// the photo is looked up from the listing.
+class CropPhoto extends StatelessWidget {
+  const CropPhoto({
+    super.key,
+    this.photoBase64,
+    this.cropId = '',
+    this.iconSize = 24,
+  });
+
+  final String? photoBase64;
+  final String cropId;
+  final double iconSize;
+
+  /// Photos are large and rarely change, so each is fetched once per run.
+  /// Misses are dropped so a photo the farmer adds later still turns up.
+  static final _cache = <String, Future<String?>>{};
+
+  static Future<String?> _lookup(String cropId) =>
+      _cache.putIfAbsent(cropId, () async {
+        try {
+          final crop =
+              await authService.database.getDocument('mobileCrops', cropId);
+          final photo = crop?['photoBase64'];
+          if (photo is String && photo.isNotEmpty) return photo;
+        } catch (_) {}
+        _cache.remove(cropId);
+        return null;
+      });
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = photoBase64;
+    if (photo != null && photo.isNotEmpty) return _image(photo);
+    if (cropId.isEmpty) return _placeholder();
+    return FutureBuilder<String?>(
+      future: _lookup(cropId),
+      builder: (context, snapshot) {
+        final found = snapshot.data;
+        return found == null ? _placeholder() : _image(found);
+      },
+    );
+  }
+
+  Widget _image(String photo) => Image.memory(
+        base64Decode(photo),
         width: double.infinity,
-        color: cropTint(crop.category),
-        alignment: Alignment.center,
-        child: Text(crop.emoji, style: const TextStyle(fontSize: 62)),
+        height: double.infinity,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        errorBuilder: (_, __, ___) => _placeholder(),
       );
+
+  Widget _placeholder() => Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: canvas,
+        alignment: Alignment.center,
+        child: Icon(Icons.image_outlined, color: muted, size: iconSize),
+      );
+}
+
+/// Small rounded [CropPhoto] for order and cart rows.
+class CropThumb extends StatelessWidget {
+  const CropThumb({super.key, this.photoBase64, this.cropId = ''});
+
+  final String? photoBase64;
+  final String cropId;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: SizedBox(
+        width: 52,
+        height: 52,
+        child: CropPhoto(photoBase64: photoBase64, cropId: cropId),
+      ),
+    );
+  }
 }
 
 class ProductDetails extends StatefulWidget {
@@ -492,13 +553,7 @@ class _ProductDetailsState extends State<ProductDetails> {
             child: SizedBox(
               height: 250,
               width: double.infinity,
-              child: photo != null && photo.isNotEmpty
-                  ? Image.memory(
-                      base64Decode(photo),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _emojiHero(crop),
-                    )
-                  : _emojiHero(crop),
+              child: CropPhoto(photoBase64: photo, iconSize: 64),
             ),
           ),
           const SizedBox(height: 22),
@@ -685,12 +740,6 @@ class _ProductDetailsState extends State<ProductDetails> {
       ),
     );
   }
-
-  Widget _emojiHero(CropListing crop) => Container(
-        color: cropTint(crop.category),
-        alignment: Alignment.center,
-        child: Text(crop.emoji, style: const TextStyle(fontSize: 120)),
-      );
 }
 
 /// Cart + checkout. Fees are charged once per farm and split across that
@@ -952,7 +1001,9 @@ class _CartSheetState extends State<CartSheet> {
                       children: [
                         Expanded(
                           child: LineItem(
-                            emoji: line.crop.emoji,
+                            thumb: CropThumb(
+                              photoBase64: line.crop.photoBase64,
+                            ),
                             name: line.crop.name,
                             detail:
                                 '${line.quantityKg} kg × ₱${line.crop.pricePerKg}',
@@ -1291,7 +1342,7 @@ class ConsumerOrders extends StatelessWidget {
               for (final order in past) ...[
                 PastOrderCard(
                   id: order.reference,
-                  emoji: order.emoji,
+                  thumb: CropThumb(cropId: order.cropId),
                   name: order.cropName,
                   detail: '${order.quantityKg} kg • ${order.farmerName}',
                   price: formatPeso(order.grandTotal),
@@ -1360,7 +1411,7 @@ class ActiveOrderCard extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               LineItem(
-                emoji: order.emoji,
+                thumb: CropThumb(cropId: order.cropId),
                 name: order.cropName,
                 detail: '${order.quantityKg} kg • ${order.farmerName}',
                 price: formatPeso(order.grandTotal),
@@ -1578,7 +1629,7 @@ class DeliveryTracking extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LineItem(
-                          emoji: order.emoji,
+                          thumb: CropThumb(cropId: order.cropId),
                           name: order.cropName,
                           detail:
                               '${order.quantityKg} kg • ${order.farmerName}',

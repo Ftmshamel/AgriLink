@@ -253,12 +253,16 @@ class CategoryChip extends StatelessWidget {
 class LineItem extends StatelessWidget {
   const LineItem({
     super.key,
-    required this.emoji,
+    this.emoji = '',
+    this.thumb,
     required this.name,
     required this.detail,
     required this.price,
   });
   final String emoji;
+
+  /// Replaces the emoji tile, e.g. with the crop's photo.
+  final Widget? thumb;
   final String name;
   final String detail;
   final String price;
@@ -267,16 +271,17 @@ class LineItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            color: lightGreen,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          alignment: Alignment.center,
-          child: Text(emoji, style: const TextStyle(fontSize: 27)),
-        ),
+        thumb ??
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: lightGreen,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              alignment: Alignment.center,
+              child: Text(emoji, style: const TextStyle(fontSize: 27)),
+            ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -334,7 +339,8 @@ class PastOrderCard extends StatelessWidget {
     required this.name,
     required this.detail,
     required this.price,
-    required this.emoji,
+    this.emoji = '',
+    this.thumb,
     this.statusText = 'DELIVERED',
     this.statusIcon = Icons.check_circle,
     this.statusColor = green,
@@ -345,6 +351,7 @@ class PastOrderCard extends StatelessWidget {
   final String detail;
   final String price;
   final String emoji;
+  final Widget? thumb;
   final String statusText;
   final IconData statusIcon;
   final Color statusColor;
@@ -360,7 +367,13 @@ class PastOrderCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              LineItem(emoji: emoji, name: name, detail: detail, price: price),
+              LineItem(
+                emoji: emoji,
+                thumb: thumb,
+                name: name,
+                detail: detail,
+                price: price,
+              ),
               const Divider(height: 26),
               Row(
                 children: [
