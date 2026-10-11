@@ -11,6 +11,7 @@ import '../services/geo.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
+import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
 import '../widgets/ui_kit.dart';
 import '../widgets/weather_card.dart';
@@ -329,14 +330,7 @@ class FarmerInventory extends StatelessWidget {
                         child: SizedBox(
                           width: 52,
                           height: 52,
-                          child: crop.photoBase64 != null &&
-                                  crop.photoBase64!.isNotEmpty
-                              ? Image.memory(
-                                  base64Decode(crop.photoBase64!),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => _emojiBox(crop),
-                                )
-                              : _emojiBox(crop),
+                          child: CropPhoto(photoBase64: crop.photoBase64),
                         ),
                       ),
                       title: Text(
@@ -364,11 +358,6 @@ class FarmerInventory extends StatelessWidget {
     );
   }
 
-  Widget _emojiBox(CropListing crop) => Container(
-        color: lightGreen,
-        alignment: Alignment.center,
-        child: Text(crop.emoji, style: const TextStyle(fontSize: 24)),
-      );
 
   Future<void> _openEditor(BuildContext context, CropListing? crop) async {
     final saved = await Navigator.push<bool>(
@@ -610,7 +599,14 @@ class _CropEditorPageState extends State<CropEditorPage> {
                   .map(
                     (category) => DropdownMenuItem(
                       value: category,
-                      child: Text('${category.emoji}  ${category.label}'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(category.icon, size: 20, color: green),
+                          const SizedBox(width: 10),
+                          Text(category.label),
+                        ],
+                      ),
                     ),
                   )
                   .toList(),
@@ -935,7 +931,7 @@ class _FarmerFulfillmentState extends State<FarmerFulfillment> {
                 for (final order in done) ...[
                   PastOrderCard(
                     id: order.reference,
-                    emoji: order.emoji,
+                    thumb: CropThumb(cropId: order.cropId),
                     name: order.cropName,
                     detail: '${order.quantityKg} kg \u2022 ${order.buyerName}',
                     price: formatPeso(order.totalPrice),
@@ -1342,7 +1338,7 @@ class FarmerOrderDetails extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LineItem(
-                          emoji: order.emoji,
+                          thumb: CropThumb(cropId: order.cropId),
                           name: order.cropName,
                           detail:
                               '${order.quantityKg} kg \u2022 ${order.reference}',

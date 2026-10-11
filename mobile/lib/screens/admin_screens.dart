@@ -9,6 +9,7 @@ import '../services/document_check.dart';
 import '../services/geo.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
+import '../widgets/crop_photo.dart';
 import '../widgets/live_data.dart';
 import '../widgets/ui_kit.dart';
 import 'shared_screens.dart';
@@ -279,9 +280,12 @@ class SuperadminOverview extends StatelessWidget {
                   for (final order in snapshot!.orders.take(5)) ...[
                     Card(
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: lightGreen,
-                          child: Text(order.emoji),
+                        leading: ClipOval(
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CropPhoto(cropId: order.cropId),
+                          ),
                         ),
                         title: Text(
                           '${order.reference} • ${order.cropName}',
@@ -491,13 +495,19 @@ class _ApplicantCardState extends State<ApplicantCard> {
   /// Flags an applicant whose upload did not finish, so a missing requirement
   /// is obvious before anyone taps Approve. Accounts registered before this
   /// was recorded simply show nothing.
-  String? _requirementSummary(Map<dynamic, dynamic> profile) {
+  (IconData, String)? _requirementSummary(Map<dynamic, dynamic> profile) {
     final required = int.tryParse('${profile['requiredDocuments'] ?? ''}');
     final submitted = int.tryParse('${profile['submittedDocuments'] ?? ''}');
     if (required == null || submitted == null || required == 0) return null;
     return submitted >= required
-        ? '🗂 $submitted of $required required documents attached'
-        : '⚠️ Only $submitted of $required required documents attached';
+        ? (
+            Icons.folder_outlined,
+            '$submitted of $required required documents attached',
+          )
+        : (
+            Icons.warning_amber_rounded,
+            'Only $submitted of $required required documents attached',
+          );
   }
 
   @override
@@ -545,22 +555,40 @@ class _ApplicantCardState extends State<ApplicantCard> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              [
-                if ('${profile['location'] ?? ''}'.isNotEmpty)
-                  '📍 ${profile['location']}',
-                if ('${profile['vehicle'] ?? ''}'.isNotEmpty)
-                  '🛵 ${profile['vehicle']}',
-                if ('${profile['payoutNumber'] ?? ''}'.isNotEmpty)
-                  '💳 ${profile['payoutNumber']}',
-                if ('${profile['secondaryId'] ?? ''}'.isNotEmpty)
-                  '🪪 ${profile['secondaryId']}',
-                if ('${account['phone'] ?? ''}'.isNotEmpty)
-                  '📞 ${account['phone']}',
-                if (_requirementSummary(profile) case final summary?) summary,
-              ].join('\n'),
-              style: const TextStyle(color: muted, height: 1.6, fontSize: 12),
-            ),
+            for (final (icon, text) in [
+              if ('${profile['location'] ?? ''}'.isNotEmpty)
+                (Icons.location_on_outlined, '${profile['location']}'),
+              if ('${profile['vehicle'] ?? ''}'.isNotEmpty)
+                (Icons.local_shipping_outlined, '${profile['vehicle']}'),
+              if ('${profile['payoutNumber'] ?? ''}'.isNotEmpty)
+                (Icons.account_balance_wallet_outlined,
+                    '${profile['payoutNumber']}'),
+              if ('${profile['secondaryId'] ?? ''}'.isNotEmpty)
+                (Icons.badge_outlined, '${profile['secondaryId']}'),
+              if ('${account['phone'] ?? ''}'.isNotEmpty)
+                (Icons.phone_outlined, '${account['phone']}'),
+              if (_requirementSummary(profile) case final summary?) summary,
+            ])
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, size: 15, color: muted),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          color: muted,
+                          height: 1.4,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () => Navigator.push(

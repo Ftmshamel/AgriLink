@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
@@ -12,6 +11,7 @@ import '../services/payment_service.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
 import '../widgets/live_data.dart';
+import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
 import '../widgets/ui_kit.dart';
 import 'shared_screens.dart';
@@ -245,7 +245,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                         ],
                       ),
                     ),
-                    Text('🧺', style: TextStyle(fontSize: 66)),
+                    Icon(Icons.shopping_basket, color: Colors.white, size: 66),
                   ],
                 ),
               ),
@@ -262,7 +262,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                   children: [
                     for (final category in CropCategory.values)
                       CategoryChip(
-                        emoji: category.emoji,
+                        icon: category.icon,
                         label: category.label,
                         selected: _category == category,
                         onTap: () => setState(
@@ -408,89 +408,6 @@ class CropTile extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// A crop's photo filling its parent, or a plain placeholder when there is
-/// none yet. Order screens only know the crop id, so they pass [cropId] and
-/// the photo is looked up from the listing.
-class CropPhoto extends StatelessWidget {
-  const CropPhoto({
-    super.key,
-    this.photoBase64,
-    this.cropId = '',
-    this.iconSize = 24,
-  });
-
-  final String? photoBase64;
-  final String cropId;
-  final double iconSize;
-
-  /// Photos are large and rarely change, so each is fetched once per run.
-  /// Misses are dropped so a photo the farmer adds later still turns up.
-  static final _cache = <String, Future<String?>>{};
-
-  static Future<String?> _lookup(String cropId) =>
-      _cache.putIfAbsent(cropId, () async {
-        try {
-          final crop =
-              await authService.database.getDocument('mobileCrops', cropId);
-          final photo = crop?['photoBase64'];
-          if (photo is String && photo.isNotEmpty) return photo;
-        } catch (_) {}
-        _cache.remove(cropId);
-        return null;
-      });
-
-  @override
-  Widget build(BuildContext context) {
-    final photo = photoBase64;
-    if (photo != null && photo.isNotEmpty) return _image(photo);
-    if (cropId.isEmpty) return _placeholder();
-    return FutureBuilder<String?>(
-      future: _lookup(cropId),
-      builder: (context, snapshot) {
-        final found = snapshot.data;
-        return found == null ? _placeholder() : _image(found);
-      },
-    );
-  }
-
-  Widget _image(String photo) => Image.memory(
-        base64Decode(photo),
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        gaplessPlayback: true,
-        errorBuilder: (_, __, ___) => _placeholder(),
-      );
-
-  Widget _placeholder() => Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: canvas,
-        alignment: Alignment.center,
-        child: Icon(Icons.image_outlined, color: muted, size: iconSize),
-      );
-}
-
-/// Small rounded [CropPhoto] for order and cart rows.
-class CropThumb extends StatelessWidget {
-  const CropThumb({super.key, this.photoBase64, this.cropId = ''});
-
-  final String? photoBase64;
-  final String cropId;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: SizedBox(
-        width: 52,
-        height: 52,
-        child: CropPhoto(photoBase64: photoBase64, cropId: cropId),
       ),
     );
   }

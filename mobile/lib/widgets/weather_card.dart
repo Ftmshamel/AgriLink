@@ -114,7 +114,7 @@ class WeatherCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(condition.emoji, style: const TextStyle(fontSize: 42)),
+                Icon(condition.icon, color: green, size: 42),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -301,7 +301,7 @@ class _DayChip extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Text(day.condition.emoji, style: const TextStyle(fontSize: 20)),
+        Icon(day.condition.icon, color: green, size: 20),
         const SizedBox(height: 5),
         Text(
           '${day.maxTemperature.round()}°',

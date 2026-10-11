@@ -6,6 +6,8 @@
 /// `docs/API_INTEGRATION.md`.
 library;
 
+import 'package:flutter/material.dart';
+
 /// A place returned by the Open-Meteo geocoding endpoint.
 class GeoPlace {
   const GeoPlace({
@@ -181,64 +183,64 @@ class FarmWeather {
 class WeatherCondition {
   const WeatherCondition({
     required this.label,
-    required this.emoji,
+    required this.icon,
     this.raining = false,
     this.severe = false,
   });
 
   final String label;
-  final String emoji;
+  final IconData icon;
   final bool raining;
   final bool severe;
 
   /// Open-Meteo reports WMO codes; this collapses them into the handful of
   /// outcomes that matter in the Philippines.
   static WeatherCondition fromCode(int code) => switch (code) {
-        0 => const WeatherCondition(label: 'Clear sky', emoji: '☀️'),
-        1 => const WeatherCondition(label: 'Mainly clear', emoji: '🌤️'),
-        2 => const WeatherCondition(label: 'Partly cloudy', emoji: '⛅'),
-        3 => const WeatherCondition(label: 'Overcast', emoji: '☁️'),
-        45 || 48 => const WeatherCondition(label: 'Foggy', emoji: '🌫️'),
+        0 => const WeatherCondition(label: 'Clear sky', icon: Icons.wb_sunny),
+        1 => const WeatherCondition(label: 'Mainly clear', icon: Icons.wb_sunny_outlined),
+        2 => const WeatherCondition(label: 'Partly cloudy', icon: Icons.wb_cloudy),
+        3 => const WeatherCondition(label: 'Overcast', icon: Icons.cloud),
+        45 || 48 => const WeatherCondition(label: 'Foggy', icon: Icons.foggy),
         51 || 53 || 55 => const WeatherCondition(
             label: 'Drizzle',
-            emoji: '🌦️',
+            icon: Icons.grain,
             raining: true,
           ),
         61 || 63 => const WeatherCondition(
             label: 'Rain',
-            emoji: '🌧️',
+            icon: Icons.umbrella,
             raining: true,
           ),
         65 => const WeatherCondition(
             label: 'Heavy rain',
-            emoji: '🌧️',
+            icon: Icons.umbrella,
             raining: true,
             severe: true,
           ),
         80 || 81 => const WeatherCondition(
             label: 'Rain showers',
-            emoji: '🌦️',
+            icon: Icons.water_drop,
             raining: true,
           ),
         82 => const WeatherCondition(
             label: 'Violent showers',
-            emoji: '⛈️',
+            icon: Icons.thunderstorm,
             raining: true,
             severe: true,
           ),
         95 => const WeatherCondition(
             label: 'Thunderstorm',
-            emoji: '⛈️',
+            icon: Icons.thunderstorm,
             raining: true,
             severe: true,
           ),
         96 || 99 => const WeatherCondition(
             label: 'Thunderstorm with hail',
-            emoji: '⛈️',
+            icon: Icons.thunderstorm,
             raining: true,
             severe: true,
           ),
-        _ => const WeatherCondition(label: 'Unknown', emoji: '🌡️'),
+        _ => const WeatherCondition(label: 'Unknown', icon: Icons.thermostat),
       };
 }
 

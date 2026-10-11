@@ -173,12 +173,11 @@ void main() {
   });
 
   group('CropListing', () {
-    test('infers a category and emoji when the farmer did not pick one', () {
+    test('infers a category when the farmer did not pick one', () {
       expect(crop(name: 'Fresh Pechay').category, CropCategory.leafy);
       expect(crop(name: 'Sweet Mango').category, CropCategory.fruits);
       expect(crop(name: 'Palay').category, CropCategory.grains);
       expect(crop(name: 'Red Onions').category, CropCategory.vegetables);
-      expect(crop(name: 'Red Onions').emoji, '🧅');
     });
 
     test('honours an explicit category over the guess', () {

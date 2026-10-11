@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
 /// Every state an order can be in, from checkout to hand-off.
@@ -77,15 +78,15 @@ class DeliveryPricing {
 
 /// The produce categories used by the market filter chips.
 enum CropCategory {
-  leafy('Leafy', '🥬'),
-  vegetables('Vegetables', '🍅'),
-  fruits('Fruits', '🥭'),
-  grains('Grains', '🌾');
+  leafy('Leafy', Icons.eco),
+  vegetables('Vegetables', Icons.yard),
+  fruits('Fruits', Icons.local_florist),
+  grains('Grains', Icons.grass);
 
-  const CropCategory(this.label, this.emoji);
+  const CropCategory(this.label, this.icon);
 
   final String label;
-  final String emoji;
+  final IconData icon;
 
   static CropCategory parse(Object? value) {
     final raw = '${value ?? ''}'.trim().toLowerCase();
@@ -109,54 +110,6 @@ enum CropCategory {
     if (grains.any(name.contains)) return CropCategory.grains;
     return CropCategory.vegetables;
   }
-}
-
-/// Emoji stand-in used by the market tiles when a listing has no photo.
-String cropEmoji(String cropName) {
-  final name = cropName.toLowerCase();
-  const table = {
-    'pechay': '🥬',
-    'cabbage': '🥬',
-    'repolyo': '🥬',
-    'lettuce': '🥬',
-    'kangkong': '🥬',
-    'tomato': '🍅',
-    'kamatis': '🍅',
-    'onion': '🧅',
-    'sibuyas': '🧅',
-    'garlic': '🧄',
-    'bawang': '🧄',
-    'carrot': '🥕',
-    'potato': '🥔',
-    'patatas': '🥔',
-    'eggplant': '🍆',
-    'talong': '🍆',
-    'corn': '🌽',
-    'mais': '🌽',
-    'rice': '🌾',
-    'palay': '🌾',
-    'mango': '🥭',
-    'banana': '🍌',
-    'saging': '🍌',
-    'papaya': '🍈',
-    'pineapple': '🍍',
-    'watermelon': '🍉',
-    'chili': '🌶️',
-    'sili': '🌶️',
-    'pepper': '🫑',
-    'cucumber': '🥒',
-    'pipino': '🥒',
-    'squash': '🎃',
-    'kalabasa': '🎃',
-    'ampalaya': '🥒',
-    'okra': '🌱',
-    'ginger': '🫚',
-    'luya': '🫚',
-  };
-  for (final entry in table.entries) {
-    if (name.contains(entry.key)) return entry.value;
-  }
-  return '🌱';
 }
 
 double? _toDouble(Object? value) {
@@ -240,7 +193,6 @@ class CropListing {
   final String status;
   final DateTime? createdAt;
 
-  String get emoji => cropEmoji(name);
   bool get inStock => quantityKg > 0 && status == 'active';
   LatLng? get point => latitude != null && longitude != null
       ? LatLng(latitude!, longitude!)
@@ -410,7 +362,6 @@ class AgriOrder {
   bool get isReceiptConfirmed => receivedConfirmedAt != null;
   bool get isDisputed => raw['deliveryDisputed'] == true;
 
-  String get emoji => cropEmoji(cropName);
   bool get hasRider => riderId.isNotEmpty;
   int get riderPayout => DeliveryPricing.riderPayout(
         deliveryFee > 0 ? deliveryFee : DeliveryPricing.baseFare,
