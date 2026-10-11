@@ -126,9 +126,15 @@ class CloudDatabase {
     throw Exception('Invalid platform staff credentials.');
   }
 
-  Future<void> setVerificationStatus(String userId, String status) =>
+  Future<void> setVerificationStatus(
+    String userId,
+    String status, {
+    String reason = '',
+  }) =>
       updateDocument('mobileUsers', userId, {
         'verificationStatus': status,
+        // Why an account was suspended; cleared when it is restored.
+        'statusReason': reason.trim(),
         'updatedAt': DateTime.now().toUtc().toIso8601String(),
       });
 
@@ -791,6 +797,31 @@ class CloudDatabase {
         'receivedConfirmedAt': DateTime.now().toUtc().toIso8601String(),
       });
 
+  /// Saves the buyer's 1–5 ratings for the farm and the rider.
+  Future<void> rateOrder(
+    String orderId, {
+    required int farmerRating,
+    required int riderRating,
+    String comment = '',
+  }) =>
+      updateDocument('mobileOrders', orderId, {
+        'farmerRating': farmerRating.clamp(1, 5),
+        if (riderRating > 0) 'riderRating': riderRating.clamp(1, 5),
+        if (comment.trim().isNotEmpty) 'ratingComment': comment.trim(),
+        'ratedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  /// How buyers rated a farm or a rider across their delivered orders.
+  Future<RatingSummary> ratingFor({String? farmerId, String? riderId}) async {
+    final field = farmerId != null ? 'farmerId' : 'riderId';
+    final id = farmerId ?? riderId ?? '';
+    if (id.isEmpty) return const RatingSummary(0, 0);
+    final rows = await _queryEquals('mobileOrders', field, id, limit: 1000);
+    final orders = rows.map(AgriOrder.fromMap);
+    return RatingSummary.of(orders.map((order) =>
+        farmerId != null ? order.farmerRating : order.riderRating));
+  }
+
   /// Flags an order the buyer has reported, so the rider's "delivered" is
   /// visibly contested until support resolves it.
   Future<void> markDeliveryDisputed(String orderId) =>
@@ -840,6 +871,94 @@ class CloudDatabase {
       'status': 'open',
       'createdAt': DateTime.now().toUtc().toIso8601String(),
     });
+  }
+
+  /// Closes a dispute and, when support decides the buyer is owed money,
+  /// credits it to their wallet. The credit is keyed by the report, so
+  /// resolving the same report twice cannot pay twice. Returns the pesos
+  /// refunded.
+  Future<int> resolveReportWithRefund({
+    required String reportId,
+    required String resolution,
+    required int refundAmount,
+  }) async {
+    final report = await getDocument('mobileReports', reportId);
+    if (report == null) throw Exception('That report no longer exists.');
+    final orderId = '${report['orderId'] ?? ''}';
+    var refunded = 0;
+    if (refundAmount > 0) {
+      final order = orderId.isEmpty ? null : await getOrder(orderId);
+      if (order == null) {
+        throw Exception('A refund needs the order this report is about.');
+      }
+      final ceiling = order.grandTotal - order.refundedAmount;
+      if (refundAmount > ceiling) {
+        throw Exception('At most ₱$ceiling of this order can still be '
+            'refunded.');
+      }
+      final id = 'dispute-$reportId';
+      final created = await _createOnce('mobileWalletTransactions', id, {
+        'id': id,
+        'userId': order.buyerId,
+        'type': WalletEntryType.refund.wire,
+        'amount': refundAmount,
+        'orderId': order.id,
+        'reference': order.reference,
+        'description': 'Dispute refund for ${order.reference} • '
+            '${order.cropName}',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+      });
+      if (created) {
+        refunded = refundAmount;
+        await updateDocument('mobileOrders', order.id, {
+          'refundedAmount': order.refundedAmount + refundAmount,
+          'refundedAt': DateTime.now().toUtc().toIso8601String(),
+        });
+      }
+    }
+    await updateDocument('mobileReports', reportId, {
+      'status': 'resolved',
+      'resolution': resolution,
+      if (refunded > 0) 'refundAmount': refunded,
+      'resolvedAt': DateTime.now().toUtc().toIso8601String(),
+    });
+    if (orderId.isNotEmpty) {
+      await updateDocument('mobileOrders', orderId, {
+        'deliveryDisputeResolvedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+    }
+    return refunded;
+  }
+
+  // ----------------------------------------------------------------- payouts
+
+  /// Records that AgriLink sent a farmer or rider their share of [orderIds].
+  Future<void> markPayout({
+    required List<String> orderIds,
+    required String payee,
+    required String reference,
+  }) async {
+    assert(payee == 'farmer' || payee == 'rider');
+    final stamp = DateTime.now().toUtc().toIso8601String();
+    for (final orderId in orderIds) {
+      await updateDocument('mobileOrders', orderId, {
+        '${payee}PaidAt': stamp,
+        '${payee}PayoutReference': reference,
+      });
+    }
+  }
+
+  Future<List<WalletTransaction>> listAllWalletTransactions() async {
+    final rows = await listCollection('mobileWalletTransactions');
+    final entries = rows.map(WalletTransaction.fromMap).toList();
+    entries.sort((a, b) =>
+        (b.createdAt ?? DateTime(1970)).compareTo(a.createdAt ?? DateTime(1970)));
+    return entries;
+  }
+
+  Future<List<Map<String, dynamic>>> listAllPendingCashIns() async {
+    final rows = await listCollection('mobileCashIns');
+    return rows.where((row) => row['status'] == 'pending').toList();
   }
 
   Future<List<Map<String, dynamic>>> listReports() async {

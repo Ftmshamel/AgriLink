@@ -433,6 +433,9 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   late int quantity = widget.crop.moqKg;
+  late final Future<RatingSummary> _farmRating = authService.database
+      .ratingFor(farmerId: widget.crop.farmerId)
+      .catchError((_) => const RatingSummary(0, 0));
 
   int get _step => widget.crop.moqKg > 0 ? widget.crop.moqKg : 1;
 
@@ -543,6 +546,17 @@ class _ProductDetailsState extends State<ProductDetails> {
                             ].join(' • '),
                             style: const TextStyle(color: muted, fontSize: 12),
                           ),
+                          FutureBuilder<RatingSummary>(
+                            future: _farmRating,
+                            builder: (context, snapshot) => Text(
+                              snapshot.data?.label ?? '',
+                              style: const TextStyle(
+                                color: orange,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -560,7 +574,7 @@ class _ProductDetailsState extends State<ProductDetails> {
           const SizedBox(height: 10),
           Text(
             '${crop.quantityKg} kg available for booking. '
-            '${crop.harvestDate.isEmpty ? 'Harvest date to be confirmed.' : 'Harvest on ${crop.harvestDate}.'} '
+            '${crop.harvestDate.isEmpty ? 'Harvest date to be confirmed.' : 'Harvest on ${formatHarvestDate(crop.harvestDate)}.'} '
             'Sorted and packed by the farm for bulk buyers.',
             style: const TextStyle(color: muted, height: 1.55),
           ),
@@ -612,11 +626,22 @@ class _ProductDetailsState extends State<ProductDetails> {
                     : null,
                 icon: const Icon(Icons.remove),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+              TextButton(
+                onPressed: () async {
+                  final typed = await askQuantity(
+                    context,
+                    min: crop.moqKg,
+                    max: crop.quantityKg,
+                    current: quantity,
+                  );
+                  if (typed != null) setState(() => quantity = typed);
+                },
                 child: Text(
                   '$quantity kg',
-                  style: const TextStyle(fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
               IconButton.filledTonal(
@@ -766,6 +791,25 @@ class _CartSheetState extends State<CartSheet> {
   void dispose() {
     _reference.dispose();
     super.dispose();
+  }
+
+  /// Straight-line distance from each farm in the cart to the buyer.
+  Map<String, ({String farm, double km})> _farmDistances() {
+    final buyer = widget.session.user.point;
+    final result = <String, ({String farm, double km})>{};
+    for (final line in widget.cart.lines) {
+      final farm = line.crop.point;
+      result.putIfAbsent(
+        line.crop.farmerId,
+        () => (
+          farm: line.crop.farmerName,
+          km: buyer != null && farm != null
+              ? GeoService.distanceKm(buyer, farm)
+              : 0.0,
+        ),
+      );
+    }
+    return result;
   }
 
   /// One delivery fee per farm, based on that farm's distance to the buyer.
@@ -1248,6 +1292,25 @@ class _CartSheetState extends State<CartSheet> {
                         '${fees.length == 1 ? '' : 's'})',
                     value: formatPeso(delivery),
                   ),
+                  for (final entry in _farmDistances().entries)
+                    Text(
+                      '${entry.value.farm} • ${formatKm(entry.value.km)} away '
+                      '• ${formatPeso(fees[entry.key] ?? 0)}',
+                      style: const TextStyle(color: muted, fontSize: 11.5),
+                    ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'A four-wheel delivery costs '
+                    '${formatPeso(DeliveryPricing.baseFare)} plus '
+                    '${formatPeso(DeliveryPricing.perKilometre)}/km and '
+                    '₱${DeliveryPricing.perKiloHandling}/kg, once per farm. '
+                    'Ordering more from the same farm spreads that cost.',
+                    style: const TextStyle(
+                      color: muted,
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   MoneyRow(
                     label: 'Total',
@@ -1401,6 +1464,11 @@ class _CartSheetState extends State<CartSheet> {
                     ),
                   ] else if (_method != 'Cash on delivery') ...[
                     const SizedBox(height: 12),
+                    _ManualPayTo(
+                      method: _method,
+                      amount: subtotal + delivery,
+                    ),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: _reference,
                       decoration: const InputDecoration(
@@ -1452,6 +1520,125 @@ class _CartSheetState extends State<CartSheet> {
   }
 }
 
+/// Where to send money when there is no payment gateway, so the buyer is not
+/// asked for a reference number without being told who to pay.
+class _ManualPayTo extends StatelessWidget {
+  const _ManualPayTo({required this.method, required this.amount});
+
+  final String method;
+  final int amount;
+
+  static const number = String.fromEnvironment('AGRILINK_GCASH_NUMBER');
+  static const name = String.fromEnvironment(
+    'AGRILINK_GCASH_NAME',
+    defaultValue: 'AgriLink',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final configured = number.isNotEmpty;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: configured ? lightGreen : const Color(0xFFFFF1DD),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            configured ? Icons.send_to_mobile : Icons.warning_amber_rounded,
+            color: configured ? green : orange,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: configured
+                ? Text.rich(
+                    TextSpan(
+                      style: const TextStyle(fontSize: 12, height: 1.45),
+                      children: [
+                        TextSpan(text: 'Send ${formatPeso(amount)} via '),
+                        TextSpan(
+                          text: method,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: ' to '),
+                        const TextSpan(
+                          text: '$name • $number',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(
+                          text: ', then enter the reference number from '
+                              'your receipt. The farm confirms it before '
+                              'packing.',
+                        ),
+                      ],
+                    ),
+                  )
+                : const Text(
+                    'No payment account is set up in this build, so there '
+                    'is nowhere to send money. Pay with your AgriLink Wallet '
+                    'instead.',
+                    style: TextStyle(fontSize: 12, height: 1.45),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Lets a bulk buyer type a quantity instead of tapping + dozens of times.
+Future<int?> askQuantity(
+  BuildContext context, {
+  required int min,
+  required int max,
+  required int current,
+}) async {
+  final controller = TextEditingController(text: '$current');
+  String? error;
+  final result = await showDialog<int>(
+    context: context,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext, setDialogState) {
+        void submit() {
+          final value = int.tryParse(controller.text.trim());
+          if (value == null || value < min || value > max) {
+            setDialogState(() => error = 'Enter $min to $max kg.');
+            return;
+          }
+          Navigator.pop(dialogContext, value);
+        }
+
+        return AlertDialog(
+          title: const Text('Quantity'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            onSubmitted: (_) => submit(),
+            decoration: InputDecoration(
+              suffixText: 'kg',
+              helperText: 'Minimum $min kg • $max kg available',
+              errorText: error,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(onPressed: submit, child: const Text('Set')),
+          ],
+        );
+      },
+    ),
+  );
+  controller.dispose();
+  return result;
+}
+
 /// Changes a cart line in steps of the farm's minimum order, never below it
 /// and never past the stock the listing had when it was added.
 class _QuantityStepper extends StatelessWidget {
@@ -1481,7 +1668,26 @@ class _QuantityStepper extends StatelessWidget {
               : null,
           icon: const Icon(Icons.remove_circle_outline, size: 22),
         ),
-        Text('$kg kg', style: const TextStyle(fontWeight: FontWeight.w800)),
+        InkWell(
+          onTap: !enabled
+              ? null
+              : () async {
+                  final typed = await askQuantity(
+                    context,
+                    min: crop.moqKg,
+                    max: crop.quantityKg,
+                    current: kg,
+                  );
+                  if (typed != null) onChanged(typed);
+                },
+          child: Text(
+            '$kg kg',
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
         IconButton(
           visualDensity: VisualDensity.compact,
           tooltip: 'More',
@@ -2137,6 +2343,24 @@ class ActiveOrderCard extends StatelessWidget {
                 detail: '${order.quantityKg} kg • ${order.farmerName}',
                 price: formatPeso(order.grandTotal),
               ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(
+                    order.isScheduled ? Icons.event : Icons.bolt,
+                    color: order.isScheduled ? green : orange,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    deliveryScheduleLabel(order),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
               const Divider(height: 28),
               Row(
                 children: [
@@ -2665,10 +2889,34 @@ class _ReceiptActionsState extends State<_ReceiptActions> {
     }
   }
 
-  Future<void> _confirm() => _run(
-        () => authService.database.confirmReceived(widget.order.id),
-        'Thanks! Receipt confirmed.',
-      );
+  Future<void> _confirm() async {
+    await _run(
+      () => authService.database.confirmReceived(widget.order.id),
+      'Thanks! Receipt confirmed.',
+    );
+    if (mounted) await _rate();
+  }
+
+  Future<void> _rate() async {
+    final order = widget.order;
+    final rating = await showDialog<_Rating>(
+      context: context,
+      builder: (_) => _RatingDialog(
+        farmName: order.farmerName,
+        riderName: order.hasRider ? order.riderName : '',
+      ),
+    );
+    if (rating == null) return;
+    await _run(
+      () => authService.database.rateOrder(
+        order.id,
+        farmerRating: rating.farm,
+        riderRating: rating.rider,
+        comment: rating.comment,
+      ),
+      'Thanks for rating this order.',
+    );
+  }
 
   Future<void> _report() => _run(() async {
         final order = widget.order;
@@ -2700,6 +2948,22 @@ class _ReceiptActionsState extends State<_ReceiptActions> {
               child: Text('I received my order'),
             ),
           ),
+        if (order.isReceiptConfirmed && !order.isRated)
+          FilledButton.icon(
+            onPressed: _busy ? null : _rate,
+            icon: const Icon(Icons.star_outline),
+            label: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('Rate this order'),
+            ),
+          ),
+        if (order.isRated)
+          Text(
+            'You rated the farm ${order.farmerRating}/5'
+            '${order.riderRating > 0 ? ' and the rider ${order.riderRating}/5' : ''}.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: muted),
+          ),
         if (!order.isDisputed) ...[
           const SizedBox(height: 8),
           OutlinedButton.icon(
@@ -2715,6 +2979,98 @@ class _ReceiptActionsState extends State<_ReceiptActions> {
             ),
           ),
         ],
+      ],
+    );
+  }
+}
+
+typedef _Rating = ({int farm, int rider, String comment});
+
+class _RatingDialog extends StatefulWidget {
+  const _RatingDialog({required this.farmName, required this.riderName});
+
+  final String farmName;
+  final String riderName;
+
+  @override
+  State<_RatingDialog> createState() => _RatingDialogState();
+}
+
+class _RatingDialogState extends State<_RatingDialog> {
+  int _farm = 0;
+  int _rider = 0;
+  final _comment = TextEditingController();
+
+  @override
+  void dispose() {
+    _comment.dispose();
+    super.dispose();
+  }
+
+  Widget _stars(int value, ValueChanged<int> onChanged) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var star = 1; star <= 5; star++)
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              tooltip: '$star star${star == 1 ? '' : 's'}',
+              onPressed: () => setState(() => onChanged(star)),
+              icon: Icon(
+                star <= value ? Icons.star : Icons.star_border,
+                color: orange,
+              ),
+            ),
+        ],
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRider = widget.riderName.isNotEmpty;
+    return AlertDialog(
+      title: const Text('Rate this order'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Produce from ${widget.farmName}',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+            _stars(_farm, (value) => _farm = value),
+            if (hasRider) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Delivery by ${widget.riderName}',
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              _stars(_rider, (value) => _rider = value),
+            ],
+            const SizedBox(height: 8),
+            TextField(
+              controller: _comment,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Comment (optional)',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Later'),
+        ),
+        FilledButton(
+          onPressed: _farm == 0 || (hasRider && _rider == 0)
+              ? null
+              : () => Navigator.pop<_Rating>(
+                    context,
+                    (farm: _farm, rider: _rider, comment: _comment.text),
+                  ),
+          child: const Text('Submit'),
+        ),
       ],
     );
   }

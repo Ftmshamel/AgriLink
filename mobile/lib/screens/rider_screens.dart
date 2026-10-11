@@ -269,9 +269,27 @@ class _RiderShellState extends State<RiderShell> {
     if (!mounted || account == null) return;
     final stored = account['riderOnline'];
     if (stored is bool) setState(() => _online = stored);
+    if (widget.session.user.payoutNumber.isEmpty) {
+      setState(() => _online = false);
+    }
   }
 
   Future<void> _setOnline(bool value) async {
+    // A rider with nowhere to be paid would be delivering for free.
+    if (value && widget.session.user.payoutNumber.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Add your GCash or Maya payout number before going online.',
+          ),
+          action: SnackBarAction(
+            label: 'ADD',
+            onPressed: () => openProfileEditor(context, widget.session),
+          ),
+        ),
+      );
+      return;
+    }
     setState(() => _online = value);
     try {
       final point = value ? await GeoService.tryCurrentPoint() : null;
@@ -439,7 +457,10 @@ class RiderDashboard extends StatelessWidget {
                           ),
                           Text(
                             online
-                                ? batches.isEmpty
+                                ? tripId != null
+                                    ? 'Finish your current trip to take '
+                                        'another'
+                                    : batches.isEmpty
                                     ? 'Waiting for packed farm orders'
                                     : '${batches.length} pooled route${batches.length == 1 ? '' : 's'} available now'
                                 : 'Go online to receive trips',
@@ -879,6 +900,15 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
     setState(() => _accepting = true);
     try {
       final user = widget.session.user;
+      if (user.payoutNumber.isEmpty) {
+        throw Exception('Add your GCash or Maya payout number in Profile '
+            'before accepting trips.');
+      }
+      // One trip at a time: the stops, codes and proofs are all per trip.
+      final mine = await authService.database.listAgriOrders(riderId: user.id);
+      if (mine.any((order) => order.status.isOpen)) {
+        throw Exception('Finish your current trip before accepting another.');
+      }
       final tripId = await authService.database.acceptTrip(
         orders: _chosen,
         riderId: user.id,
@@ -1814,8 +1844,23 @@ class RiderProfile extends StatelessWidget {
         final snapshot = data.value;
         final delivered = snapshot?.delivered.length ?? 0;
         final assigned = snapshot?.mine.length ?? 0;
+        // Trips still on the road are neither completed nor failed yet.
+        final finished = snapshot?.mine
+                .where((order) => !order.status.isOpen)
+                .length ??
+            0;
         final completion =
-            assigned == 0 ? 0 : (delivered / assigned * 100).round();
+            finished == 0 ? 0 : (delivered / finished * 100).round();
+        final earned = snapshot?.delivered ?? const <AgriOrder>[];
+        final paidOut = earned
+            .where((order) => order.isRiderPaid)
+            .fold<int>(0, (sum, order) => sum + order.riderPayout);
+        final unpaid = earned
+            .where((order) => !order.isRiderPaid)
+            .fold<int>(0, (sum, order) => sum + order.riderPayout);
+        final rating = RatingSummary.of(
+          (snapshot?.mine ?? const <AgriOrder>[]).map((o) => o.riderRating),
+        );
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
@@ -1853,7 +1898,7 @@ class RiderProfile extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ProfileTile(
-                icon: Icons.two_wheeler_outlined,
+                icon: Icons.local_shipping_outlined,
                 title: 'Vehicle',
                 subtitle:
                     user.vehicle.isEmpty ? 'Add your vehicle' : user.vehicle,
@@ -1872,7 +1917,22 @@ class RiderProfile extends StatelessWidget {
                 title: 'Performance',
                 subtitle: assigned == 0
                     ? 'No trips yet'
-                    : '$completion% completion • $assigned accepted',
+                    : finished == 0
+                        ? '$assigned accepted • none finished yet'
+                        : '$completion% completed • $assigned accepted',
+                onTap: () {},
+              ),
+              ProfileTile(
+                icon: Icons.request_quote_outlined,
+                title: 'Payouts',
+                subtitle: '${formatPeso(paidOut)} paid • '
+                    '${formatPeso(unpaid)} awaiting payout',
+                onTap: () {},
+              ),
+              ProfileTile(
+                icon: Icons.star_outline,
+                title: 'Buyer rating',
+                subtitle: rating.label,
                 onTap: () {},
               ),
               ProfileTile(

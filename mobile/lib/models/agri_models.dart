@@ -59,9 +59,14 @@ enum OrderStatus {
 /// Fee model shared by checkout (what the buyer pays) and the rider pool
 /// (what the trip is worth). Keeping it in one place stops the two sides of
 /// the app from quoting different numbers for the same delivery.
+///
+/// Riders drive four-wheelers (L300, FB vans) and return empty, so the
+/// per-kilometre rate is set to cover the round trip: such a van does roughly
+/// 10 km per litre of diesel, about ₱6/km each way, and the rider's 80% share
+/// of ₱15/km is ₱12/km. The base fare covers loading at the farm.
 class DeliveryPricing {
-  static const baseFare = 60;
-  static const perKilometre = 8;
+  static const baseFare = 80;
+  static const perKilometre = 15;
   static const perKiloHandling = 1.5;
   static const riderShare = 0.8;
 
@@ -194,6 +199,9 @@ class CropListing {
   final DateTime? createdAt;
 
   bool get inStock => quantityKg > 0 && status == 'active';
+
+  /// Enough for fewer than three minimum orders: time to restock or harvest.
+  bool get isLowStock => inStock && quantityKg < moqKg * 3;
   LatLng? get point => latitude != null && longitude != null
       ? LatLng(latitude!, longitude!)
       : null;
@@ -399,6 +407,20 @@ class AgriOrder {
     return date == null || !now.isBefore(DeliveryHours.opensOn(date));
   }
 
+  /// The day the farm has to have this out: its delivery date, or the day it
+  /// was placed for orders older than scheduling.
+  DateTime get dueDate =>
+      deliveryDate ?? dateOnly((createdAt ?? DateTime.now()).toLocal());
+
+  bool isDueBy(DateTime now) => !dueDate.isAfter(dateOnly(now));
+
+  /// Soonest delivery first, then oldest order first.
+  static int byDueDate(AgriOrder a, AgriOrder b) {
+    final due = a.dueDate.compareTo(b.dueDate);
+    if (due != 0) return due;
+    return (a.createdAt ?? DateTime(1970)).compareTo(b.createdAt ?? DateTime(1970));
+  }
+
   /// A same-day order placed after the cutoff that rolled over to tomorrow.
   bool get isNextDay {
     final date = deliveryDate;
@@ -420,6 +442,15 @@ class AgriOrder {
     }
     return 0;
   }
+
+  // Buyer ratings, 1–5, left after confirming receipt. 0 means not rated.
+  int get farmerRating => _toInt(raw['farmerRating']);
+  int get riderRating => _toInt(raw['riderRating']);
+  bool get isRated => raw['ratedAt'] != null;
+
+  // Payouts the superadmin has sent for a delivered order.
+  bool get isFarmerPaid => raw['farmerPaidAt'] != null;
+  bool get isRiderPaid => raw['riderPaidAt'] != null;
 
   int get refundedAmount => _toInt(raw['refundedAmount']);
   bool get isRefunded => refundedAmount > 0;
@@ -477,6 +508,27 @@ class AgriOrder {
 
 DateTime dateOnly(DateTime time) => DateTime(time.year, time.month, time.day);
 
+/// Average of the 1–5 ratings buyers left, ignoring unrated orders.
+class RatingSummary {
+  const RatingSummary(this.average, this.count);
+
+  factory RatingSummary.of(Iterable<int> ratings) {
+    final given = ratings.where((rating) => rating > 0).toList();
+    if (given.isEmpty) return const RatingSummary(0, 0);
+    return RatingSummary(
+      given.reduce((a, b) => a + b) / given.length,
+      given.length,
+    );
+  }
+
+  final double average;
+  final int count;
+
+  String get label => count == 0
+      ? 'No ratings yet'
+      : '${average.toStringAsFixed(1)} \u2605 (${count == 1 ? '1 rating' : '$count ratings'})';
+}
+
 /// When deliveries run. Riders work from [opensAt]; an order placed at or
 /// after [cutoff] is delivered the next day. Times are the phone's local time.
 class DeliveryHours {
@@ -508,6 +560,7 @@ class DeliveryHours {
 class WalletTransaction {
   const WalletTransaction({
     required this.id,
+    this.userId = '',
     required this.type,
     required this.amount,
     required this.description,
@@ -518,6 +571,7 @@ class WalletTransaction {
   factory WalletTransaction.fromMap(Map<String, dynamic> map) =>
       WalletTransaction(
         id: '${map['id'] ?? ''}',
+        userId: '${map['userId'] ?? ''}',
         type: WalletEntryType.parse(map['type']),
         amount: _toInt(map['amount']),
         description: '${map['description'] ?? ''}',
@@ -526,6 +580,7 @@ class WalletTransaction {
       );
 
   final String id;
+  final String userId;
   final WalletEntryType type;
 
   /// Signed pesos: positive adds to the balance, negative spends it.

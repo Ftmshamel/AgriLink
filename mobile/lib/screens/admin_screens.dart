@@ -124,6 +124,17 @@ class PlatformSnapshot {
         .toList();
   }
 
+  Iterable<AgriOrder> get _delivered =>
+      orders.where((order) => order.status == OrderStatus.delivered);
+
+  int get owedToFarmers => _delivered
+      .where((order) => !order.isFarmerPaid)
+      .fold<int>(0, (sum, order) => sum + order.totalPrice);
+
+  int get owedToRiders => _delivered
+      .where((order) => !order.isRiderPaid && order.hasRider)
+      .fold<int>(0, (sum, order) => sum + order.riderPayout);
+
   int countPending(String role) =>
       pending.where((account) => account['role'] == role).length;
 
@@ -227,9 +238,9 @@ class SuperadminOverview extends StatelessWidget {
                       title:
                           '${snapshot!.pending.length} registration${snapshot.pending.length == 1 ? '' : 's'} pending',
                       subtitle:
-                          '${snapshot.countPending('farmer')} farmers • '
-                          '${snapshot.countPending('consumer')} consumers • '
-                          '${snapshot.countPending('rider')} riders',
+                          '${plural(snapshot.countPending('farmer'), 'farmer')} • '
+                          '${plural(snapshot.countPending('consumer'), 'consumer')} • '
+                          '${plural(snapshot.countPending('rider'), 'rider')}',
                       badge: 'REVIEW',
                     ),
                   ),
@@ -268,7 +279,53 @@ class SuperadminOverview extends StatelessWidget {
                         'No pending registrations, disputes, or delayed orders.',
                   ),
                 const SizedBox(height: 24),
-                const SectionTitle(title: 'Recent orders', action: 'Latest'),
+                const SectionTitle(title: 'Money', action: ''),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PayoutsPage(session: session),
+                    ),
+                  ),
+                  child: ActionCard(
+                    icon: Icons.request_quote_outlined,
+                    title: 'Payouts',
+                    subtitle: snapshot == null
+                        ? 'Loading…'
+                        : '${formatPeso(snapshot.owedToFarmers)} to farmers • '
+                            '${formatPeso(snapshot.owedToRiders)} to riders',
+                    badge: 'OWED',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WalletLedgerPage(session: session),
+                    ),
+                  ),
+                  child: const ActionCard(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'Buyer wallets',
+                    subtitle: 'Cash-ins, payments, refunds, and balances',
+                    badge: 'LEDGER',
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SectionTitle(
+                  title: 'Recent orders',
+                  action: 'View all',
+                  onAction: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AllOrdersPage(session: session),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 10),
                 if ((snapshot?.orders.length ?? 0) == 0)
                   const EmptyState(
@@ -388,7 +445,8 @@ class VerificationQueue extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       subtitle: Text(
-                        '${account['role']} • ${account['verificationStatus']}',
+                        '${account['role']} • ${account['verificationStatus']}'
+                        '${'${account['statusReason'] ?? ''}'.isEmpty ? '' : '\n${account['statusReason']}'}',
                       ),
                       trailing: TextButton(
                         onPressed: () => _setStatus(
@@ -421,8 +479,46 @@ class VerificationQueue extends StatelessWidget {
     Map<String, dynamic> account,
     String status,
   ) async {
-    await authService.database
-        .setVerificationStatus('${account['id']}', status);
+    var reason = '';
+    if (status == 'suspended') {
+      final controller = TextEditingController();
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text('Suspend ${account['name']}?'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              labelText: 'Reason',
+              hintText: 'Repeated no-shows, fake documents…',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                controller.text.trim().isNotEmpty,
+              ),
+              child: const Text('Suspend'),
+            ),
+          ],
+        ),
+      );
+      reason = controller.text.trim();
+      controller.dispose();
+      if (confirmed != true || reason.isEmpty) return;
+    }
+    await authService.database.setVerificationStatus(
+      '${account['id']}',
+      status,
+      reason: reason,
+    );
     session.bump();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -526,7 +622,7 @@ class _ApplicantCardState extends State<ApplicantCard> {
                   backgroundColor: lightGreen,
                   child: Icon(
                     account['role'] == 'rider'
-                        ? Icons.two_wheeler
+                        ? Icons.local_shipping
                         : Icons.agriculture,
                     color: green,
                   ),
@@ -1066,7 +1162,10 @@ class DisputeCenter extends StatelessWidget {
                         'Against ${report['farmerName'] ?? 'a farmer'}',
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
-                      subtitle: Text('${report['resolution'] ?? 'Resolved'}'),
+                      subtitle: Text(
+                        '${report['resolution'] ?? 'Resolved'}'
+                        '${report['refundAmount'] == null ? '' : ' • refunded ${formatPeso(report['refundAmount'] as num)}'}',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -1121,17 +1220,38 @@ class DisputeCenter extends StatelessWidget {
     Map<String, dynamic> report,
   ) async {
     final notes = TextEditingController();
+    final refund = TextEditingController();
+    final hasOrder = '${report['orderId'] ?? ''}'.isNotEmpty;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Resolve dispute'),
-        content: TextField(
-          controller: notes,
-          maxLines: 3,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Resolution notes',
-            hintText: 'What action was taken?',
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: notes,
+                maxLines: 3,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Resolution notes',
+                  hintText: 'What action was taken?',
+                ),
+              ),
+              if (hasOrder) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: refund,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Refund to buyer wallet (optional)',
+                    prefixText: '₱',
+                    helperText: 'e.g. the value of the missing kilos',
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         actions: [
@@ -1146,16 +1266,36 @@ class DisputeCenter extends StatelessWidget {
         ],
       ),
     );
+    final resolution =
+        notes.text.trim().isEmpty ? 'Reviewed by AgriLink' : notes.text.trim();
+    final amount = int.tryParse(refund.text.trim()) ?? 0;
+    notes.dispose();
+    refund.dispose();
     if (confirmed != true) return;
-    await authService.database.resolveReport(
-      '${report['id']}',
-      notes.text.trim().isEmpty ? 'Reviewed by AgriLink' : notes.text.trim(),
-    );
-    session.bump();
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dispute marked as resolved.')),
-    );
+    try {
+      final refunded = await authService.database.resolveReportWithRefund(
+        reportId: '${report['id']}',
+        resolution: resolution,
+        refundAmount: amount,
+      );
+      session.bump();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            refunded > 0
+                ? 'Resolved. ${formatPeso(refunded)} refunded to the buyer\'s '
+                    'wallet.'
+                : 'Dispute marked as resolved.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    }
   }
 }
 
@@ -1244,8 +1384,523 @@ class SuperadminProfile extends StatelessWidget {
     int count(MobileRole role) => snapshot.accounts
         .where((account) => account['role'] == role.name)
         .length;
-    return '${count(MobileRole.consumer)} consumers • '
-        '${count(MobileRole.farmer)} farmers • '
-        '${count(MobileRole.rider)} riders';
+    return '${plural(count(MobileRole.consumer), 'consumer')} • '
+        '${plural(count(MobileRole.farmer), 'farmer')} • '
+        '${plural(count(MobileRole.rider), 'rider')}';
+  }
+}
+
+/// Every order on the network, searchable and filterable by stage.
+class AllOrdersPage extends StatefulWidget {
+  const AllOrdersPage({super.key, required this.session});
+
+  final AppSession session;
+
+  @override
+  State<AllOrdersPage> createState() => _AllOrdersPageState();
+}
+
+enum _OrderFilter {
+  all('All'),
+  open('Open'),
+  withRider('With rider'),
+  delivered('Delivered'),
+  cancelled('Cancelled'),
+  disputed('Disputed');
+
+  const _OrderFilter(this.label);
+  final String label;
+
+  bool matches(AgriOrder order) => switch (this) {
+        all => true,
+        open => order.status.isOpen && !order.status.isWithRider,
+        withRider => order.status.isWithRider,
+        delivered => order.status == OrderStatus.delivered,
+        cancelled => order.status == OrderStatus.cancelled,
+        disputed => order.isDisputed,
+      };
+}
+
+class _AllOrdersPageState extends State<AllOrdersPage> {
+  final _search = TextEditingController();
+  _OrderFilter _filter = _OrderFilter.all;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  bool _matchesSearch(AgriOrder order) {
+    final query = _search.text.trim().toLowerCase();
+    if (query.isEmpty) return true;
+    return [
+      order.reference,
+      order.buyerName,
+      order.farmerName,
+      order.riderName,
+      order.cropName,
+      order.deliveryAddress,
+    ].any((field) => field.toLowerCase().contains(query));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('All orders')),
+      body: LiveBuilder<List<AgriOrder>>(
+        session: widget.session,
+        load: () => authService.database.listAgriOrders(),
+        builder: (context, data) {
+          final orders = (data.value ?? const <AgriOrder>[])
+              .where(_filter.matches)
+              .where(_matchesSearch)
+              .toList();
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                TextField(
+                  controller: _search,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Reference, buyer, farm, rider, crop…',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final filter in _OrderFilter.values)
+                      ChoiceChip(
+                        label: Text(filter.label),
+                        selected: _filter == filter,
+                        onSelected: (_) => setState(() => _filter = filter),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  plural(orders.length, 'order'),
+                  style: const TextStyle(color: muted),
+                ),
+                const SizedBox(height: 8),
+                if (data.error != null && data.value == null)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  )
+                else if (orders.isEmpty)
+                  const EmptyState(
+                    icon: Icons.search_off,
+                    title: 'No matching orders',
+                    message: 'Try another search or filter.',
+                  )
+                else
+                  for (final order in orders)
+                    Card(
+                      child: ListTile(
+                        leading: ClipOval(
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CropPhoto(cropId: order.cropId),
+                          ),
+                        ),
+                        title: Text(
+                          '${order.reference} • ${order.cropName}',
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          '${order.buyerName} ← ${order.farmerName}\n'
+                          '${order.status.label} • ${deliveryScheduleLabel(order)}'
+                          '${order.hasRider ? ' • ${order.riderName}' : ''}'
+                          '${order.isRefunded ? ' • refunded ${formatPeso(order.refundedAmount)}' : ''}',
+                        ),
+                        isThreeLine: true,
+                        trailing: Text(
+                          formatPeso(order.grandTotal),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: green,
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// What AgriLink owes each farmer and rider for delivered orders, and a way
+/// to record that it was sent.
+class PayoutsPage extends StatelessWidget {
+  const PayoutsPage({super.key, required this.session});
+
+  final AppSession session;
+
+  static Future<({List<AgriOrder> orders, Map<String, String> payoutNumbers})>
+      _load() async {
+    final results = await Future.wait([
+      authService.database.listAgriOrders(),
+      authService.database.listAccounts(),
+    ]);
+    final accounts = results[1] as List<Map<String, dynamic>>;
+    return (
+      orders: (results[0] as List<AgriOrder>)
+          .where((order) => order.status == OrderStatus.delivered)
+          .toList(),
+      payoutNumbers: {
+        for (final account in accounts)
+          '${account['id']}':
+              '${(account['profile'] as Map?)?['payoutNumber'] ?? ''}',
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Payouts')),
+      body: LiveBuilder(
+        session: session,
+        load: _load,
+        builder: (context, data) {
+          final value = data.value;
+          final delivered = value?.orders ?? const <AgriOrder>[];
+          final numbers = value?.payoutNumbers ?? const <String, String>{};
+
+          List<_PayoutGroup> group(String payee) {
+            final groups = <String, _PayoutGroup>{};
+            for (final order in delivered) {
+              final farmer = payee == 'farmer';
+              if (farmer ? order.isFarmerPaid : order.isRiderPaid) continue;
+              final id = farmer ? order.farmerId : order.riderId;
+              if (id.isEmpty) continue;
+              final entry = groups.putIfAbsent(
+                id,
+                () => _PayoutGroup(
+                  payee: payee,
+                  name: farmer ? order.farmerName : order.riderName,
+                  number: numbers[id] ?? '',
+                ),
+              );
+              entry.orders.add(order);
+              entry.amount += farmer ? order.totalPrice : order.riderPayout;
+            }
+            return groups.values.toList()
+              ..sort((a, b) => b.amount.compareTo(a.amount));
+          }
+
+          final farmers = group('farmer');
+          final riders = group('rider');
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                const Text(
+                  'Farmers are owed the produce price of each delivered '
+                  'order; riders their share of the delivery fee. Send the '
+                  'money by GCash or Maya, then record the reference here.',
+                  style: TextStyle(color: muted, height: 1.4),
+                ),
+                const SizedBox(height: 18),
+                if (data.error != null && value == null)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  ),
+                for (final (title, groups) in [
+                  ('Farmers', farmers),
+                  ('Riders', riders),
+                ]) ...[
+                  SectionTitle(title: title, action: ''),
+                  const SizedBox(height: 10),
+                  if (groups.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 18),
+                      child: Text(
+                        'Nothing owed right now.',
+                        style: TextStyle(color: muted),
+                      ),
+                    )
+                  else
+                    for (final entry in groups)
+                      _PayoutCard(session: session, group: entry),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PayoutGroup {
+  _PayoutGroup({
+    required this.payee,
+    required this.name,
+    required this.number,
+  });
+
+  final String payee;
+  final String name;
+  final String number;
+  final List<AgriOrder> orders = [];
+  int amount = 0;
+}
+
+class _PayoutCard extends StatefulWidget {
+  const _PayoutCard({required this.session, required this.group});
+
+  final AppSession session;
+  final _PayoutGroup group;
+
+  @override
+  State<_PayoutCard> createState() => _PayoutCardState();
+}
+
+class _PayoutCardState extends State<_PayoutCard> {
+  bool _busy = false;
+
+  Future<void> _markPaid() async {
+    final group = widget.group;
+    final reference = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Paid ${formatPeso(group.amount)} to ${group.name}?'),
+        content: TextField(
+          controller: reference,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'GCash / Maya reference number',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(
+              dialogContext,
+              reference.text.trim().isNotEmpty,
+            ),
+            child: const Text('Mark as paid'),
+          ),
+        ],
+      ),
+    );
+    final value = reference.text.trim();
+    reference.dispose();
+    if (confirmed != true || value.isEmpty) return;
+    setState(() => _busy = true);
+    try {
+      await authService.database.markPayout(
+        orderIds: group.orders.map((order) => order.id).toList(),
+        payee: group.payee,
+        reference: value,
+      );
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payout to ${group.name} recorded.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final group = widget.group;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.name,
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  Text(
+                    '${plural(group.orders.length, 'order')} • '
+                    '${group.number.isEmpty ? 'no payout number' : group.number}',
+                    style: const TextStyle(color: muted, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    formatPeso(group.amount),
+                    style: const TextStyle(
+                      color: green,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            FilledButton(
+              onPressed: _busy || group.number.isEmpty ? null : _markPaid,
+              child: const Text('Mark paid'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Every wallet entry on the network, with what buyers currently hold.
+class WalletLedgerPage extends StatelessWidget {
+  const WalletLedgerPage({super.key, required this.session});
+
+  final AppSession session;
+
+  static Future<
+      ({
+        List<WalletTransaction> entries,
+        int pendingCashIns,
+        Map<String, String> names,
+      })> _load() async {
+    final results = await Future.wait([
+      authService.database.listAllWalletTransactions(),
+      authService.database.listAllPendingCashIns(),
+      authService.database.listAccounts(role: 'consumer'),
+    ]);
+    return (
+      entries: results[0] as List<WalletTransaction>,
+      pendingCashIns: (results[1] as List).length,
+      names: {
+        for (final account in results[2] as List<Map<String, dynamic>>)
+          '${account['id']}': '${account['name']}',
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Buyer wallets')),
+      body: LiveBuilder(
+        session: session,
+        load: _load,
+        builder: (context, data) {
+          final value = data.value;
+          final entries = value?.entries ?? const <WalletTransaction>[];
+          int total(WalletEntryType type) => entries
+              .where((entry) => entry.type == type)
+              .fold<int>(0, (sum, entry) => sum + entry.amount);
+          final held = entries.fold<int>(0, (sum, entry) => sum + entry.amount);
+          final names = value?.names ?? const <String, String>{};
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.savings_outlined,
+                        value: formatPeso(held),
+                        label: 'Held in wallets',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.hourglass_top,
+                        value: '${value?.pendingCashIns ?? 0}',
+                        label: 'Unpaid cash-ins',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.add_card,
+                        value: formatPeso(total(WalletEntryType.cashIn)),
+                        label: 'Cashed in',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: MetricCard(
+                        icon: Icons.undo,
+                        value: formatPeso(total(WalletEntryType.refund)),
+                        label: 'Refunded',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 22),
+                const SectionTitle(title: 'Latest entries', action: ''),
+                const SizedBox(height: 10),
+                if (data.error != null && value == null)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  )
+                else if (entries.isEmpty)
+                  const EmptyState(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'No wallet activity yet',
+                    message: 'Cash-ins, payments and refunds appear here.',
+                  )
+                else
+                  for (final entry in entries.take(100))
+                    Card(
+                      child: ListTile(
+                        title: Text(
+                          names[entry.userId] ?? 'Buyer',
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          '${entry.description.isEmpty ? entry.type.label : entry.description}'
+                          '${entry.createdAt == null ? '' : '\n${formatRelativeDay(entry.createdAt!)} • ${formatClock(entry.createdAt!)}'}',
+                        ),
+                        trailing: Text(
+                          '${entry.amount >= 0 ? '+' : ''}'
+                          '${formatPeso(entry.amount)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: entry.amount >= 0 ? green : ink,
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }

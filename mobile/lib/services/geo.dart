@@ -303,6 +303,19 @@ String formatPeso(num value) {
   return '${rounded < 0 ? '-' : ''}₱$buffer';
 }
 
+/// "2026-10-20" as "Oct 20, 2026"; anything unparseable is shown as stored.
+String formatHarvestDate(String raw) {
+  final date = DateTime.tryParse(raw.trim());
+  if (date == null) return raw;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+      'Sep', 'Oct', 'Nov', 'Dec'];
+  return '${months[date.month - 1]} ${date.day}, ${date.year}';
+}
+
+/// "1 farmer", "2 farmers".
+String plural(int count, String noun, [String? many]) =>
+    '$count ${count == 1 ? noun : many ?? '${noun}s'}';
+
 String formatDeliveryDate(DateTime date) {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',

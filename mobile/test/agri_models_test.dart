@@ -104,11 +104,11 @@ void main() {
   group('DeliveryPricing', () {
     test('charges base fare plus distance and handling', () {
       final fee = DeliveryPricing.fee(distanceKm: 10, quantityKg: 20);
-      expect(fee, 60 + 80 + 30);
+      expect(fee, 80 + 150 + 30);
     });
 
     test('uses a default distance when nothing is pinned', () {
-      expect(DeliveryPricing.fee(distanceKm: 0, quantityKg: 0), 100);
+      expect(DeliveryPricing.fee(distanceKm: 0, quantityKg: 0), 155);
     });
 
     test('pays the rider the agreed share of the fee', () {

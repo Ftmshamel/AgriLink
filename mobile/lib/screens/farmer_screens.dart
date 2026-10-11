@@ -137,7 +137,13 @@ class FarmerDashboard extends StatelessWidget {
       builder: (context, data) {
         final snapshot =
             data.value ?? const FarmerSnapshot(crops: [], orders: []);
-        final attention = [...snapshot.newOrders, ...snapshot.packing];
+        final attention = [...snapshot.newOrders, ...snapshot.packing]
+          ..sort(AgriOrder.byDueDate);
+        final lowStock =
+            snapshot.crops.where((crop) => crop.isLowStock).toList();
+        final soldOut = snapshot.crops
+            .where((crop) => !crop.inStock && crop.status == 'sold_out')
+            .toList();
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
@@ -217,17 +223,21 @@ class FarmerDashboard extends StatelessWidget {
                     icon: Icons.restaurant,
                     title: '${order.buyerName} • ${order.quantityKg} kg',
                     subtitle:
-                        '${order.cropName} • ${formatPeso(order.totalPrice)}',
-                    badge:
-                        order.status == OrderStatus.placed ? 'NEW' : 'PACKING',
+                        '${order.cropName} • ${formatPeso(order.totalPrice)}'
+                        '\n${deliveryScheduleLabel(order)}',
+                    badge: order.status == OrderStatus.placed
+                        ? 'NEW'
+                        : order.isDueBy(DateTime.now())
+                            ? 'DUE TODAY'
+                            : 'PACKING',
                   ),
                   const SizedBox(height: 10),
                 ],
               const SizedBox(height: 14),
               SectionTitle(
-                title: 'Harvest catalog',
-                action: 'Manage',
-                onAction: onOpenCrops,
+                title: 'Deliveries',
+                action: 'View',
+                onAction: onOpenOrders,
               ),
               const SizedBox(height: 10),
               Row(
@@ -249,6 +259,29 @@ class FarmerDashboard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (lowStock.isNotEmpty || soldOut.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                SectionTitle(
+                  title: 'Stock alerts',
+                  action: 'Manage',
+                  onAction: onOpenCrops,
+                ),
+                const SizedBox(height: 10),
+                for (final crop in [...soldOut, ...lowStock]) ...[
+                  ActionCard(
+                    icon: crop.inStock
+                        ? Icons.trending_down
+                        : Icons.remove_shopping_cart_outlined,
+                    title: crop.name,
+                    subtitle: crop.inStock
+                        ? 'Only ${crop.quantityKg} kg left • '
+                            'minimum order ${crop.moqKg} kg'
+                        : 'Sold out — hidden from the market',
+                    badge: crop.inStock ? 'LOW' : 'SOLD OUT',
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
             ],
           ),
         );
@@ -338,8 +371,9 @@ class FarmerInventory extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w900),
                       ),
                       subtitle: Text(
-                        '${crop.quantityKg} kg • ₱${crop.pricePerKg}/kg\n'
-                        'MOQ ${crop.moqKg} kg${crop.harvestDate.isEmpty ? '' : ' • Harvest ${crop.harvestDate}'}',
+                        '${crop.quantityKg} kg • ₱${crop.pricePerKg}/kg'
+                        '${crop.isLowStock ? ' • LOW STOCK' : !crop.inStock ? ' • SOLD OUT' : ''}\n'
+                        'MOQ ${crop.moqKg} kg${crop.harvestDate.isEmpty ? '' : ' • Harvest ${formatHarvestDate(crop.harvestDate)}'}',
                       ),
                       isThreeLine: true,
                       trailing: IconButton(
@@ -798,7 +832,9 @@ class _FarmerFulfillmentState extends State<FarmerFulfillment> {
           authService.database.listAgriOrders(farmerId: widget.session.user.id),
       builder: (context, data) {
         final orders = data.value ?? const <AgriOrder>[];
-        final open = orders.where((order) => order.status.isOpen).toList();
+        // What has to go out first sits on top, not whatever was ordered last.
+        final open = orders.where((order) => order.status.isOpen).toList()
+          ..sort(AgriOrder.byDueDate);
         final done = orders.where((order) => !order.status.isOpen).toList();
 
         // Only packed-and-confirmed orders can be sent out, and pooling is
@@ -1146,6 +1182,17 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
+                  // Only while the farm still has to act on it.
+                  if ((order.status == OrderStatus.placed ||
+                          order.status == OrderStatus.preparing) &&
+                      order.isDueBy(DateTime.now())) ...[
+                    const SizedBox(width: 8),
+                    const Pill(
+                      icon: Icons.priority_high,
+                      text: 'DUE TODAY',
+                      color: orange,
+                    ),
+                  ],
                 ],
               ),
               if (order.status == OrderStatus.readyForPickup) ...[
@@ -1191,7 +1238,7 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                     const CircleAvatar(
                       radius: 16,
                       backgroundColor: Color(0xFFFFF1DD),
-                      child: Icon(Icons.two_wheeler, color: orange, size: 18),
+                      child: Icon(Icons.local_shipping, color: orange, size: 18),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -1475,7 +1522,7 @@ class FarmerOrderDetails extends StatelessWidget {
               children: [
                 const CircleAvatar(
                   backgroundColor: Color(0xFFFFF1DD),
-                  child: Icon(Icons.two_wheeler, color: orange),
+                  child: Icon(Icons.local_shipping, color: orange),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1687,6 +1734,11 @@ class FarmerProfile extends StatelessWidget {
             .toList();
         final revenue =
             delivered.fold<int>(0, (sum, order) => sum + order.totalPrice);
+        final paidOut = delivered
+            .where((order) => order.isFarmerPaid)
+            .fold<int>(0, (sum, order) => sum + order.totalPrice);
+        final rating =
+            RatingSummary.of(snapshot.orders.map((o) => o.farmerRating));
         return LiveRefreshView(
           loading: data.loading,
           onRefresh: data.reload,
@@ -1737,6 +1789,19 @@ class FarmerProfile extends StatelessWidget {
                     ? 'Add your GCash / Maya number'
                     : user.payoutNumber,
                 onTap: () => openProfileEditor(context, session),
+              ),
+              ProfileTile(
+                icon: Icons.request_quote_outlined,
+                title: 'Payouts',
+                subtitle: '${formatPeso(paidOut)} paid • '
+                    '${formatPeso(revenue - paidOut)} awaiting payout',
+                onTap: () {},
+              ),
+              ProfileTile(
+                icon: Icons.star_outline,
+                title: 'Buyer rating',
+                subtitle: rating.label,
+                onTap: () {},
               ),
               ProfileTile(
                 icon: Icons.eco_outlined,

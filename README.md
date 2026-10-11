@@ -59,6 +59,38 @@ goes back on the listing. The farm can cancel any order before pickup, and
 the buyer is refunded the same way. Riders only see a scheduled order in the
 pool on its delivery day.
 
+## Manual payments without a gateway
+
+Until the Xendit worker is deployed, the GCash option asks the buyer for a
+reference number. Tell them where to send the money by building with:
+
+```powershell
+flutter run `
+  --dart-define=AGRILINK_GCASH_NUMBER=09XXXXXXXXX `
+  --dart-define=AGRILINK_GCASH_NAME="AgriLink Payments"
+```
+
+Without these the checkout says no payment account is set up and points the
+buyer to the wallet instead.
+
+## Delivery pricing, payouts, and ratings
+
+Delivery is charged once per farm: ₱80 base + ₱15/km + ₱1.50/kg. Riders drive
+four-wheelers and return empty, so their 80% share (₱12/km) is set to cover
+round-trip diesel. The constants live in `DeliveryPricing`.
+
+The superadmin's **Payouts** page lists what each farmer (produce price) and
+rider (delivery share) is owed for delivered orders; after sending the money
+by GCash/Maya they record the reference, and the farmer and rider see paid vs
+awaiting amounts in their profiles. Riders must add a payout number before
+going online.
+
+After confirming receipt, buyers rate the farm and the rider 1–5. Averages
+show on the product page and on the farmer and rider profiles. Superadmins
+can resolve a dispute with a refund to the buyer's wallet (capped at what the
+order cost, once per report), suspend accounts with a recorded reason, search
+every order, and review all wallet activity.
+
 ## Proof of delivery
 
 A rider cannot mark a drop-off delivered on their word alone. **Verify &
