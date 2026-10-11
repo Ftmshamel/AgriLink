@@ -686,6 +686,50 @@ class _CartSheetState extends State<CartSheet> {
   bool _placing = false;
   String? _error;
 
+  /// Same-day unless the buyer picks a date.
+  bool _scheduled = false;
+  DateTime? _deliveryDate;
+
+  bool _useWallet = false;
+  int? _walletBalance;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWallet();
+  }
+
+  Future<void> _loadWallet() async {
+    try {
+      final balance =
+          await authService.database.walletBalance(widget.session.user.id);
+      if (mounted) setState(() => _walletBalance = balance);
+    } catch (_) {
+      // Without a balance the wallet option simply stays unavailable.
+    }
+  }
+
+  Future<void> _openWallet() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => WalletPage(session: widget.session)),
+    );
+    await _loadWallet();
+  }
+
+  Future<void> _pickDate() async {
+    final today = dateOnly(DateTime.now());
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _deliveryDate ??
+          today.add(const Duration(days: AgriOrder.cancelNoticeDays + 1)),
+      firstDate: today.add(const Duration(days: 1)),
+      lastDate: today.add(const Duration(days: 60)),
+      helpText: 'Delivery date',
+    );
+    if (picked != null) setState(() => _deliveryDate = dateOnly(picked));
+  }
+
   @override
   void dispose() {
     _reference.dispose();
@@ -719,7 +763,11 @@ class _CartSheetState extends State<CartSheet> {
           'Add a delivery address in your profile before checking out.');
       return;
     }
-    if (!_payingOnline && _reference.text.trim().isEmpty) {
+    if (_scheduled && _deliveryDate == null) {
+      setState(() => _error = 'Pick a delivery date.');
+      return;
+    }
+    if (!_useWallet && !_payingOnline && _reference.text.trim().isEmpty) {
       setState(() => _error = 'Enter your $_method reference number.');
       return;
     }
@@ -727,14 +775,25 @@ class _CartSheetState extends State<CartSheet> {
       _placing = true;
       _error = null;
     });
+    final total = _grandTotal();
+    String? walletReference;
+    var written = 0;
     try {
-      if (_payingOnline && _paidInvoice == null) {
+      if (_useWallet) {
+        walletReference = await authService.database.payFromWallet(
+          userId: user.id,
+          amount: total,
+          description: 'Order payment \u2022 ${widget.cart.lines.length} '
+              'item${widget.cart.lines.length == 1 ? '' : 's'}',
+        );
+      } else if (_payingOnline && _paidInvoice == null) {
         final settled = await _collectPayment();
         if (!settled) {
           if (mounted) setState(() => _placing = false);
           return;
         }
       }
+      final paid = walletReference != null || _paidInvoice != null;
       final fees = _feesByFarm();
       final grouped = <String, List<CartLine>>{};
       for (final line in widget.cart.lines) {
@@ -778,18 +837,24 @@ class _CartSheetState extends State<CartSheet> {
             'farmLocation': crop.farmLocation,
             'farmLatitude': crop.latitude,
             'farmLongitude': crop.longitude,
-            'paymentMethod': _method,
-            'paymentReference':
-                _paidInvoice?.reference ?? _reference.text.trim(),
-            'paymentStatus': _paidInvoice != null ? 'paid' : 'submitted',
+            'paymentMethod':
+                walletReference != null ? 'AgriLink Wallet' : _method,
+            'paymentReference': walletReference ??
+                _paidInvoice?.reference ??
+                _reference.text.trim(),
+            'paymentStatus': paid ? 'paid' : 'submitted',
             if (_paidInvoice != null) 'paymentInvoiceId': _paidInvoice!.id,
+            'deliveryType': _scheduled ? 'scheduled' : 'same_day',
+            if (_scheduled)
+              'deliveryDate':
+                  _deliveryDate!.toIso8601String().substring(0, 10),
             // Money already in means there is nothing left for the farm to
             // accept or refuse, so a paid order arrives confirmed and the
             // farmer's only job is to pack it and book a rider.
-            'status': _paidInvoice != null
-                ? OrderStatus.preparing.wire
-                : OrderStatus.placed.wire,
+            'status':
+                paid ? OrderStatus.preparing.wire : OrderStatus.placed.wire,
           });
+          written += line.subtotal + fee;
           await authService.database.reduceCropStock(crop.id, line.quantityKg);
         }
       }
@@ -803,6 +868,16 @@ class _CartSheetState extends State<CartSheet> {
         ),
       );
     } catch (error) {
+      // Wallet money for orders that never got written goes straight back.
+      if (walletReference != null && total > written) {
+        try {
+          await authService.database.reverseWalletPayment(
+            userId: user.id,
+            reference: walletReference,
+            amount: total - written,
+          );
+        } catch (_) {}
+      }
       if (!mounted) return;
       setState(() {
         _error = '$error'.replaceFirst('Exception: ', '');
@@ -864,6 +939,63 @@ class _CartSheetState extends State<CartSheet> {
   void _recordChannel(String channel) {
     if (channel.isEmpty) return;
     _method = channel;
+  }
+
+  String _cancelPolicy() {
+    if (!_scheduled) {
+      return 'Same-day orders are final once placed and cannot be cancelled.';
+    }
+    final date = _deliveryDate;
+    if (date == null) {
+      return 'You can cancel a scheduled order up to '
+          '${AgriOrder.cancelNoticeDays} days before delivery for a full '
+          'refund to your wallet.';
+    }
+    final deadline =
+        date.subtract(const Duration(days: AgriOrder.cancelNoticeDays));
+    if (deadline.isBefore(dateOnly(DateTime.now()))) {
+      return 'This date is less than ${AgriOrder.cancelNoticeDays} days away, '
+          'so the order will be final once placed.';
+    }
+    return 'Free cancellation until ${formatDeliveryDate(deadline)}. '
+        'Refunds go to your AgriLink wallet.';
+  }
+
+  Widget _walletNotice(int total) {
+    final balance = _walletBalance;
+    final short = balance != null && balance < total;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: short ? const Color(0xFFFFF1DD) : canvas,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            short ? Icons.warning_amber_rounded : Icons.lock_outline,
+            color: short ? orange : green,
+            size: 19,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              balance == null
+                  ? 'Loading your wallet balance\u2026'
+                  : short
+                      ? 'Your wallet has ${formatPeso(balance)}. Cash in '
+                          '${formatPeso(total - balance)} more to pay for '
+                          'this order.'
+                      : 'Paid instantly from your wallet. '
+                          '${formatPeso(balance - total)} left after this.',
+              style: const TextStyle(fontSize: 11.5, height: 1.4),
+            ),
+          ),
+          if (short)
+            TextButton(onPressed: _openWallet, child: const Text('Cash in')),
+        ],
+      ),
+    );
   }
 
   /// What the buyer owes for the whole cart, items plus every farm's fee.
@@ -972,7 +1104,78 @@ class _CartSheetState extends State<CartSheet> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Delivery',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                        value: false,
+                        icon: Icon(Icons.bolt),
+                        label: Text('Same day'),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        icon: Icon(Icons.event),
+                        label: Text('Schedule'),
+                      ),
+                    ],
+                    selected: {_scheduled},
+                    onSelectionChanged: (value) =>
+                        setState(() => _scheduled = value.first),
+                  ),
+                  if (_scheduled) ...[
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: _pickDate,
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: Text(
+                        _deliveryDate == null
+                            ? 'Pick a delivery date'
+                            : formatDeliveryDate(_deliveryDate!),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Text(
+                    _cancelPolicy(),
+                    style: const TextStyle(
+                      color: muted,
+                      fontSize: 11.5,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Payment',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                        value: false,
+                        icon: Icon(Icons.phone_iphone),
+                        label: Text('GCash'),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        icon: Icon(Icons.account_balance_wallet_outlined),
+                        label: Text('Wallet'),
+                      ),
+                    ],
+                    selected: {_useWallet},
+                    onSelectionChanged: _paidInvoice != null
+                        ? null
+                        : (value) => setState(() => _useWallet = value.first),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_useWallet)
+                    _walletNotice(subtotal + delivery)
+                  else ...[
                   if (!PaymentService.enabled)
                     DropdownButtonFormField<String>(
                       initialValue: _method,
@@ -1029,6 +1232,7 @@ class _CartSheetState extends State<CartSheet> {
                       ),
                     ),
                   ],
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: 12),
                     Text(
@@ -1047,7 +1251,12 @@ class _CartSheetState extends State<CartSheet> {
                       child: Padding(
                         padding: const EdgeInsets.all(14),
                         child: Text(
-                          _placing ? 'Placing order…' : 'Place order',
+                          _placing
+                              ? 'Placing order…'
+                              : _useWallet
+                                  ? 'Pay ${formatPeso(subtotal + delivery)} '
+                                      'from wallet'
+                                  : 'Place order',
                         ),
                       ),
                     ),
@@ -1199,6 +1408,372 @@ class _PaymentWaitDialogState extends State<_PaymentWaitDialog> {
           onPressed: _checking ? null : () => _check(manual: true),
           child: const Text('Check now'),
         ),
+      ],
+    );
+  }
+}
+
+/// The buyer's AgriLink wallet: balance, cash-in, and every peso's history.
+///
+/// Cash-ins go through the same Xendit worker as checkout. The invoice is
+/// recorded before the buyer leaves the app, so one paid after they closed the
+/// waiting dialog is still credited the next time this page opens.
+class WalletPage extends StatefulWidget {
+  const WalletPage({super.key, required this.session});
+
+  final AppSession session;
+
+  @override
+  State<WalletPage> createState() => _WalletPageState();
+}
+
+class _WalletPageState extends State<WalletPage> {
+  final _payments = PaymentService();
+  bool _busy = false;
+
+  static const minCashIn = 100;
+  static const maxCashIn = 50000;
+
+  String get _userId => widget.session.user.id;
+
+  Future<List<WalletTransaction>> _load() async {
+    await _settlePending();
+    return authService.database.listWalletTransactions(_userId);
+  }
+
+  /// Credits any cash-in Xendit has confirmed since it was started.
+  Future<void> _settlePending() async {
+    if (!PaymentService.enabled) return;
+    try {
+      final pending = await authService.database.listPendingCashIns(_userId);
+      for (final request in pending) {
+        final invoiceId = '${request['id']}';
+        final status = await _payments.check(invoiceId);
+        if (status.paid && status.amount > 0) {
+          await authService.database.creditCashIn(
+            userId: _userId,
+            amount: status.amount,
+            invoiceId: invoiceId,
+            reference: '${request['reference'] ?? ''}',
+            channel: status.channel,
+          );
+          await authService.database.closeCashInRequest(invoiceId, 'credited');
+        } else if (status.expired) {
+          await authService.database.closeCashInRequest(invoiceId, 'expired');
+        }
+      }
+    } catch (_) {
+      // Settling is retried on every refresh; a failed check is not an error
+      // worth showing over the balance.
+    }
+  }
+
+  Future<void> _cashIn() async {
+    final amount = await showDialog<int>(
+      context: context,
+      builder: (_) => const _CashInDialog(min: minCashIn, max: maxCashIn),
+    );
+    if (amount == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final credited = PaymentService.enabled
+          ? await _cashInOnline(amount)
+          : await _cashInDemo(amount);
+      if (!mounted || !credited) return;
+      widget.session.bump();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${formatPeso(amount)} added to your wallet.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<bool> _cashInOnline(int amount) async {
+    final reference = 'AGRILINK-WALLET-${DateTime.now().millisecondsSinceEpoch}';
+    final invoice = await _payments.createInvoice(
+      amount: amount,
+      reference: reference,
+      description: 'AgriLink wallet cash-in',
+    );
+    await authService.database.recordCashInRequest(
+      userId: _userId,
+      invoiceId: invoice.id,
+      amount: amount,
+      reference: reference,
+    );
+    final opened = await launchUrl(
+      Uri.parse(invoice.url),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened) throw Exception('Could not open the payment page.');
+    if (!mounted) return false;
+    var channel = '';
+    final paid = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _PaymentWaitDialog(
+        payments: _payments,
+        invoice: invoice,
+        amount: amount,
+        onChannel: (value) => channel = value,
+      ),
+    );
+    if (paid != true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'If you finish paying later, the money appears here '
+              'automatically.',
+            ),
+          ),
+        );
+      }
+      return false;
+    }
+    // Credit what Xendit says was paid, not what the app asked for.
+    final status = await _payments.check(invoice.id);
+    await authService.database.creditCashIn(
+      userId: _userId,
+      amount: status.amount > 0 ? status.amount : amount,
+      invoiceId: invoice.id,
+      reference: reference,
+      channel: channel,
+    );
+    await authService.database.closeCashInRequest(invoice.id, 'credited');
+    return true;
+  }
+
+  /// Without a payment worker there is nothing to verify a payment against,
+  /// so a development build adds clearly labelled demo funds instead — the
+  /// same approach the password reset takes without an email provider.
+  Future<bool> _cashInDemo(int amount) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Development build'),
+        content: Text(
+          'No payment gateway is configured, so no real money moves. '
+          'Add ${formatPeso(amount)} of demo funds to this wallet?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Add demo funds'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return false;
+    final id = 'demo-${DateTime.now().millisecondsSinceEpoch}';
+    return authService.database.creditCashIn(
+      userId: _userId,
+      amount: amount,
+      invoiceId: id,
+      reference: id,
+      channel: 'demo funds',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('AgriLink Wallet')),
+      body: LiveBuilder<List<WalletTransaction>>(
+        session: widget.session,
+        load: _load,
+        builder: (context, data) {
+          final entries = data.value ?? const <WalletTransaction>[];
+          final balance =
+              entries.fold<int>(0, (sum, entry) => sum + entry.amount);
+          return LiveRefreshView(
+            loading: data.loading,
+            onRefresh: data.reload,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              children: [
+                Card(
+                  color: green,
+                  child: Padding(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Available balance',
+                          style: TextStyle(color: Color(0xFFD8EAD1)),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          data.value == null ? '—' : formatPeso(balance),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 34,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: green,
+                          ),
+                          onPressed: _busy ? null : _cashIn,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Cash in'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Pay for orders with your balance. Refunds for cancelled '
+                  'orders always come back here. Wallet funds cannot be '
+                  'withdrawn.',
+                  style: TextStyle(color: muted, fontSize: 12, height: 1.4),
+                ),
+                const SizedBox(height: 22),
+                const SectionTitle(title: 'History', action: ''),
+                const SizedBox(height: 10),
+                if (data.error != null && entries.isEmpty)
+                  LiveErrorCard(
+                    message: data.errorMessage,
+                    onRetry: data.reload,
+                  )
+                else if (entries.isEmpty)
+                  const EmptyState(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'No transactions yet',
+                    message: 'Cash in to start paying with your wallet.',
+                  )
+                else
+                  for (final entry in entries)
+                    Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              entry.amount >= 0 ? lightGreen : canvas,
+                          child: Icon(
+                            switch (entry.type) {
+                              WalletEntryType.cashIn => Icons.add_card,
+                              WalletEntryType.payment => Icons.shopping_bag,
+                              WalletEntryType.refund => Icons.undo,
+                            },
+                            color: entry.amount >= 0 ? green : muted,
+                          ),
+                        ),
+                        title: Text(
+                          entry.description.isEmpty
+                              ? entry.type.label
+                              : entry.description,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          [
+                            if (entry.createdAt != null)
+                              '${formatRelativeDay(entry.createdAt!)} • '
+                                  '${formatClock(entry.createdAt!)}',
+                            if (entry.reference.isNotEmpty) entry.reference,
+                          ].join('\n'),
+                        ),
+                        trailing: Text(
+                          '${entry.amount >= 0 ? '+' : ''}'
+                          '${formatPeso(entry.amount)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: entry.amount >= 0 ? green : ink,
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CashInDialog extends StatefulWidget {
+  const _CashInDialog({required this.min, required this.max});
+
+  final int min;
+  final int max;
+
+  @override
+  State<_CashInDialog> createState() => _CashInDialogState();
+}
+
+class _CashInDialogState extends State<_CashInDialog> {
+  final _amount = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final value = int.tryParse(_amount.text.trim());
+    if (value == null || value < widget.min || value > widget.max) {
+      setState(() => _error = 'Enter ${formatPeso(widget.min)} to '
+          '${formatPeso(widget.max)}.');
+      return;
+    }
+    Navigator.pop(context, value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Cash in'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final preset in const [100, 500, 1000, 2000])
+                ActionChip(
+                  label: Text(formatPeso(preset)),
+                  onPressed: () => setState(() {
+                    _amount.text = '$preset';
+                    _error = null;
+                  }),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _amount,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Amount',
+              prefixText: '₱',
+              errorText: _error,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(onPressed: _submit, child: const Text('Continue')),
       ],
     );
   }
@@ -1527,6 +2102,8 @@ class DeliveryTracking extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                _ScheduleCard(session: session, order: order),
                 if (order.status.isWithRider &&
                     order.deliveryCode.isNotEmpty) ...[
                   const SizedBox(height: 16),
@@ -1633,6 +2210,142 @@ class DeliveryTracking extends StatelessWidget {
           last: index == steps.length - 1,
         ),
     ];
+  }
+}
+
+/// When the order arrives, whether it can still be cancelled, and what was
+/// refunded if it was.
+class _ScheduleCard extends StatefulWidget {
+  const _ScheduleCard({required this.session, required this.order});
+
+  final AppSession session;
+  final AgriOrder order;
+
+  @override
+  State<_ScheduleCard> createState() => _ScheduleCardState();
+}
+
+class _ScheduleCardState extends State<_ScheduleCard> {
+  bool _busy = false;
+
+  Future<void> _cancel() async {
+    final order = widget.order;
+    final refund = order.refundableAmount;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Cancel this order?'),
+        content: Text(
+          refund > 0
+              ? '${formatPeso(refund)} goes back to your AgriLink wallet.'
+              : 'Nothing has been paid yet, so there is nothing to refund.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Keep order'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    setState(() => _busy = true);
+    try {
+      final refunded = await authService.database.cancelOrder(
+        order.id,
+        cancelledBy: 'buyer',
+        restock: true,
+      );
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            refunded > 0
+                ? 'Order cancelled. ${formatPeso(refunded)} is back in your '
+                    'wallet.'
+                : 'Order cancelled.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final order = widget.order;
+    final deadline = order.cancelDeadline;
+    final canCancel = order.canBuyerCancel(DateTime.now());
+    final String policy;
+    if (order.status == OrderStatus.cancelled) {
+      final by = switch (order.cancelledBy) {
+        'buyer' => 'You cancelled this order.',
+        'farmer' => 'The farm cancelled this order.',
+        _ => 'This order was cancelled.',
+      };
+      policy = order.isRefunded
+          ? '$by ${formatPeso(order.refundedAmount)} was refunded to your '
+              'AgriLink wallet.'
+          : by;
+    } else if (!order.status.isOpen) {
+      policy = '';
+    } else if (canCancel) {
+      policy = 'Free cancellation until ${formatDeliveryDate(deadline!)}.';
+    } else if (deadline == null) {
+      policy = 'Same-day orders cannot be cancelled.';
+    } else {
+      policy = 'The cancellation window closed on '
+          '${formatDeliveryDate(deadline)}.';
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  order.isScheduled ? Icons.event : Icons.bolt,
+                  color: order.isScheduled ? green : orange,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  deliveryScheduleLabel(order),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ],
+            ),
+            if (policy.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(policy, style: const TextStyle(color: muted, height: 1.4)),
+            ],
+            if (canCancel) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _busy ? null : _cancel,
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('Cancel order'),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -1812,6 +2525,17 @@ class ConsumerProfile extends StatelessWidget {
                 title: 'Delivery address',
                 subtitle: user.location.isEmpty ? 'Not set yet' : user.location,
                 onTap: () => openProfileEditor(context, session),
+              ),
+              ProfileTile(
+                icon: Icons.account_balance_wallet_outlined,
+                title: 'AgriLink Wallet',
+                subtitle: 'Balance, cash in, and refunds',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => WalletPage(session: session),
+                  ),
+                ),
               ),
               ProfileTile(
                 icon: Icons.payments_outlined,

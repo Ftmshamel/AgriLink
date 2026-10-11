@@ -558,6 +558,197 @@ class CloudDatabase {
         },
       );
 
+  /// Cancels [orderId] and returns the money to the buyer's wallet.
+  ///
+  /// The order is re-read first: a rider may have taken it, or the farm
+  /// cancelled it, since the screen last refreshed. The refund entry's id is
+  /// derived from the order, so a second cancel can never refund twice.
+  /// Returns the pesos refunded.
+  Future<int> cancelOrder(
+    String orderId, {
+    required String cancelledBy,
+    String reason = '',
+    bool restock = false,
+  }) async {
+    final order = await getOrder(orderId);
+    if (order == null) throw Exception('This order no longer exists.');
+    if (order.status == OrderStatus.cancelled) return order.refundedAmount;
+    if (cancelledBy == 'buyer' && !order.canBuyerCancel(DateTime.now())) {
+      throw Exception(order.isScheduled
+          ? 'Scheduled orders can only be cancelled up to '
+              '${AgriOrder.cancelNoticeDays} days before delivery.'
+          : 'Same-day orders cannot be cancelled once placed.');
+    }
+    if (order.status.step >= OrderStatus.pickedUp.step) {
+      throw Exception('The rider already has this order.');
+    }
+
+    final amount = order.refundableAmount;
+    await advanceOrder(
+      order.id,
+      OrderStatus.cancelled,
+      existingTimeline: order.timeline,
+      extra: {
+        'cancelledBy': cancelledBy,
+        if (reason.isNotEmpty) 'cancelReason': reason,
+      },
+    );
+    var refunded = 0;
+    if (amount > 0 && order.buyerId.isNotEmpty) {
+      await _createOnce('mobileWalletTransactions', 'refund-${order.id}', {
+        'id': 'refund-${order.id}',
+        'userId': order.buyerId,
+        'type': WalletEntryType.refund.wire,
+        'amount': amount,
+        'orderId': order.id,
+        'reference': order.reference,
+        'description': 'Refund for ${order.reference} • ${order.cropName}',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+      });
+      refunded = amount;
+      await updateDocument('mobileOrders', order.id, {
+        'refundedAmount': amount,
+        'refundedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+    }
+    if (restock) await restoreCropStock(order.cropId, order.quantityKg);
+    return refunded;
+  }
+
+  /// Puts cancelled kilos back on the listing they came from.
+  Future<void> restoreCropStock(String cropId, int kg) async {
+    if (cropId.isEmpty || kg <= 0) return;
+    final current = await getDocument('mobileCrops', cropId);
+    if (current == null) return;
+    final quantity = ((current['quantityKg'] as num?)?.round() ?? 0) + kg;
+    await updateCrop(cropId, {
+      'quantityKg': quantity,
+      if (current['status'] == 'sold_out') 'status': 'active',
+    });
+  }
+
+  // ------------------------------------------------------------------ wallet
+
+  Future<List<WalletTransaction>> listWalletTransactions(
+    String userId,
+  ) async {
+    final rows = await _queryEquals(
+      'mobileWalletTransactions',
+      'userId',
+      userId,
+      limit: 1000,
+    );
+    final entries = rows.map(WalletTransaction.fromMap).toList();
+    entries.sort((a, b) =>
+        (b.createdAt ?? DateTime(1970)).compareTo(a.createdAt ?? DateTime(1970)));
+    return entries;
+  }
+
+  Future<int> walletBalance(String userId) async {
+    final entries = await listWalletTransactions(userId);
+    return entries.fold<int>(0, (sum, entry) => sum + entry.amount);
+  }
+
+  /// Adds a paid Xendit invoice to the wallet. Keyed by the invoice id, so
+  /// checking the same invoice twice credits it once. Returns false when it
+  /// had already been credited.
+  Future<bool> creditCashIn({
+    required String userId,
+    required int amount,
+    required String invoiceId,
+    String reference = '',
+    String channel = '',
+  }) {
+    if (amount <= 0) throw Exception('Cash-in amount must be positive.');
+    final id = 'cashin-$invoiceId';
+    return _createOnce('mobileWalletTransactions', id, {
+      'id': id,
+      'userId': userId,
+      'type': WalletEntryType.cashIn.wire,
+      'amount': amount,
+      'invoiceId': invoiceId,
+      'reference': reference,
+      'description': channel.isEmpty ? 'Cash in' : 'Cash in via $channel',
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
+  /// Remembers a cash-in invoice the buyer was sent to pay, so it can still
+  /// be credited if they close the app before Xendit confirms it.
+  Future<void> recordCashInRequest({
+    required String userId,
+    required String invoiceId,
+    required int amount,
+    required String reference,
+  }) =>
+      _create('mobileCashIns', invoiceId, {
+        'id': invoiceId,
+        'userId': userId,
+        'amount': amount,
+        'reference': reference,
+        'status': 'pending',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  Future<List<Map<String, dynamic>>> listPendingCashIns(String userId) async {
+    final rows =
+        await _queryEquals('mobileCashIns', 'userId', userId, limit: 200);
+    return rows.where((row) => row['status'] == 'pending').toList();
+  }
+
+  Future<void> closeCashInRequest(String invoiceId, String status) =>
+      updateDocument('mobileCashIns', invoiceId, {
+        'status': status,
+        'closedAt': DateTime.now().toUtc().toIso8601String(),
+      });
+
+  /// Spends [amount] from the wallet and returns the entry's reference.
+  Future<String> payFromWallet({
+    required String userId,
+    required int amount,
+    required String description,
+  }) async {
+    if (amount <= 0) throw Exception('Nothing to pay.');
+    final balance = await walletBalance(userId);
+    if (balance < amount) {
+      throw Exception('Not enough wallet balance. You have ₱$balance but '
+          'this order costs ₱$amount.');
+    }
+    final now = DateTime.now();
+    final id = 'pay-${now.millisecondsSinceEpoch}-${_token(5)}';
+    final reference = 'WALLET-${now.millisecondsSinceEpoch}';
+    await _create('mobileWalletTransactions', id, {
+      'id': id,
+      'userId': userId,
+      'type': WalletEntryType.payment.wire,
+      'amount': -amount,
+      'reference': reference,
+      'description': description,
+      'createdAt': now.toUtc().toIso8601String(),
+    });
+    return reference;
+  }
+
+  /// Returns money for a wallet payment whose orders were never written,
+  /// e.g. the connection dropped half way through checkout.
+  Future<void> reverseWalletPayment({
+    required String userId,
+    required String reference,
+    required int amount,
+  }) async {
+    if (amount <= 0) return;
+    final id = 'reversal-$reference';
+    await _createOnce('mobileWalletTransactions', id, {
+      'id': id,
+      'userId': userId,
+      'type': WalletEntryType.refund.wire,
+      'amount': amount,
+      'reference': reference,
+      'description': 'Checkout did not finish — payment returned',
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
   // --------------------------------------------------------- delivery proof
 
   /// Stores the drop-off photo with where and when it was taken.
@@ -775,6 +966,27 @@ class CloudDatabase {
       body: jsonEncode({'fields': _encodeMap(value)}),
     );
     _ensureSuccess(response);
+  }
+
+  /// Creates [id] unless it already exists. Firestore refuses a create on an
+  /// existing id with 409, which is what makes refunds and cash-ins safe to
+  /// retry. Returns false when the document was already there.
+  Future<bool> _createOnce(
+    String collection,
+    String id,
+    Map<String, dynamic> value,
+  ) async {
+    final uri = Uri.parse('$_base/$collection').replace(
+      queryParameters: {'documentId': id},
+    );
+    final response = await _client.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'fields': _encodeMap(value)}),
+    );
+    if (response.statusCode == 409) return false;
+    _ensureSuccess(response);
+    return true;
   }
 
   void _ensureSuccess(http.Response response) {

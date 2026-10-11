@@ -1020,13 +1020,10 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Cancel this order?'),
         content: Text(
-          widget.order.paymentStatus == 'paid'
-              // Refunds are not handled in the app, so the farm has to settle
-              // with the buyer directly. Saying so here is the only warning
-              // they get.
-              ? 'The buyer has already paid for this order. Cancelling does '
-                  'not refund them — you will have to return the money '
-                  'yourself. Do this only if you cannot supply the harvest.'
+          widget.order.refundableAmount > 0
+              ? 'The buyer gets ${formatPeso(widget.order.refundableAmount)} '
+                  'back in their AgriLink wallet. Do this only if you cannot '
+                  'supply the harvest.'
               : 'The buyer will see it as cancelled. Do this only if you '
                   'cannot supply the harvest.',
         ),
@@ -1042,7 +1039,33 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
         ],
       ),
     );
-    if (confirmed == true) await _advance(OrderStatus.cancelled);
+    if (confirmed != true) return;
+    setState(() => _busy = true);
+    try {
+      final refunded = await authService.database.cancelOrder(
+        widget.order.id,
+        cancelledBy: 'farmer',
+      );
+      widget.session.bump();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            refunded > 0
+                ? 'Order cancelled. ${formatPeso(refunded)} refunded to the '
+                    'buyer\'s wallet.'
+                : 'Order cancelled.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
@@ -1107,6 +1130,24 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                     : order.deliveryAddress,
                 style: const TextStyle(color: muted, fontSize: 12, height: 1.4),
               ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(
+                    order.isScheduled ? Icons.event : Icons.bolt,
+                    color: order.isScheduled ? green : orange,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    deliveryScheduleLabel(order),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
               if (order.status == OrderStatus.readyForPickup) ...[
                 const SizedBox(height: 12),
                 Container(
@@ -1115,14 +1156,21 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                     color: canvas,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.inventory_2_outlined, color: green, size: 19),
-                      SizedBox(width: 8),
+                      const Icon(
+                        Icons.inventory_2_outlined,
+                        color: green,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Waiting for a rider to accept this pickup',
-                          style: TextStyle(
+                          order.isDueForPickup(DateTime.now())
+                              ? 'Waiting for a rider to accept this pickup'
+                              : 'Riders will see this on '
+                                  '${formatDeliveryDate(order.deliveryDate!)}',
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),

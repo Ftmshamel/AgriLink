@@ -1,0 +1,237 @@
+import 'package:agrilink_mobile/models/agri_models.dart';
+import 'package:agrilink_mobile/services/cloud_database.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'fake_firestore.dart';
+
+String _day(DateTime date) => date.toIso8601String().substring(0, 10);
+
+void main() {
+  late FakeFirestore fake;
+  late CloudDatabase db;
+
+  setUp(() {
+    fake = FakeFirestore();
+    db = CloudDatabase(client: fake.client);
+  });
+
+  Future<String> placeOrder({
+    String paymentStatus = 'paid',
+    OrderStatus status = OrderStatus.preparing,
+    DateTime? deliveryDate,
+    String cropId = '',
+  }) =>
+      db.createOrder({
+        'buyerId': 'buyer-1',
+        'buyerName': 'Maria',
+        'farmerId': 'farm-1',
+        'farmerName': 'Green Valley Farm',
+        'cropId': cropId,
+        'cropName': 'Red Onions',
+        'quantityKg': 20,
+        'pricePerKg': 75,
+        'totalPrice': 1500,
+        'deliveryFee': 140,
+        'paymentMethod': 'AgriLink Wallet',
+        'paymentStatus': paymentStatus,
+        'deliveryType': deliveryDate == null ? 'same_day' : 'scheduled',
+        if (deliveryDate != null) 'deliveryDate': _day(deliveryDate),
+        'status': status.wire,
+      });
+
+  group('wallet ledger', () {
+    test('a cash-in is credited once however often it is checked', () async {
+      expect(await db.walletBalance('buyer-1'), 0);
+
+      final first = await db.creditCashIn(
+        userId: 'buyer-1',
+        amount: 500,
+        invoiceId: 'inv-1',
+      );
+      final again = await db.creditCashIn(
+        userId: 'buyer-1',
+        amount: 500,
+        invoiceId: 'inv-1',
+      );
+
+      expect(first, isTrue);
+      expect(again, isFalse);
+      expect(await db.walletBalance('buyer-1'), 500);
+    });
+
+    test('paying spends the balance and refuses to overdraw', () async {
+      await db.creditCashIn(userId: 'buyer-1', amount: 2000, invoiceId: 'a');
+
+      final reference = await db.payFromWallet(
+        userId: 'buyer-1',
+        amount: 1640,
+        description: 'Order payment',
+      );
+      expect(reference, startsWith('WALLET-'));
+      expect(await db.walletBalance('buyer-1'), 360);
+
+      expect(
+        () => db.payFromWallet(
+          userId: 'buyer-1',
+          amount: 500,
+          description: 'Order payment',
+        ),
+        throwsA(isA<Exception>().having(
+          (e) => '$e',
+          'message',
+          contains('Not enough wallet balance'),
+        )),
+      );
+      expect(await db.walletBalance('buyer-1'), 360);
+    });
+
+    test('a checkout that failed half way returns the unused money once',
+        () async {
+      await db.creditCashIn(userId: 'buyer-1', amount: 1000, invoiceId: 'a');
+      final reference = await db.payFromWallet(
+        userId: 'buyer-1',
+        amount: 800,
+        description: 'Order payment',
+      );
+
+      await db.reverseWalletPayment(
+        userId: 'buyer-1',
+        reference: reference,
+        amount: 300,
+      );
+      await db.reverseWalletPayment(
+        userId: 'buyer-1',
+        reference: reference,
+        amount: 300,
+      );
+
+      expect(await db.walletBalance('buyer-1'), 500);
+    });
+
+    test('history lists every entry with its sign', () async {
+      await db.creditCashIn(userId: 'buyer-1', amount: 1000, invoiceId: 'a');
+      await db.payFromWallet(
+        userId: 'buyer-1',
+        amount: 400,
+        description: 'Order payment',
+      );
+      await db.creditCashIn(userId: 'buyer-2', amount: 999, invoiceId: 'b');
+
+      final entries = await db.listWalletTransactions('buyer-1');
+      expect(entries, hasLength(2));
+      expect(entries.map((e) => e.type),
+          containsAll([WalletEntryType.cashIn, WalletEntryType.payment]));
+      expect(entries.firstWhere((e) => e.type == WalletEntryType.payment).amount,
+          -400);
+    });
+  });
+
+  group('cancelling', () {
+    test('a buyer cancels a scheduled order early and is refunded to the '
+        'wallet, once', () async {
+      final cropId = await db.createCrop({
+        'farmerId': 'farm-1',
+        'name': 'Red Onions',
+        'quantityKg': 100,
+      });
+      final orderId = await placeOrder(
+        deliveryDate: DateTime.now().add(const Duration(days: 10)),
+        cropId: cropId,
+      );
+
+      final refunded = await db.cancelOrder(
+        orderId,
+        cancelledBy: 'buyer',
+        restock: true,
+      );
+      expect(refunded, 1640);
+      expect(await db.walletBalance('buyer-1'), 1640);
+
+      final order = (await db.getOrder(orderId))!;
+      expect(order.status, OrderStatus.cancelled);
+      expect(order.cancelledBy, 'buyer');
+      expect(order.refundedAmount, 1640);
+
+      final crop = (await db.listCropListings(farmerId: 'farm-1')).single;
+      expect(crop.quantityKg, 120, reason: 'cancelled kilos go back on sale');
+
+      // A second tap, or the farm cancelling too, must not pay out again.
+      await db.cancelOrder(orderId, cancelledBy: 'farmer');
+      expect(await db.walletBalance('buyer-1'), 1640);
+    });
+
+    test('a buyer cannot cancel a same-day order', () async {
+      final orderId = await placeOrder();
+      expect(
+        () => db.cancelOrder(orderId, cancelledBy: 'buyer'),
+        throwsA(isA<Exception>().having(
+            (e) => '$e', 'message', contains('Same-day'))),
+      );
+      expect((await db.getOrder(orderId))!.status, OrderStatus.preparing);
+    });
+
+    test('a buyer cannot cancel inside the five-day window', () async {
+      final orderId = await placeOrder(
+        deliveryDate: DateTime.now().add(const Duration(days: 4)),
+      );
+      expect(
+        () => db.cancelOrder(orderId, cancelledBy: 'buyer'),
+        throwsA(isA<Exception>().having(
+            (e) => '$e', 'message', contains('5 days before'))),
+      );
+    });
+
+    test('the farm can cancel a paid same-day order and the buyer is refunded',
+        () async {
+      final orderId = await placeOrder();
+      final refunded = await db.cancelOrder(orderId, cancelledBy: 'farmer');
+      expect(refunded, 1640);
+      expect(await db.walletBalance('buyer-1'), 1640);
+    });
+
+    test('an unconfirmed manual payment is not refunded', () async {
+      final orderId = await placeOrder(
+        paymentStatus: 'submitted',
+        status: OrderStatus.placed,
+      );
+      final refunded = await db.cancelOrder(orderId, cancelledBy: 'farmer');
+      expect(refunded, 0);
+      expect(await db.walletBalance('buyer-1'), 0);
+    });
+  });
+
+  group('schedule rules', () {
+    final now = DateTime(2026, 10, 11, 15);
+
+    AgriOrder order({String? date, OrderStatus status = OrderStatus.preparing}) =>
+        AgriOrder.fromMap({
+          'id': 'o',
+          'status': status.wire,
+          'deliveryType': date == null ? 'same_day' : 'scheduled',
+          if (date != null) 'deliveryDate': date,
+        });
+
+    test('the last day to cancel is exactly five days before delivery', () {
+      expect(order(date: '2026-10-16').canBuyerCancel(now), isTrue);
+      expect(order(date: '2026-10-15').canBuyerCancel(now), isFalse);
+      expect(order().canBuyerCancel(now), isFalse);
+    });
+
+    test('nothing can be cancelled once a rider has it', () {
+      final taken = AgriOrder.fromMap({
+        'id': 'o',
+        'status': OrderStatus.riderAssigned.wire,
+        'riderId': 'rider-1',
+        'deliveryType': 'scheduled',
+        'deliveryDate': '2026-11-30',
+      });
+      expect(taken.canBuyerCancel(now), isFalse);
+    });
+
+    test('riders only see an order on its delivery day', () {
+      expect(order(date: '2026-10-12').isDueForPickup(now), isFalse);
+      expect(order(date: '2026-10-11').isDueForPickup(now), isTrue);
+      expect(order().isDueForPickup(now), isTrue);
+    });
+  });
+}

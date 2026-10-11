@@ -171,7 +171,9 @@ class RiderSnapshot {
     return RiderSnapshot(
       pool: all
           .where((order) =>
-              order.status == OrderStatus.readyForPickup && !order.hasRider)
+              order.status == OrderStatus.readyForPickup &&
+              !order.hasRider &&
+              order.isDueForPickup(DateTime.now()))
           .toList(),
       mine: all.where((order) => order.riderId == riderId).toList(),
       trips: results[1] as List<Map<String, dynamic>>,

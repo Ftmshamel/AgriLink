@@ -303,6 +303,13 @@ String formatPeso(num value) {
   return '${rounded < 0 ? '-' : ''}₱$buffer';
 }
 
+String formatDeliveryDate(DateTime date) {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+      'Sep', 'Oct', 'Nov', 'Dec'];
+  return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
+}
+
 String formatClock(DateTime time) {
   final local = time.toLocal();
   final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;

@@ -14,6 +14,8 @@ riders, and superadministrators in one agricultural marketplace.
 - Farmer and rider requirement uploads held for superadmin approval
 - Live weather from Open-Meteo for harvest planning and delivery safety
 - Verified proof of delivery: geofence, buyer code, photo, and buyer receipt
+- AgriLink Wallet: cash in through Xendit, pay from the balance, get refunds
+- Same-day or scheduled delivery, with cancellation up to 5 days before
 - Cloud-backed account and marketplace data
 
 ## API integration
@@ -30,6 +32,29 @@ The Farmer and Rider dashboards show live conditions for the location the
 account pinned at signup, using the free [Open-Meteo](https://open-meteo.com)
 API — no API key or account is needed, so it runs straight from source. The
 outlook page adds a 7-day forecast and a town search.
+
+## Wallet, scheduling, and refunds
+
+Consumers can pay with GCash/online through Xendit as before, or from their
+**AgriLink Wallet**. The wallet is a ledger in `mobileWalletTransactions`:
+the balance is the sum of its entries, which are never edited or deleted.
+
+- **Cash in** opens a Xendit invoice. The wallet is credited only after the
+  payments worker reports the invoice paid, for the amount Xendit holds, and
+  only once per invoice. A cash-in paid after the buyer left the app is
+  picked up the next time the wallet opens.
+- **Refunds always go to the wallet**, however the order was paid. Each order
+  can be refunded once.
+- **No withdrawals** — wallet funds can only be spent in AgriLink.
+- Without `AGRILINK_PAYMENTS_URL`, cash-in adds clearly labelled demo funds so
+  the flow can be shown without a payment gateway.
+
+At checkout the buyer picks **Same day** or a **scheduled date** (up to 60
+days ahead). Same-day orders are final. A scheduled order can be cancelled by
+the buyer until 5 days before delivery, as long as no rider has it; the stock
+goes back on the listing. The farm can cancel any order before pickup, and
+the buyer is refunded the same way. Riders only see a scheduled order in the
+pool on its delivery day.
 
 ## Proof of delivery
 

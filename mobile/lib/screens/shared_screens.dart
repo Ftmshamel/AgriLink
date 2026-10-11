@@ -331,6 +331,14 @@ Future<void> showFarmSheet(
 }
 
 /// Sends a dispute to the superadmin queue.
+/// "Same-day delivery" or "Delivery Mon, Oct 20", for order cards.
+String deliveryScheduleLabel(AgriOrder order) {
+  final date = order.deliveryDate;
+  return date == null
+      ? 'Same-day delivery'
+      : 'Delivery ${formatDeliveryDate(date)}';
+}
+
 /// Returns true once a report was actually filed.
 Future<bool> showReportSheet(
   BuildContext context, {

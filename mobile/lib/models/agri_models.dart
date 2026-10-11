@@ -362,6 +362,59 @@ class AgriOrder {
   bool get isReceiptConfirmed => receivedConfirmedAt != null;
   bool get isDisputed => raw['deliveryDisputed'] == true;
 
+  // Delivery schedule. Orders saved before scheduling existed carry neither
+  // field and are treated as same-day.
+
+  /// How many days ahead of a scheduled delivery the buyer may still cancel.
+  static const cancelNoticeDays = 5;
+
+  bool get isScheduled => raw['deliveryType'] == 'scheduled';
+
+  /// The day the buyer wants it, at local midnight. Null for same-day orders.
+  DateTime? get deliveryDate {
+    if (!isScheduled) return null;
+    final parsed = DateTime.tryParse('${raw['deliveryDate'] ?? ''}');
+    return parsed == null ? null : dateOnly(parsed);
+  }
+
+  /// Last day the buyer can cancel, or null when they cannot at all.
+  DateTime? get cancelDeadline => deliveryDate
+      ?.subtract(const Duration(days: cancelNoticeDays));
+
+  /// Same-day orders are committed the moment they are paid. A scheduled
+  /// order can be cancelled up to [cancelNoticeDays] before delivery, as long
+  /// as no rider has taken it.
+  bool canBuyerCancel(DateTime now) {
+    final deadline = cancelDeadline;
+    if (deadline == null || !status.isOpen || hasRider) return false;
+    return !dateOnly(now).isAfter(deadline);
+  }
+
+  /// Riders only see an order once its delivery day has arrived; a packed
+  /// order for next week should not be picked up today.
+  bool isDueForPickup(DateTime now) {
+    final date = deliveryDate;
+    return date == null || !date.isAfter(dateOnly(now));
+  }
+
+  /// What goes back to the buyer's wallet if this order is cancelled.
+  ///
+  /// Gateway and wallet payments are confirmed money. A manually submitted
+  /// reference only counts once the farm accepted the order, which is the
+  /// farm saying it saw the payment.
+  int get refundableAmount {
+    if (paymentStatus == 'paid') return grandTotal;
+    if (paymentStatus == 'submitted' &&
+        timeline.containsKey(OrderStatus.preparing.wire)) {
+      return grandTotal;
+    }
+    return 0;
+  }
+
+  int get refundedAmount => _toInt(raw['refundedAmount']);
+  bool get isRefunded => refundedAmount > 0;
+  String get cancelledBy => '${raw['cancelledBy'] ?? ''}';
+
   bool get hasRider => riderId.isNotEmpty;
   int get riderPayout => DeliveryPricing.riderPayout(
         deliveryFee > 0 ? deliveryFee : DeliveryPricing.baseFare,
@@ -410,6 +463,56 @@ class AgriOrder {
     }
     return parts.length >= 2 ? parts[parts.length - 2] : parts.last;
   }
+}
+
+DateTime dateOnly(DateTime time) => DateTime(time.year, time.month, time.day);
+
+/// One movement of money in a buyer's AgriLink wallet.
+///
+/// The wallet has no stored balance: it is the sum of these entries, so every
+/// peso in it can be traced to a cash-in, a payment, or a refund.
+class WalletTransaction {
+  const WalletTransaction({
+    required this.id,
+    required this.type,
+    required this.amount,
+    required this.description,
+    required this.reference,
+    required this.createdAt,
+  });
+
+  factory WalletTransaction.fromMap(Map<String, dynamic> map) =>
+      WalletTransaction(
+        id: '${map['id'] ?? ''}',
+        type: WalletEntryType.parse(map['type']),
+        amount: _toInt(map['amount']),
+        description: '${map['description'] ?? ''}',
+        reference: '${map['reference'] ?? ''}',
+        createdAt: _toDate(map['createdAt']),
+      );
+
+  final String id;
+  final WalletEntryType type;
+
+  /// Signed pesos: positive adds to the balance, negative spends it.
+  final int amount;
+  final String description;
+  final String reference;
+  final DateTime? createdAt;
+}
+
+enum WalletEntryType {
+  cashIn('cash_in', 'Cash in'),
+  payment('payment', 'Payment'),
+  refund('refund', 'Refund');
+
+  const WalletEntryType(this.wire, this.label);
+
+  final String wire;
+  final String label;
+
+  static WalletEntryType parse(Object? value) => WalletEntryType.values
+      .firstWhere((type) => type.wire == value, orElse: () => payment);
 }
 
 /// A crop plus the quantity a buyer wants, held in the market cart.

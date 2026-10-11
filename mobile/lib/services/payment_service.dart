@@ -39,9 +39,21 @@ class PaymentInvoice {
 
 /// What Xendit says about an invoice right now.
 class PaymentStatus {
-  const PaymentStatus({required this.paid, required this.channel});
+  const PaymentStatus({
+    required this.paid,
+    required this.channel,
+    this.amount = 0,
+    this.expired = false,
+  });
 
   final bool paid;
+
+  /// The invoice lapsed unpaid and can no longer be paid.
+  final bool expired;
+
+  /// Pesos on the invoice as Xendit has it. A wallet cash-in credits this,
+  /// never the figure the app asked for.
+  final int amount;
 
   /// The channel the buyer actually used - GCash, a card, a bank. Empty until
   /// they have paid, which is why the app cannot ask for it up front.
@@ -125,6 +137,8 @@ class PaymentService {
     return PaymentStatus(
       paid: body['paid'] == true,
       channel: channel.isNotEmpty ? channel : method,
+      amount: (body['amount'] as num?)?.round() ?? 0,
+      expired: '${body['status'] ?? ''}'.toUpperCase() == 'EXPIRED',
     );
   }
 
