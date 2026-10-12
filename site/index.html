@@ -4,77 +4,514 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AgriLink for Android</title>
-  <meta name="description" content="Download the latest AgriLink Android app.">
+  <meta name="description" content="AgriLink connects Nueva Ecija farms directly with buyers, with verified riders delivering in between. Download the Android app and read the quick guide for your role.">
+  <link rel="icon" href="logo.png">
   <style>
     :root {
-      --bg: #f6f8f4; --card: #ffffff; --ink: #172018; --muted: #5b6b5c;
-      --green: #2d7a10; --green-ink: #ffffff; --line: #dfe6da;
+      --bg: #f5f7f2; --surface: #ffffff; --surface-2: #eef3e8; --ink: #152015;
+      --muted: #5a6a5b; --line: #dde5d6; --green: #2d7a10; --green-ink: #ffffff;
+      --green-soft: #e3f0d9; --green-deep: #1d5209; --amber: #9a5b00; --amber-soft: #fbefd9;
+      --hero-a: #1d5209; --hero-b: #3c9a17; --hero-ink: #ffffff; --hero-muted: #d6ecc8;
+      --shadow: 0 1px 2px rgba(20, 40, 10, .06), 0 8px 24px rgba(20, 40, 10, .06);
     }
     @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0f140f; --card: #182018; --ink: #eef3ea; --muted: #a9b7a6;
-        --green: #5fb23a; --green-ink: #0f140f; --line: #2a352a;
+      :root:not([data-theme="light"]) {
+        --bg: #0e130e; --surface: #161e16; --surface-2: #1d271d; --ink: #edf3e9;
+        --muted: #a5b4a2; --line: #2a362a; --green: #6cc443; --green-ink: #0e130e;
+        --green-soft: #213321; --green-deep: #9bdc79; --amber: #f2b45a; --amber-soft: #33281a;
+        --hero-a: #143a06; --hero-b: #2a6e10; --hero-ink: #f3f9ee; --hero-muted: #bcd9ab;
+        --shadow: none;
       }
     }
+    :root[data-theme="dark"] {
+      --bg: #0e130e; --surface: #161e16; --surface-2: #1d271d; --ink: #edf3e9;
+      --muted: #a5b4a2; --line: #2a362a; --green: #6cc443; --green-ink: #0e130e;
+      --green-soft: #213321; --green-deep: #9bdc79; --amber: #f2b45a; --amber-soft: #33281a;
+      --hero-a: #143a06; --hero-b: #2a6e10; --hero-ink: #f3f9ee; --hero-muted: #bcd9ab;
+      --shadow: none;
+    }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0; background: var(--bg); color: var(--ink);
-      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
-    main { max-width: 520px; margin: 0 auto; padding: 32px 16px 48px; }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img { width: 56px; height: 56px; border-radius: 14px; background: #fff; }
-    h1 { font-size: 28px; margin: 0; }
-    .tag { color: var(--muted); margin: 2px 0 0; }
+    a { color: var(--green); }
+    svg { flex: none; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+    /* Top bar */
+    .top {
+      position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+    }
+    .top .wrap { display: flex; align-items: center; gap: 16px; height: 60px; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; color: var(--ink); text-decoration: none; }
+    .logo img { width: 34px; height: 34px; border-radius: 9px; background: #fff; }
+    .top nav { margin-left: auto; display: flex; gap: 4px; }
+    .top nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; padding: 8px 10px; border-radius: 10px; }
+    .top nav a:hover { background: var(--surface-2); color: var(--ink); }
+    .top .get { background: var(--green); color: var(--green-ink); }
+    .top .get:hover { background: var(--green); color: var(--green-ink); opacity: .9; }
+    @media (max-width: 720px) { .top nav a:not(.get) { display: none; } }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--hero-a), var(--hero-b)); color: var(--hero-ink);
+      padding: 56px 0 64px;
+    }
+    .hero .wrap { display: grid; grid-template-columns: 1.25fr .75fr; gap: 40px; align-items: center; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 700; color: var(--hero-muted); margin: 0 0 12px; }
+    .hero h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin: 0 0 16px; letter-spacing: -.01em; }
+    .hero p.lead { font-size: 18px; color: var(--hero-muted); margin: 0 0 28px; max-width: 34em; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px; padding: 14px 20px; border-radius: 14px;
+      font-weight: 700; text-decoration: none; font-size: 16px;
+    }
+    .btn-light { background: #ffffff; color: #1d5209; }
+    .btn-ghost { color: var(--hero-ink); border: 1.5px solid rgba(255,255,255,.45); }
+    .btn-ghost:hover { background: rgba(255,255,255,.1); }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 28px; padding: 0; list-style: none; color: var(--hero-muted); font-size: 14px; }
+    .facts li { display: flex; align-items: center; gap: 6px; }
+    .qr-card {
+      background: #ffffff; color: #152015; border-radius: 22px; padding: 20px; text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,.25); justify-self: end; width: 100%; max-width: 300px;
+    }
+    .qr-card img { width: 100%; max-width: 240px; aspect-ratio: 1; display: block; margin: 0 auto; }
+    .qr-card strong { display: block; margin-top: 10px; font-size: 16px; }
+    .qr-card span { display: block; color: #5a6a5b; font-size: 13px; }
+    @media (max-width: 760px) {
+      .hero { padding: 40px 0 44px; }
+      .hero .wrap { grid-template-columns: 1fr; gap: 28px; }
+      .qr-card { justify-self: center; }
+      .btn { flex: 1 1 auto; justify-content: center; }
+    }
+
+    /* Sections */
+    section.block { padding: 64px 0 8px; scroll-margin-top: 60px; }
+    .hero { scroll-margin-top: 60px; }
+    .head { max-width: 640px; margin-bottom: 28px; }
+    .head h2 { font-size: clamp(24px, 3.4vw, 32px); line-height: 1.2; margin: 0 0 8px; letter-spacing: -.01em; }
+    .head p { color: var(--muted); margin: 0; font-size: 17px; }
+    .kicker { color: var(--green); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+
+    .grid { display: grid; gap: 16px; }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g2 { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 900px) { .g4 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .g4, .g3, .g2 { grid-template-columns: 1fr; } }
+
     .card {
-      background: var(--card); border: 1px solid var(--line); border-radius: 20px;
-      padding: 24px; margin-top: 24px; text-align: center;
+      background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px;
+      box-shadow: var(--shadow);
     }
-    .qr { width: 220px; height: 220px; border-radius: 12px; background: #fff; padding: 8px; }
-    .hint { color: var(--muted); font-size: 14px; margin: 12px 0 20px; }
-    .button {
-      display: block; padding: 14px 18px; border-radius: 14px; background: var(--green);
-      color: var(--green-ink); font-weight: 700; text-decoration: none;
+    .card h3 { margin: 12px 0 6px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    .icon {
+      width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+      background: var(--green-soft); color: var(--green);
     }
-    ol { text-align: left; padding-left: 20px; margin: 0; }
-    li { margin: 8px 0; }
-    h2 { font-size: 18px; margin: 0 0 8px; text-align: left; }
-    .small { color: var(--muted); font-size: 13px; margin-top: 20px; text-align: center; }
-    .small a { color: inherit; }
+    .icon svg { width: 24px; height: 24px; }
+    .role-tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--green); background: var(--green-soft); padding: 3px 9px; border-radius: 999px; margin-top: 12px; }
+
+    /* Quick guide tabs */
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab {
+      appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+      font: inherit; font-weight: 700; font-size: 15px; padding: 10px 16px; border-radius: 999px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .tab svg { width: 18px; height: 18px; }
+    .tab[aria-selected="true"] { background: var(--green); color: var(--green-ink); border-color: var(--green); }
+    .panel { display: none; }
+    .panel.on { display: grid; grid-template-columns: 1fr 300px; gap: 16px; }
+    @media (max-width: 820px) { .panel.on { grid-template-columns: 1fr; } }
+    .steps { list-style: none; counter-reset: s; margin: 0; padding: 0; }
+    .steps li { counter-increment: s; position: relative; padding: 0 0 18px 48px; }
+    .steps li:last-child { padding-bottom: 0; }
+    .steps li::before {
+      content: counter(s); position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%;
+      background: var(--green-soft); color: var(--green); font-weight: 800; display: grid; place-items: center; font-size: 15px;
+    }
+    .steps li:not(:last-child)::after {
+      content: ""; position: absolute; left: 15px; top: 36px; bottom: 4px; width: 2px; background: var(--line);
+    }
+    .steps b { display: block; font-size: 16px; }
+    .steps span { color: var(--muted); font-size: 15px; }
+    .side h4 { margin: 0 0 10px; font-size: 15px; }
+    .side ul { margin: 0; padding: 0; list-style: none; }
+    .side li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); padding: 7px 0; border-top: 1px solid var(--line); }
+    .side li:first-child { border-top: 0; }
+    .side li svg { width: 18px; height: 18px; color: var(--green); margin-top: 2px; }
+    .note {
+      margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--amber-soft); color: var(--ink);
+      font-size: 14px; display: flex; gap: 10px;
+    }
+    .note svg { width: 18px; height: 18px; color: var(--amber); margin-top: 2px; }
+
+    /* Order flow */
+    .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; counter-reset: f; }
+    .flow div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 12px; text-align: center; font-size: 14px; }
+    .flow div b { display: block; font-size: 14px; margin-top: 8px; }
+    .flow div span { color: var(--muted); font-size: 13px; }
+    .flow .icon { margin: 0 auto; width: 38px; height: 38px; }
+    .flow .icon svg { width: 20px; height: 20px; }
+    @media (max-width: 900px) { .flow { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 480px) { .flow { grid-template-columns: repeat(2, 1fr); } }
+
+    /* Rules table */
+    .rules { display: grid; gap: 0; }
+    .rule { display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+    .rule:first-child { border-top: 0; padding-top: 0; }
+    .rule .icon { width: 38px; height: 38px; }
+    .rule .icon svg { width: 20px; height: 20px; }
+    .rule b { display: block; }
+    .rule span { color: var(--muted); font-size: 15px; }
+
+    /* Install + FAQ */
+    .install ol { margin: 0; padding-left: 20px; }
+    .install li { margin: 0 0 10px; }
+    details { border-top: 1px solid var(--line); padding: 14px 0; }
+    details:first-of-type { border-top: 0; padding-top: 0; }
+    summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--green); font-size: 20px; line-height: 1; }
+    details[open] summary::after { content: "–"; }
+    details p { color: var(--muted); margin: 8px 0 0; font-size: 15px; }
+
+    footer { padding: 48px 0 40px; color: var(--muted); font-size: 14px; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 24px; }
+    footer a { color: inherit; }
   </style>
 </head>
 <body>
-  <main>
-    <div class="brand">
-      <img src="logo.png" alt="">
+  <!-- Icon sprite: Material Symbols paths, so nothing here is an emoji. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-download" viewBox="0 0 24 24"><path fill="currentColor" d="M5 20h14v-2H5v2zm14-9h-4V3H9v8H5l7 7 7-7z"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><path fill="currentColor" d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42a.25.25 0 0 1-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></symbol>
+    <symbol id="i-farm" viewBox="0 0 24 24"><path fill="currentColor" d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path fill="currentColor" d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9 1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path fill="currentColor" d="M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path fill="currentColor" d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></symbol>
+    <symbol id="i-thumb" viewBox="0 0 24 24"><path fill="currentColor" d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path fill="currentColor" d="M21 18v1c0 1.1-.9 2-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14c1.1 0 2 .9 2 2v1h-9a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></symbol>
+    <symbol id="i-group" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></symbol>
+    <symbol id="i-admin" viewBox="0 0 24 24"><path fill="currentColor" d="M17 11c.34 0 .67.04 1 .09V6.27L10.5 3 3 6.27v4.91c0 4.54 3.2 8.79 7.5 9.82.55-.13 1.08-.32 1.6-.55A5.97 5.97 0 0 1 11 17c0-3.31 2.69-6 6-6zm0 2c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 1.38c.62 0 1.12.51 1.12 1.12s-.51 1.12-1.12 1.12-1.12-.51-1.12-1.12.5-1.12 1.12-1.12zm0 5.37c-.93 0-1.74-.46-2.24-1.17.05-.72 1.51-1.08 2.24-1.08s2.19.36 2.24 1.08c-.5.71-1.31 1.17-2.24 1.17z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path fill="currentColor" d="M20 3H4c-1.1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V19c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V9.7c.57-.35 1-.97 1-1.69V5c0-1.1-.9-2-2-2zm-5 12H9v-2h6v2zm5-7H4V5h16v3z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path fill="currentColor" d="M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></symbol>
+  </svg>
+
+  <header class="top">
+    <div class="wrap">
+      <a class="logo" href="#"><img src="logo.png" alt="">AgriLink</a>
+      <nav>
+        <a href="#who">Who it's for</a>
+        <a href="#guide">Quick guide</a>
+        <a href="#trust">Safe delivery</a>
+        <a href="#install">Install</a>
+        <a class="get" href="#download">Download</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" id="download">
+    <div class="wrap">
       <div>
-        <h1>AgriLink</h1>
-        <p class="tag">Farm-to-table marketplace for Android</p>
+        <p class="eyebrow">Farm-to-table marketplace · Nueva Ecija</p>
+        <h1>Buy straight from the farm. Delivered by a rider you can trust.</h1>
+        <p class="lead">
+          AgriLink connects local farmers with restaurants, stores, and households.
+          Buyers get fresh crops at farm prices, farmers sell without a middleman,
+          and verified riders bring the order to the buyer's door.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-light" href="https://github.com/Ftmshamel/AgriLink/releases/download/apk-latest/AgriLink.apk">
+            <svg width="20" height="20"><use href="#i-download"/></svg> Download for Android
+          </a>
+          <a class="btn btn-ghost" href="#guide">Read the quick guide</a>
+        </div>
+        <ul class="facts">
+          <li><svg width="16" height="16"><use href="#i-check"/></svg>Free to download</li>
+          <li><svg width="16" height="16"><use href="#i-check"/></svg>For Android phones</li>
+          <li><svg width="16" height="16"><use href="#i-check"/></svg>Always the latest version</li>
+        </ul>
+      </div>
+      <div class="qr-card">
+        <img src="apk-qr.png" alt="QR code that downloads the AgriLink app">
+        <strong>Scan to download</strong>
+        <span>Point your phone's camera at the code</span>
       </div>
     </div>
+  </section>
 
-    <section class="card">
-      <img class="qr" src="apk-qr.png" alt="QR code that downloads the AgriLink app">
-      <p class="hint">Scan with your phone's camera to download the app.</p>
-      <a class="button" href="https://github.com/Ftmshamel/AgriLink/releases/download/apk-latest/AgriLink.apk">
-        Download AgriLink.apk
-      </a>
+  <main class="wrap">
+    <section class="block" id="who">
+      <div class="head">
+        <p class="kicker">Who it's for</p>
+        <h2>One app, four roles</h2>
+        <p>Choose your role when you create an account. Each role sees its own screens.</p>
+      </div>
+      <div class="grid g4">
+        <div class="card">
+          <div class="icon"><svg><use href="#i-cart"/></svg></div>
+          <h3>Consumers</h3>
+          <p>Restaurants, carinderias, stores, and households who want fresh crops in bulk at farm prices.</p>
+          <span class="role-tag">Buy</span>
+        </div>
+        <div class="card">
+          <div class="icon"><svg><use href="#i-farm"/></svg></div>
+          <h3>Farmers</h3>
+          <p>Verified crop producers who post their harvest, set their own price, and get paid for every order.</p>
+          <span class="role-tag">Sell</span>
+        </div>
+        <div class="card">
+          <div class="icon"><svg><use href="#i-truck"/></svg></div>
+          <h3>Riders</h3>
+          <p>Verified drivers with a vehicle who pick up from farms and deliver to buyers on a planned route.</p>
+          <span class="role-tag">Deliver</span>
+        </div>
+        <div class="card">
+          <div class="icon"><svg><use href="#i-admin"/></svg></div>
+          <h3>Admin</h3>
+          <p>Platform staff who approve accounts, settle reports, release payouts, and set delivery rates.</p>
+          <span class="role-tag">Manage</span>
+        </div>
+      </div>
     </section>
 
-    <section class="card">
-      <h2>Install on your phone</h2>
-      <ol>
-        <li>Scan the code or tap <strong>Download</strong>, then open <strong>AgriLink.apk</strong>.</li>
-        <li>If Android says installs are blocked, tap <strong>Settings</strong> and allow this source.</li>
-        <li>Tap <strong>Install</strong>. If an older AgriLink is already on the phone and Android says it cannot install, uninstall the old one first.</li>
-        <li>Open AgriLink and log in. New here? Use <strong>Forgot password?</strong> to set one.</li>
-      </ol>
+    <section class="block" id="guide">
+      <div class="head">
+        <p class="kicker">Quick guide</p>
+        <h2>Getting started, step by step</h2>
+        <p>Pick your role to see what to do first.</p>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" aria-controls="p-consumer" id="t-consumer"><svg><use href="#i-cart"/></svg>Consumer</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-farmer" id="t-farmer"><svg><use href="#i-farm"/></svg>Farmer</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-rider" id="t-rider"><svg><use href="#i-truck"/></svg>Rider</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-admin" id="t-admin"><svg><use href="#i-admin"/></svg>Admin</button>
+      </div>
+
+      <div class="panel on" id="p-consumer" role="tabpanel" aria-labelledby="t-consumer">
+        <div class="card">
+          <ol class="steps">
+            <li><b>Create an account</b><span>Tap <strong>Create account</strong>, choose <strong>Consumer</strong>, and pin your delivery address on the map.</span></li>
+            <li><b>Cash in to your wallet (optional)</b><span>Go to <strong>Profile → Wallet → Cash in</strong> and pay through GCash. You can also pay with GCash directly at checkout.</span></li>
+            <li><b>Shop and add to cart</b><span>Browse by category or search. Set how many kilos you need; each crop has a minimum order.</span></li>
+            <li><b>Choose when to deliver</b><span>Pick <strong>Same day</strong> or <strong>Schedule</strong> a date. The cart tells you if other buyers in your area share the trip, which lowers your delivery fee.</span></li>
+            <li><b>Pay and track</b><span>Pay with your wallet or GCash. Under <strong>Orders</strong>, follow the rider live on the map.</span></li>
+            <li><b>Give your code, then confirm</b><span>When the rider arrives, read out the 4-digit delivery code shown in your order. Check the items, then tap <strong>I received my order</strong>, or report a problem if something is wrong.</span></li>
+          </ol>
+        </div>
+        <div class="card side">
+          <h4>Good to know</h4>
+          <ul>
+            <li><svg><use href="#i-clock"/></svg>Orders before 6 PM arrive the same day. Orders from 6 PM arrive the next day.</li>
+            <li><svg><use href="#i-calendar"/></svg>Scheduled orders can be cancelled up to 5 days before the delivery date.</li>
+            <li><svg><use href="#i-wallet"/></svg>Refunds always go back to your AgriLink wallet.</li>
+            <li><svg><use href="#i-star"/></svg>Rate the farm and the rider after delivery.</li>
+          </ul>
+          <div class="note"><svg><use href="#i-info"/></svg><span>Same-day orders are final and cannot be cancelled.</span></div>
+        </div>
+      </div>
+
+      <div class="panel" id="p-farmer" role="tabpanel" aria-labelledby="t-farmer">
+        <div class="card">
+          <ol class="steps">
+            <li><b>Create an account</b><span>Choose <strong>Farmer</strong>, pin your farm on the map, and upload your Barangay Certificate. Your RSBSA number is optional.</span></li>
+            <li><b>Wait for approval</b><span>An admin checks your documents. You'll see the result when you log in, and you can resubmit if a photo was unclear.</span></li>
+            <li><b>Add your payout number</b><span>In <strong>Profile → Payout number</strong>, enter the GCash number where you want to receive your earnings.</span></li>
+            <li><b>Post your crops</b><span>Add each crop with a real photo, price per kilo, available stock, and minimum order. You'll get a warning when stock runs low.</span></li>
+            <li><b>Prepare orders</b><span>New orders are sorted by due date. Orders marked <strong>DUE TODAY</strong> come first. Mark them ready when packed.</span></li>
+            <li><b>Hand over to the rider</b><span>The rider takes a pickup photo at your farm. You can see it in the order details.</span></li>
+          </ol>
+        </div>
+        <div class="card side">
+          <h4>Good to know</h4>
+          <ul>
+            <li><svg><use href="#i-bell"/></svg>The bell icon shows new orders and cancellations.</li>
+            <li><svg><use href="#i-box"/></svg>Cancelled orders put the kilos back on sale automatically.</li>
+            <li><svg><use href="#i-wallet"/></svg>Your payouts are listed under Profile once the admin releases them.</li>
+            <li><svg><use href="#i-star"/></svg>Buyers rate your produce; your rating shows on your listings.</li>
+          </ul>
+          <div class="note"><svg><use href="#i-info"/></svg><span>If you cancel a paid order, the buyer is refunded to their wallet.</span></div>
+        </div>
+      </div>
+
+      <div class="panel" id="p-rider" role="tabpanel" aria-labelledby="t-rider">
+        <div class="card">
+          <ol class="steps">
+            <li><b>Create an account</b><span>Choose <strong>Rider</strong> and upload your professional license, vehicle OR/CR, clearance, and public-service authorization.</span></li>
+            <li><b>Wait for approval, then add a payout number</b><span>After an admin approves you, enter your GCash number under <strong>Profile → Payout number</strong>. You can't go online without it.</span></li>
+            <li><b>Go online and accept a trip</b><span>Tap <strong>Go online</strong>. Trips group orders going to the same area. You handle one trip at a time.</span></li>
+            <li><b>Pick up at the farm</b><span>Stand near the farm's pin, take a pickup photo, and tap confirm pickup.</span></li>
+            <li><b>Deliver to each buyer</b><span>Follow the route, or open turn-by-turn navigation. At the buyer's pin, ask for their 4-digit code and take a delivery photo.</span></li>
+            <li><b>Finish the trip</b><span>After the last stop, the trip is complete and your earnings appear under <strong>Trips</strong>.</span></li>
+          </ol>
+        </div>
+        <div class="card side">
+          <h4>Good to know</h4>
+          <ul>
+            <li><svg><use href="#i-pin"/></svg>You must be within 150 m of the pin to confirm a stop.</li>
+            <li><svg><use href="#i-clock"/></svg>If GPS keeps failing, you can confirm after 3 minutes. The stop is marked "outside the pin".</li>
+            <li><svg><use href="#i-group"/></svg>Shared trips pay you for the whole route, while each buyer pays less.</li>
+            <li><svg><use href="#i-star"/></svg>Buyers rate you after each delivery.</li>
+          </ul>
+          <div class="note"><svg><use href="#i-info"/></svg><span>Fake GPS (mock location) apps are detected and blocked.</span></div>
+        </div>
+      </div>
+
+      <div class="panel" id="p-admin" role="tabpanel" aria-labelledby="t-admin">
+        <div class="card">
+          <ol class="steps">
+            <li><b>Log in as staff</b><span>On the login screen, open <strong>Platform staff access</strong>.</span></li>
+            <li><b>Approve new accounts</b><span>Review farmer and rider documents in the <strong>Verify</strong> tab. Approve them, or refuse with a reason so they can resubmit.</span></li>
+            <li><b>Handle disputes</b><span>In the <strong>Disputes</strong> tab, open a report to see the delivery photo, GPS distance, and code check. Resolve it with a refund to the buyer's wallet when needed.</span></li>
+            <li><b>Release payouts</b><span>Under <strong>Money → Payouts</strong>, send farmers and riders their earnings by GCash and mark each payout as paid.</span></li>
+            <li><b>Set delivery pricing</b><span>Under <strong>Money → Delivery pricing</strong>, update the diesel price and rates. Fees adjust right away.</span></li>
+          </ol>
+        </div>
+        <div class="card side">
+          <h4>Good to know</h4>
+          <ul>
+            <li><svg><use href="#i-wallet"/></svg>Buyer wallets keep a full ledger of every cash-in, payment, and refund.</li>
+            <li><svg><use href="#i-box"/></svg>All orders can be viewed in one list.</li>
+            <li><svg><use href="#i-shield"/></svg>Accounts can be suspended, with a reason the user sees.</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
-    <p class="small">
-      Always the latest build from the main branch.
-      <a href="https://github.com/Ftmshamel/AgriLink/releases/tag/apk-latest">Release details</a>
-    </p>
+    <section class="block" id="how">
+      <div class="head">
+        <p class="kicker">How an order moves</p>
+        <h2>From the field to the front door</h2>
+      </div>
+      <div class="flow">
+        <div><div class="icon"><svg><use href="#i-cart"/></svg></div><b>Placed</b><span>Buyer pays</span></div>
+        <div><div class="icon"><svg><use href="#i-farm"/></svg></div><b>Preparing</b><span>Farm packs it</span></div>
+        <div><div class="icon"><svg><use href="#i-box"/></svg></div><b>Ready</b><span>Waiting for rider</span></div>
+        <div><div class="icon"><svg><use href="#i-truck"/></svg></div><b>Picked up</b><span>Photo at farm</span></div>
+        <div><div class="icon"><svg><use href="#i-pin"/></svg></div><b>Delivered</b><span>Code + photo</span></div>
+        <div><div class="icon"><svg><use href="#i-thumb"/></svg></div><b>Confirmed</b><span>Buyer checks it</span></div>
+      </div>
+    </section>
+
+    <section class="block" id="trust">
+      <div class="head">
+        <p class="kicker">Safe delivery</p>
+        <h2>How we know the order really arrived</h2>
+        <p>A rider can't mark an order delivered just by tapping a button. Four checks back every drop-off.</p>
+      </div>
+      <div class="grid g4">
+        <div class="card">
+          <div class="icon"><svg><use href="#i-pin"/></svg></div>
+          <h3>GPS geofence</h3>
+          <p>The rider's phone must be within 150 m of the buyer's pin. Fake GPS apps are blocked.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg><use href="#i-key"/></svg></div>
+          <h3>Delivery code</h3>
+          <p>Only the buyer sees a 4-digit code. The rider has to enter it to finish the stop.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg><use href="#i-camera"/></svg></div>
+          <h3>Photo proof</h3>
+          <p>The rider takes a photo at pickup and at drop-off, saved with the time and place.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg><use href="#i-thumb"/></svg></div>
+          <h3>Buyer confirms</h3>
+          <p>The buyer taps "I received my order" or reports a problem, which an admin then reviews.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="rules">
+      <div class="head">
+        <p class="kicker">Delivery and payment rules</p>
+        <h2>The rules at a glance</h2>
+      </div>
+      <div class="grid g2">
+        <div class="card rules">
+          <div class="rule"><div class="icon"><svg><use href="#i-clock"/></svg></div><div><b>Open 6 AM, cutoff 6 PM</b><span>Order before 6 PM for same-day delivery. Orders from 6 PM arrive the next day. Orders placed from midnight to 6 AM are still same-day, and riders start at 6 AM.</span></div></div>
+          <div class="rule"><div class="icon"><svg><use href="#i-calendar"/></svg></div><div><b>Scheduled delivery</b><span>Choose a later date. You can cancel up to 5 days before it. Same-day orders are final.</span></div></div>
+          <div class="rule"><div class="icon"><svg><use href="#i-group"/></svg></div><div><b>Shared trips cost less</b><span>When other buyers in your area order for the same day, the delivery fee is split. If someone joins after you paid, the difference goes back to your wallet.</span></div></div>
+        </div>
+        <div class="card rules">
+          <div class="rule"><div class="icon"><svg><use href="#i-wallet"/></svg></div><div><b>AgriLink wallet</b><span>Cash in through GCash and pay in one tap. Wallet money is for orders only and can't be withdrawn.</span></div></div>
+          <div class="rule"><div class="icon"><svg><use href="#i-phone"/></svg></div><div><b>Or pay with GCash directly</b><span>You can skip the wallet and pay each order through GCash.</span></div></div>
+          <div class="rule"><div class="icon"><svg><use href="#i-shield"/></svg></div><div><b>Refunds go to your wallet</b><span>Cancelled orders and approved reports are refunded to your wallet, whichever way you paid.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="install">
+      <div class="head">
+        <p class="kicker">Install</p>
+        <h2>Install on your phone</h2>
+      </div>
+      <div class="grid g2">
+        <div class="card install">
+          <ol>
+            <li>Scan the QR code above, or tap <strong>Download for Android</strong> on your phone.</li>
+            <li>Open <strong>AgriLink.apk</strong> from your downloads.</li>
+            <li>If Android says installs are blocked, tap <strong>Settings</strong> and allow this source.</li>
+            <li>Tap <strong>Install</strong>, then <strong>Open</strong>.</li>
+            <li>Log in, or tap <strong>Create account</strong> and choose your role.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <details>
+            <summary>It says "App not installed"</summary>
+            <p>An older AgriLink is already on your phone. Uninstall it first, then install the new one.</p>
+          </details>
+          <details>
+            <summary>I forgot my password</summary>
+            <p>On the login screen, tap <strong>Forgot password?</strong>, enter your email, and follow the steps to set a new one.</p>
+          </details>
+          <details>
+            <summary>Why does the app ask for my location?</summary>
+            <p>To pin your farm or delivery address, to show nearby crops, and, for riders, to prove they reached each stop.</p>
+          </details>
+          <details>
+            <summary>Is there an iPhone version?</summary>
+            <p>Not yet. AgriLink is available for Android phones only.</p>
+          </details>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <div class="wrap">
+      <span>AgriLink · Farm-to-table marketplace</span>
+      <span>Always the latest build. <a href="https://github.com/Ftmshamel/AgriLink/releases/tag/apk-latest">Release details</a></span>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.tab').forEach(function (t) {
+          var on = t === tab;
+          t.setAttribute('aria-selected', on);
+          document.getElementById(t.getAttribute('aria-controls')).classList.toggle('on', on);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
