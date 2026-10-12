@@ -1,5 +1,14 @@
 # AgriLink Mobile
 
+## Install on Android
+
+<img src="site/apk-qr.png" alt="QR code that downloads the AgriLink app" width="180">
+
+Scan the code with your phone's camera, or open
+**[ftmshamel.github.io/AgriLink](https://ftmshamel.github.io/AgriLink/)** and tap
+Download. The link always serves the newest build of `main`:
+[AgriLink.apk](https://github.com/Ftmshamel/AgriLink/releases/download/apk-latest/AgriLink.apk).
+
 AgriLink is a Flutter mobile application that connects consumers, farmers,
 riders, and superadministrators in one agricultural marketplace.
 
