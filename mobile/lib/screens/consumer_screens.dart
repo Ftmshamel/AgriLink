@@ -468,8 +468,13 @@ class _ProductDetailsState extends State<ProductDetails> {
             onPressed: () => showReportSheet(
               context,
               session: widget.session,
-              farmerId: crop.farmerId,
-              farmerName: crop.farmerName,
+              targets: [
+                ReportTarget(
+                  id: crop.farmerId,
+                  name: crop.farmerName,
+                  role: 'farmer',
+                ),
+              ],
               cropId: crop.id,
             ),
             icon: const Icon(Icons.flag_outlined),
@@ -3181,12 +3186,21 @@ class _ReceiptActionsState extends State<_ReceiptActions> {
         final filed = await showReportSheet(
           context,
           session: widget.session,
-          farmerId: order.farmerId,
-          farmerName: order.farmerName,
+          targets: [
+            ReportTarget(
+              id: order.farmerId,
+              name: order.farmerName,
+              role: 'farmer',
+            ),
+            if (order.hasRider)
+              ReportTarget(
+                id: order.riderId,
+                name: order.riderName,
+                role: 'rider',
+              ),
+          ],
           cropId: order.cropId,
           orderId: order.id,
-          riderId: order.riderId,
-          riderName: order.riderName,
         );
         if (filed) await authService.database.markDeliveryDisputed(order.id);
       }, '');

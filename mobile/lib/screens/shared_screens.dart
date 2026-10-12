@@ -316,8 +316,13 @@ Future<void> showFarmSheet(
               showReportSheet(
                 context,
                 session: session,
-                farmerId: crop.farmerId,
-                farmerName: crop.farmerName,
+                targets: [
+                  ReportTarget(
+                    id: crop.farmerId,
+                    name: crop.farmerName,
+                    role: 'farmer',
+                  ),
+                ],
                 cropId: crop.id,
               );
             },
@@ -330,7 +335,6 @@ Future<void> showFarmSheet(
   );
 }
 
-/// Sends a dispute to the superadmin queue.
 /// "Same-day delivery", "Next-day delivery • Tue, Oct 12" or
 /// "Scheduled • Mon, Oct 20", for order cards.
 String deliveryScheduleLabel(AgriOrder order) {
@@ -345,54 +349,134 @@ String deliveryScheduleLabel(AgriOrder order) {
 }
 
 /// Returns true once a report was actually filed.
+/// Someone a report can be filed against.
+class ReportTarget {
+  const ReportTarget({
+    required this.id,
+    required this.name,
+    required this.role,
+  });
+
+  final String id;
+  final String name;
+
+  /// `farmer`, `rider` or `consumer`, as stored on the account.
+  final String role;
+
+  String get roleLabel => switch (role) {
+        'farmer' => 'Farm',
+        'rider' => 'Rider',
+        _ => 'Buyer',
+      };
+}
+
+/// Sends a report to the superadmin, who can resolve it and suspend the
+/// account it is filed against. With more than one [targets] the reporter
+/// picks who the report is about; with none it is a general support report.
 Future<bool> showReportSheet(
   BuildContext context, {
   required AppSession session,
-  required String farmerId,
-  required String farmerName,
+  required List<ReportTarget> targets,
   String cropId = '',
   String orderId = '',
-  String riderId = '',
-  String riderName = '',
 }) async {
+  final people = [
+    for (final target in targets)
+      if (target.id.isNotEmpty) target,
+  ];
   final reason = TextEditingController();
+  var against = people.isEmpty ? null : people.first;
   final submit = await showDialog<bool>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: const Text('Report a problem'),
-      content: TextField(
-        controller: reason,
-        maxLines: 3,
-        autofocus: true,
-        decoration: const InputDecoration(
-          labelText: 'What went wrong?',
-          hintText: 'Quantity mismatch, quality, late delivery…',
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext, setState) => AlertDialog(
+        title: const Text('Report a problem'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (people.length > 1) ...[
+                const Text(
+                  'Who is this about?',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    for (final person in people)
+                      ChoiceChip(
+                        label: Text('${person.roleLabel}: ${person.name}'),
+                        selected: against == person,
+                        onSelected: (_) => setState(() => against = person),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+              ] else if (people.length == 1) ...[
+                Text(
+                  'About ${people.first.roleLabel.toLowerCase()} '
+                  '${people.first.name}',
+                  style: const TextStyle(color: muted),
+                ),
+                const SizedBox(height: 10),
+              ],
+              TextField(
+                controller: reason,
+                maxLines: 3,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'What went wrong?',
+                  hintText: switch (against?.role) {
+                    'consumer' =>
+                      'Fake payment, no-show, refused delivery, scam…',
+                    'rider' => 'Late, rude, missing items, wrong drop-off…',
+                    _ => 'Quantity mismatch, quality, late delivery…',
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Submit'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext, false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(dialogContext, true),
-          child: const Text('Submit'),
-        ),
-      ],
     ),
   );
-  if (submit != true || reason.text.trim().isEmpty) return false;
+  final text = reason.text.trim();
+  reason.dispose();
+  if (submit != true || text.isEmpty) return false;
+  ReportTarget? withRole(String role) =>
+      people.where((person) => person.role == role).firstOrNull;
+  final farm = withRole('farmer');
+  final rider = withRole('rider');
   await authService.database.createReport({
     'reporterId': session.user.id,
     'reporterName': session.user.name,
     'reporterRole': session.user.role.name,
-    'farmerId': farmerId,
-    'farmerName': farmerName,
+    if (against != null) ...{
+      'againstId': against!.id,
+      'againstName': against!.name,
+      'againstRole': against!.role,
+    },
+    // Kept for the order context shown with the report.
+    if (farm != null) 'farmerId': farm.id,
+    if (farm != null) 'farmerName': farm.name,
+    if (rider != null) 'riderId': rider.id,
+    if (rider != null) 'riderName': rider.name,
     'cropId': cropId,
     'orderId': orderId,
-    if (riderId.isNotEmpty) 'riderId': riderId,
-    if (riderName.isNotEmpty) 'riderName': riderName,
-    'reason': reason.text.trim(),
+    'reason': text,
   });
   session.bump();
   if (context.mounted) {

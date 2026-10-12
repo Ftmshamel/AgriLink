@@ -10,7 +10,6 @@ import '../services/geo.dart';
 import '../services/notifications.dart';
 import '../services/session.dart';
 import '../utils/app_colors.dart';
-import '../widgets/crop_photo.dart';
 import '../widgets/live_data.dart';
 import '../widgets/notification_bell.dart';
 import '../widgets/ui_kit.dart';
@@ -33,9 +32,11 @@ class _SuperadminShellState extends State<SuperadminShell> {
       SuperadminOverview(
         session: widget.session,
         onOpenVerification: () => setState(() => _index = 1),
-        onOpenDisputes: () => setState(() => _index = 2),
+        onOpenAccounts: () => setState(() => _index = 2),
+        onOpenReports: () => setState(() => _index = 3),
       ),
       VerificationQueue(session: widget.session),
+      AccountsPage(session: widget.session),
       DisputeCenter(session: widget.session),
       SuperadminProfile(session: widget.session),
     ];
@@ -56,9 +57,14 @@ class _SuperadminShellState extends State<SuperadminShell> {
             label: 'Verify',
           ),
           NavigationDestination(
-            icon: Icon(Icons.gavel_outlined),
-            selectedIcon: Icon(Icons.gavel),
-            label: 'Disputes',
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups),
+            label: 'Accounts',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.flag_outlined),
+            selectedIcon: Icon(Icons.flag),
+            label: 'Reports',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -94,37 +100,14 @@ class PlatformSnapshot {
   List<Map<String, dynamic>> get openReports =>
       reports.where((report) => report['status'] != 'resolved').toList();
 
-  /// Value of everything delivered in the last 30 days.
-  int get monthlyVolume {
-    final cutoff = DateTime.now().subtract(const Duration(days: 30));
-    return orders
-        .where((order) =>
-            order.status == OrderStatus.delivered &&
-            (order.timeline[OrderStatus.delivered.wire] ??
-                    order.createdAt ??
-                    DateTime(1970))
-                .isAfter(cutoff))
-        .fold<int>(0, (total, order) => total + order.grandTotal);
-  }
+  int countActive(String role) => accounts
+      .where((account) =>
+          account['role'] == role && account['verificationStatus'] == 'active')
+      .length;
 
-  /// Delivered as a share of everything that reached a final state.
-  int get fulfilmentRate {
-    final finished =
-        orders.where((order) => !order.status.isOpen).length;
-    if (finished == 0) return 0;
-    final delivered =
-        orders.where((order) => order.status == OrderStatus.delivered).length;
-    return (delivered / finished * 100).round();
-  }
-
-  List<AgriOrder> get stalled {
-    final cutoff = DateTime.now().subtract(const Duration(hours: 24));
-    return orders
-        .where((order) =>
-            order.status.isOpen &&
-            (order.createdAt ?? DateTime.now()).isBefore(cutoff))
-        .toList();
-  }
+  int get suspended => accounts
+      .where((account) => account['verificationStatus'] == 'suspended')
+      .length;
 
   Iterable<AgriOrder> get _delivered =>
       orders.where((order) => order.status == OrderStatus.delivered);
@@ -160,12 +143,14 @@ class SuperadminOverview extends StatelessWidget {
     super.key,
     required this.session,
     required this.onOpenVerification,
-    required this.onOpenDisputes,
+    required this.onOpenAccounts,
+    required this.onOpenReports,
   });
 
   final AppSession session;
   final VoidCallback onOpenVerification;
-  final VoidCallback onOpenDisputes;
+  final VoidCallback onOpenAccounts;
+  final VoidCallback onOpenReports;
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +173,7 @@ class SuperadminOverview extends StatelessWidget {
                       eyebrow: 'PLATFORM OPERATIONS',
                       title: 'Network Overview',
                       subtitle:
-                          'Live transaction and delivery health across AgriLink.',
+                          'Accounts and reports across AgriLink.',
                     ),
                   ),
                   NotificationBell(
@@ -211,17 +196,17 @@ class SuperadminOverview extends StatelessWidget {
                   children: [
                     Expanded(
                       child: MetricCard(
-                        icon: Icons.payments,
-                        value: formatPeso(snapshot?.monthlyVolume ?? 0),
-                        label: 'Monthly volume',
+                        icon: Icons.shopping_basket_outlined,
+                        value: '${snapshot?.countActive('consumer') ?? 0}',
+                        label: 'Consumers',
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: MetricCard(
-                        icon: Icons.route,
-                        value: '${snapshot?.fulfilmentRate ?? 0}%',
-                        label: 'Fulfillment',
+                        icon: Icons.agriculture,
+                        value: '${snapshot?.countActive('farmer') ?? 0}',
+                        label: 'Farmers',
                       ),
                     ),
                   ],
@@ -231,17 +216,17 @@ class SuperadminOverview extends StatelessWidget {
                   children: [
                     Expanded(
                       child: MetricCard(
-                        icon: Icons.groups,
-                        value: '${snapshot?.verifiedUsers ?? 0}',
-                        label: 'Verified users',
+                        icon: Icons.local_shipping_outlined,
+                        value: '${snapshot?.countActive('rider') ?? 0}',
+                        label: 'Riders',
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: MetricCard(
-                        icon: Icons.warning_amber,
+                        icon: Icons.flag_outlined,
                         value: '${snapshot?.openReports.length ?? 0}',
-                        label: 'Open disputes',
+                        label: 'Open reports',
                       ),
                     ),
                   ],
@@ -268,35 +253,36 @@ class SuperadminOverview extends StatelessWidget {
                   const SizedBox(height: 10),
                 if ((snapshot?.openReports.length ?? 0) > 0)
                   InkWell(
-                    onTap: onOpenDisputes,
+                    onTap: onOpenReports,
                     borderRadius: BorderRadius.circular(20),
                     child: ActionCard(
-                      icon: Icons.gavel_outlined,
+                      icon: Icons.flag_outlined,
                       title:
-                          '${snapshot!.openReports.length} open dispute${snapshot.openReports.length == 1 ? '' : 's'}',
-                      subtitle: 'Reports filed by buyers and riders',
+                          '${snapshot!.openReports.length} open report${snapshot.openReports.length == 1 ? '' : 's'}',
+                      subtitle: 'Filed by consumers, farmers, and riders',
                       badge: 'OPEN',
                     ),
                   ),
                 if ((snapshot?.openReports.length ?? 0) > 0)
                   const SizedBox(height: 10),
-                if ((snapshot?.stalled.length ?? 0) > 0)
-                  ActionCard(
-                    icon: Icons.local_shipping_outlined,
-                    title:
-                        '${snapshot!.stalled.length} order${snapshot.stalled.length == 1 ? '' : 's'} older than 24h',
-                    subtitle: 'Still moving through the network',
-                    badge: 'DELAYED',
+                if ((snapshot?.suspended ?? 0) > 0)
+                  InkWell(
+                    onTap: onOpenAccounts,
+                    borderRadius: BorderRadius.circular(20),
+                    child: ActionCard(
+                      icon: Icons.block,
+                      title: plural(snapshot!.suspended, 'suspended account'),
+                      subtitle: 'Review and restore from Accounts',
+                      badge: 'PAUSED',
+                    ),
                   ),
                 if (snapshot != null &&
                     snapshot.pending.isEmpty &&
-                    snapshot.openReports.isEmpty &&
-                    snapshot.stalled.isEmpty)
+                    snapshot.openReports.isEmpty)
                   const EmptyState(
                     icon: Icons.verified,
                     title: 'Everything is clear',
-                    message:
-                        'No pending registrations, disputes, or delayed orders.',
+                    message: 'No pending registrations or open reports.',
                   ),
                 const SizedBox(height: 24),
                 const SectionTitle(title: 'Money', action: ''),
@@ -352,55 +338,6 @@ class SuperadminOverview extends StatelessWidget {
                     badge: 'LEDGER',
                   ),
                 ),
-                const SizedBox(height: 24),
-                SectionTitle(
-                  title: 'Recent orders',
-                  action: 'View all',
-                  onAction: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AllOrdersPage(session: session),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                if ((snapshot?.orders.length ?? 0) == 0)
-                  const EmptyState(
-                    icon: Icons.receipt_long_outlined,
-                    title: 'No transactions yet',
-                    message: 'Orders across the network will show up here.',
-                  )
-                else
-                  for (final order in snapshot!.orders.take(5)) ...[
-                    Card(
-                      child: ListTile(
-                        leading: ClipOval(
-                          child: SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: CropPhoto(cropId: order.cropId),
-                          ),
-                        ),
-                        title: Text(
-                          '${order.reference} • ${order.cropName}',
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        subtitle: Text(
-                          '${order.buyerName} ← ${order.farmerName}\n'
-                          '${order.quantityKg} kg • ${order.status.label}',
-                        ),
-                        isThreeLine: true,
-                        trailing: Text(
-                          formatPeso(order.grandTotal),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: green,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
               ],
             ],
           ),
@@ -424,11 +361,6 @@ class VerificationQueue extends StatelessWidget {
         final accounts = data.value ?? const <Map<String, dynamic>>[];
         final pending = accounts
             .where((a) => a['verificationStatus'] == 'pending_review')
-            .toList();
-        final reviewed = accounts
-            .where((a) =>
-                a['verificationStatus'] != 'pending_review' &&
-                a['role'] != 'superadmin')
             .toList();
         return LiveRefreshView(
           loading: data.loading,
@@ -456,110 +388,376 @@ class VerificationQueue extends StatelessWidget {
                   ApplicantCard(session: session, account: account),
                   const SizedBox(height: 10),
                 ],
-              if (reviewed.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                const SectionTitle(title: 'Reviewed accounts', action: ''),
-                const SizedBox(height: 10),
-                for (final account in reviewed) ...[
-                  Card(
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor:
-                            account['verificationStatus'] == 'active'
-                                ? lightGreen
-                                : const Color(0xFFFFE7E2),
-                        child: Icon(
-                          account['verificationStatus'] == 'active'
-                              ? Icons.verified
-                              : Icons.block,
-                          color: account['verificationStatus'] == 'active'
-                              ? green
-                              : const Color(0xFFB42318),
-                        ),
-                      ),
-                      title: Text(
-                        '${account['name']}',
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      subtitle: Text(
-                        '${account['role']} • ${account['verificationStatus']}'
-                        '${'${account['statusReason'] ?? ''}'.isEmpty ? '' : '\n${account['statusReason']}'}',
-                      ),
-                      trailing: TextButton(
-                        onPressed: () => _setStatus(
-                          context,
-                          account,
-                          account['verificationStatus'] == 'active'
-                              ? 'suspended'
-                              : 'active',
-                        ),
-                        child: Text(
-                          account['verificationStatus'] == 'active'
-                              ? 'Suspend'
-                              : 'Restore',
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ],
             ],
           ),
         );
       },
     );
   }
+}
 
-  Future<void> _setStatus(
-    BuildContext context,
-    Map<String, dynamic> account,
-    String status,
-  ) async {
-    var reason = '';
-    if (status == 'suspended') {
-      final controller = TextEditingController();
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text('Suspend ${account['name']}?'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Reason',
-              hintText: 'Repeated no-shows, fake documents…',
+/// Asks for a reason and suspends [account], or restores it straight away.
+/// Shared by the Accounts list and the Reports queue.
+Future<void> changeSuspension(
+  BuildContext context,
+  AppSession session,
+  Map<String, dynamic> account, {
+  required bool suspend,
+  String suggestedReason = '',
+}) async {
+  var reason = '';
+  if (suspend) {
+    final controller = TextEditingController(text: suggestedReason);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Suspend ${account['name']}?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              switch (account['role']) {
+                'farmer' => 'Their listings leave the marketplace and they '
+                    'cannot use the app until restored.',
+                'rider' => 'They cannot take trips or use the app until '
+                    'restored.',
+                _ => 'They cannot order or use the app until restored.',
+              },
+              style: const TextStyle(color: muted, height: 1.4),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                controller.text.trim().isNotEmpty,
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Reason (shown to them)',
+                hintText: 'Scam report, repeated no-shows, fake documents…',
               ),
-              child: const Text('Suspend'),
             ),
           ],
         ),
-      );
-      reason = controller.text.trim();
-      controller.dispose();
-      if (confirmed != true || reason.isEmpty) return;
-    }
-    await authService.database.setVerificationStatus(
-      '${account['id']}',
-      status,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFB42318),
+            ),
+            onPressed: () => Navigator.pop(
+              dialogContext,
+              controller.text.trim().isNotEmpty,
+            ),
+            child: const Text('Suspend'),
+          ),
+        ],
+      ),
+    );
+    reason = controller.text.trim();
+    controller.dispose();
+    if (confirmed != true || reason.isEmpty) return;
+  }
+  try {
+    await authService.database.setAccountSuspended(
+      account,
+      suspended: suspend,
       reason: reason,
     );
     session.bump();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${account['name']} is now $status.')),
+      SnackBar(
+        content: Text(
+          '${account['name']} is ${suspend ? 'suspended' : 'restored'}.',
+        ),
+      ),
+    );
+  } catch (error) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$error'.replaceFirst('Exception: ', ''))),
+    );
+  }
+}
+
+/// The id a report is filed against; older reports only named a farm.
+String reportedAccountId(Map<String, dynamic> report) =>
+    '${report['againstId'] ?? report['farmerId'] ?? ''}';
+
+/// Every consumer, farmer and rider, with how often they have been reported,
+/// and the switch to suspend or restore them.
+class AccountsPage extends StatefulWidget {
+  const AccountsPage({super.key, required this.session});
+
+  final AppSession session;
+
+  @override
+  State<AccountsPage> createState() => _AccountsPageState();
+}
+
+class _AccountsPageState extends State<AccountsPage> {
+  final _search = TextEditingController();
+  String _role = '';
+
+  static const _roles = {
+    '': 'All',
+    'consumer': 'Consumers',
+    'farmer': 'Farmers',
+    'rider': 'Riders',
+  };
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  static Future<({List<Map<String, dynamic>> accounts, Map<String, int> reports})>
+      _load() async {
+    final results = await Future.wait([
+      authService.database.listAccounts(),
+      authService.database.listReports(),
+    ]);
+    final counts = <String, int>{};
+    for (final report in results[1]) {
+      final id = reportedAccountId(report);
+      if (id.isNotEmpty) counts[id] = (counts[id] ?? 0) + 1;
+    }
+    return (accounts: results[0], reports: counts);
+  }
+
+  bool _matches(Map<String, dynamic> account) {
+    if (account['role'] == 'superadmin') return false;
+    // Applications still waiting are handled on the Verify tab.
+    if (account['verificationStatus'] == 'pending_review') return false;
+    if (_role.isNotEmpty && account['role'] != _role) return false;
+    final query = _search.text.trim().toLowerCase();
+    if (query.isEmpty) return true;
+    return [account['name'], account['email'], account['phone']]
+        .any((field) => '${field ?? ''}'.toLowerCase().contains(query));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LiveBuilder(
+      session: widget.session,
+      load: _load,
+      builder: (context, data) {
+        final accounts =
+            (data.value?.accounts ?? const <Map<String, dynamic>>[])
+                .where(_matches)
+                .toList()
+              ..sort((a, b) => '${a['name']}'
+                  .toLowerCase()
+                  .compareTo('${b['name']}'.toLowerCase()));
+        final reports = data.value?.reports ?? const <String, int>{};
+        return LiveRefreshView(
+          loading: data.loading,
+          onRefresh: data.reload,
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              const PageHeader(
+                eyebrow: 'NETWORK SAFETY',
+                title: 'Accounts',
+                subtitle: 'Consumers, farmers, and riders on AgriLink.',
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _search,
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Name, email, or phone',
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final entry in _roles.entries)
+                    ChoiceChip(
+                      label: Text(entry.value),
+                      selected: _role == entry.key,
+                      onSelected: (_) => setState(() => _role = entry.key),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (data.error != null && data.value == null)
+                LiveErrorCard(message: data.errorMessage, onRetry: data.reload)
+              else if (accounts.isEmpty)
+                const EmptyState(
+                  icon: Icons.person_search,
+                  title: 'No accounts found',
+                  message: 'Try another name or role.',
+                )
+              else
+                for (final account in accounts) ...[
+                  _AccountCard(
+                    session: widget.session,
+                    account: account,
+                    reportCount: reports['${account['id']}'] ?? 0,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AccountCard extends StatelessWidget {
+  const _AccountCard({
+    required this.session,
+    required this.account,
+    required this.reportCount,
+  });
+
+  final AppSession session;
+  final Map<String, dynamic> account;
+  final int reportCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = '${account['verificationStatus'] ?? ''}';
+    final active = status == 'active';
+    final role = '${account['role'] ?? ''}';
+    final reason = '${account['statusReason'] ?? ''}';
+    final (icon, label) = switch (role) {
+      'farmer' => (Icons.agriculture, 'Farmer'),
+      'rider' => (Icons.local_shipping, 'Rider'),
+      _ => (Icons.shopping_basket_outlined, 'Consumer'),
+    };
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor:
+                      active ? lightGreen : const Color(0xFFFFE7E2),
+                  child: Icon(
+                    active ? icon : Icons.block,
+                    color: active ? green : const Color(0xFFB42318),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${account['name']}',
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      Text(
+                        '$label \u2022 ${account['email'] ?? ''}',
+                        style: const TextStyle(color: muted, fontSize: 12),
+                      ),
+                      if ('${account['phone'] ?? ''}'.isNotEmpty)
+                        Text(
+                          '${account['phone']}',
+                          style: const TextStyle(color: muted, fontSize: 12),
+                        ),
+                    ],
+                  ),
+                ),
+                Pill(
+                  icon: active ? Icons.verified : Icons.block,
+                  text: switch (status) {
+                    'active' => 'ACTIVE',
+                    'suspended' => 'SUSPENDED',
+                    'rejected' => 'REJECTED',
+                    _ => status.toUpperCase(),
+                  },
+                  color: active ? green : const Color(0xFFB42318),
+                ),
+              ],
+            ),
+            if (reportCount > 0 || reason.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              if (reportCount > 0)
+                Row(
+                  children: [
+                    const Icon(Icons.flag, size: 15, color: orange),
+                    const SizedBox(width: 6),
+                    Text(
+                      plural(reportCount, 'report'),
+                      style: const TextStyle(
+                        color: orange,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              if (reason.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Reason: $reason',
+                    style: const TextStyle(color: muted, fontSize: 12),
+                  ),
+                ),
+            ],
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                if (role == 'farmer' || role == 'rider')
+                  TextButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DocumentsPage(
+                          userId: '${account['id']}',
+                          name: '${account['name']}',
+                        ),
+                      ),
+                    ),
+                    icon: const Icon(Icons.folder_open_outlined, size: 18),
+                    label: const Text('Documents'),
+                  ),
+                const Spacer(),
+                if (active)
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFB42318),
+                    ),
+                    onPressed: () => changeSuspension(
+                      context,
+                      session,
+                      account,
+                      suspend: true,
+                    ),
+                    icon: const Icon(Icons.block, size: 18),
+                    label: const Text('Suspend'),
+                  )
+                else if (status == 'suspended')
+                  FilledButton.icon(
+                    onPressed: () => changeSuspension(
+                      context,
+                      session,
+                      account,
+                      suspend: false,
+                    ),
+                    icon: const Icon(Icons.restore, size: 18),
+                    label: const Text('Restore'),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1081,18 +1279,19 @@ class DisputeCenter extends StatelessWidget {
             children: [
               const PageHeader(
                 eyebrow: 'RESOLUTION CENTER',
-                title: 'Active Disputes',
-                subtitle:
-                    'Review order evidence and coordinate resolutions.',
+                title: 'Reports',
+                subtitle: 'Review each report, then resolve it or suspend '
+                    'the account it is about.',
               ),
               const SizedBox(height: 18),
               if (data.error != null && reports.isEmpty)
                 LiveErrorCard(message: data.errorMessage, onRetry: data.reload)
               else if (open.isEmpty)
                 const EmptyState(
-                  icon: Icons.gavel_outlined,
-                  title: 'No open disputes',
-                  message: 'Reports from buyers and riders will appear here.',
+                  icon: Icons.flag_outlined,
+                  title: 'No open reports',
+                  message: 'Reports from consumers, farmers, and riders '
+                      'will appear here.',
                 )
               else
                 for (final report in open) ...[
@@ -1121,7 +1320,7 @@ class DisputeCenter extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Against ${report['farmerName'] ?? 'a farmer'}',
+                            'About ${_against(report)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 16,
@@ -1145,16 +1344,7 @@ class DisputeCenter extends StatelessWidget {
                               style: const TextStyle(height: 1.45),
                             ),
                           ),
-                          if ('${report['riderName'] ?? ''}'.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              'Rider: ${report['riderName']}',
-                              style: const TextStyle(
-                                color: muted,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+
                           if ('${report['orderId'] ?? ''}'.isNotEmpty) ...[
                             const SizedBox(height: 10),
                             SizedBox(
@@ -1170,13 +1360,30 @@ class DisputeCenter extends StatelessWidget {
                             ),
                           ],
                           const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              onPressed: () => _resolve(context, report),
-                              icon: const Icon(Icons.done_all),
-                              label: const Text('Mark resolved'),
-                            ),
+                          Row(
+                            children: [
+                              if (reportedAccountId(report).isNotEmpty) ...[
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xFFB42318),
+                                    ),
+                                    onPressed: () =>
+                                        _suspendReported(context, report),
+                                    icon: const Icon(Icons.block, size: 18),
+                                    label: const Text('Suspend'),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: () => _resolve(context, report),
+                                  icon: const Icon(Icons.done_all, size: 18),
+                                  label: const Text('Resolve'),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -1196,7 +1403,7 @@ class DisputeCenter extends StatelessWidget {
                         child: Icon(Icons.check, color: green),
                       ),
                       title: Text(
-                        'Against ${report['farmerName'] ?? 'a farmer'}',
+                        'About ${_against(report)}',
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       subtitle: Text(
@@ -1212,6 +1419,49 @@ class DisputeCenter extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// "Juan Dela Cruz (rider)"; older reports were always about a farm.
+  String _against(Map<String, dynamic> report) {
+    final name = '${report['againstName'] ?? report['farmerName'] ?? ''}';
+    final role = '${report['againstRole'] ?? (report['farmerId'] == null ? '' : 'farmer')}';
+    final label = switch (role) {
+      'farmer' => 'farm',
+      'rider' => 'rider',
+      'consumer' => 'buyer',
+      _ => '',
+    };
+    if (name.isEmpty) return 'a general issue';
+    return label.isEmpty ? name : '$name ($label)';
+  }
+
+  /// Suspends the account a report is about, with the report as the reason.
+  Future<void> _suspendReported(
+    BuildContext context,
+    Map<String, dynamic> report,
+  ) async {
+    final account =
+        await authService.database.getAccount(reportedAccountId(report));
+    if (!context.mounted) return;
+    if (account == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('That account no longer exists.')),
+      );
+      return;
+    }
+    if (account['verificationStatus'] == 'suspended') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${account['name']} is already suspended.')),
+      );
+      return;
+    }
+    await changeSuspension(
+      context,
+      session,
+      account,
+      suspend: true,
+      suggestedReason: 'Reported: ${report['reason'] ?? ''}'.trim(),
     );
   }
 
@@ -1375,9 +1625,9 @@ class SuperadminProfile extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: StatCard(
-                      icon: Icons.receipt_long_outlined,
-                      label: 'Orders',
-                      value: '${snapshot?.orders.length ?? 0}',
+                      icon: Icons.flag_outlined,
+                      label: 'Open reports',
+                      value: '${snapshot?.openReports.length ?? 0}',
                       tint: const Color(0xFFFFF1DD),
                       color: orange,
                     ),
@@ -1400,7 +1650,7 @@ class SuperadminProfile extends StatelessWidget {
               ProfileTile(
                 icon: Icons.security,
                 title: 'Platform access',
-                subtitle: 'Superadmin — full verification and dispute powers',
+                subtitle: 'Superadmin: verification, accounts, and reports',
                 onTap: () {},
               ),
               const SizedBox(height: 16),
@@ -1424,156 +1674,6 @@ class SuperadminProfile extends StatelessWidget {
     return '${plural(count(MobileRole.consumer), 'consumer')} • '
         '${plural(count(MobileRole.farmer), 'farmer')} • '
         '${plural(count(MobileRole.rider), 'rider')}';
-  }
-}
-
-/// Every order on the network, searchable and filterable by stage.
-class AllOrdersPage extends StatefulWidget {
-  const AllOrdersPage({super.key, required this.session});
-
-  final AppSession session;
-
-  @override
-  State<AllOrdersPage> createState() => _AllOrdersPageState();
-}
-
-enum _OrderFilter {
-  all('All'),
-  open('Open'),
-  withRider('With rider'),
-  delivered('Delivered'),
-  cancelled('Cancelled'),
-  disputed('Disputed');
-
-  const _OrderFilter(this.label);
-  final String label;
-
-  bool matches(AgriOrder order) => switch (this) {
-        all => true,
-        open => order.status.isOpen && !order.status.isWithRider,
-        withRider => order.status.isWithRider,
-        delivered => order.status == OrderStatus.delivered,
-        cancelled => order.status == OrderStatus.cancelled,
-        disputed => order.isDisputed,
-      };
-}
-
-class _AllOrdersPageState extends State<AllOrdersPage> {
-  final _search = TextEditingController();
-  _OrderFilter _filter = _OrderFilter.all;
-
-  @override
-  void dispose() {
-    _search.dispose();
-    super.dispose();
-  }
-
-  bool _matchesSearch(AgriOrder order) {
-    final query = _search.text.trim().toLowerCase();
-    if (query.isEmpty) return true;
-    return [
-      order.reference,
-      order.buyerName,
-      order.farmerName,
-      order.riderName,
-      order.cropName,
-      order.deliveryAddress,
-    ].any((field) => field.toLowerCase().contains(query));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('All orders')),
-      body: LiveBuilder<List<AgriOrder>>(
-        session: widget.session,
-        load: () => authService.database.listAgriOrders(),
-        builder: (context, data) {
-          final orders = (data.value ?? const <AgriOrder>[])
-              .where(_filter.matches)
-              .where(_matchesSearch)
-              .toList();
-          return LiveRefreshView(
-            loading: data.loading,
-            onRefresh: data.reload,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-              children: [
-                TextField(
-                  controller: _search,
-                  onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.search),
-                    hintText: 'Reference, buyer, farm, rider, crop…',
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    for (final filter in _OrderFilter.values)
-                      ChoiceChip(
-                        label: Text(filter.label),
-                        selected: _filter == filter,
-                        onSelected: (_) => setState(() => _filter = filter),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  plural(orders.length, 'order'),
-                  style: const TextStyle(color: muted),
-                ),
-                const SizedBox(height: 8),
-                if (data.error != null && data.value == null)
-                  LiveErrorCard(
-                    message: data.errorMessage,
-                    onRetry: data.reload,
-                  )
-                else if (orders.isEmpty)
-                  const EmptyState(
-                    icon: Icons.search_off,
-                    title: 'No matching orders',
-                    message: 'Try another search or filter.',
-                  )
-                else
-                  for (final order in orders)
-                    Card(
-                      child: ListTile(
-                        leading: ClipOval(
-                          child: SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: CropPhoto(cropId: order.cropId),
-                          ),
-                        ),
-                        title: Text(
-                          '${order.reference} • ${order.cropName}',
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        subtitle: Text(
-                          '${order.buyerName} ← ${order.farmerName}\n'
-                          '${order.status.label} • ${deliveryScheduleLabel(order)}'
-                          '${order.hasRider ? ' • ${order.riderName}' : ''}'
-                          '${order.isRefunded ? ' • refunded ${formatPeso(order.refundedAmount)}' : ''}',
-                        ),
-                        isThreeLine: true,
-                        trailing: Text(
-                          formatPeso(order.grandTotal),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: green,
-                          ),
-                        ),
-                      ),
-                    ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
   }
 }
 
