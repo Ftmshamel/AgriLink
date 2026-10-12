@@ -87,18 +87,19 @@ class EmailService {
           'If you did not ask for a reset, you can ignore this message and '
           'your password stays the same.\n\n'
           'AgriLink • Fresh harvest. Fair trade.',
-      html: '''
-<div style="font-family:Arial,Helvetica,sans-serif;color:#1A1F17;max-width:520px">
-  <h2 style="color:#2E7D32;margin:0 0 6px">AgriLink password reset</h2>
-  <p style="margin:0 0 18px;color:#6B7A66">Hi $name, use the code below to set a new password.</p>
-  <div style="background:#EEF6E8;border:1px solid #CFE5C5;border-radius:14px;padding:18px;text-align:center">
-    <div style="font-size:32px;font-weight:900;letter-spacing:8px;color:#2E7D32">$code</div>
-  </div>
-  <p style="margin:18px 0 0;color:#6B7A66;font-size:13px">
-    This code expires in $minutes minutes and can only be used once.
-    If you did not request a reset, ignore this email — your password will not change.
-  </p>
-</div>''',
+      html: _layout(
+        preheader: 'Your AgriLink reset code is $code.',
+        heading: 'Reset your password',
+        body: '''
+<p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:#3d4a3e">Hi ${_escape(name)}, use this code in the AgriLink app to set a new password.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td align="center" style="background:#fbf3d6;border:2px dashed #e0b84a;border-radius:18px;padding:22px 10px">
+    <div style="font-family:'Fredoka',Arial,Helvetica,sans-serif;font-size:40px;font-weight:700;letter-spacing:10px;color:#123d1c">$code</div>
+    <div style="margin-top:6px;font-size:13px;color:#7a6a3a">Expires in $minutes minutes &middot; One-time use</div>
+  </td></tr>
+</table>
+<p style="margin:20px 0 0;font-size:14px;line-height:1.6;color:#5a6a5b">Didn't ask for a reset? You can ignore this email. Your password stays the same, and no one can change it without this code.</p>''',
+      ),
       templateParams: {
         'to_email': email,
         'to_name': name,
@@ -134,13 +135,20 @@ class EmailService {
       toName: name,
       subject: subject,
       text: '$greeting,\n\n$body\n\nAgriLink • Fresh harvest. Fair trade.',
-      html: '''
-<div style="font-family:Arial,Helvetica,sans-serif;color:#1A1F17;max-width:520px">
-  <h2 style="color:${approved ? '#2E7D32' : '#B42318'};margin:0 0 6px">$subject</h2>
-  <p style="margin:0 0 12px;color:#6B7A66">$greeting,</p>
-  <p style="margin:0 0 18px;line-height:1.5">$body</p>
-  <p style="margin:0;color:#6B7A66;font-size:13px">AgriLink • Fresh harvest. Fair trade.</p>
-</div>''',
+      html: _layout(
+        preheader: subject,
+        heading: approved
+            ? 'You\'re approved!'
+            : 'Your application needs another look',
+        badge: approved ? 'APPROVED' : 'ACTION NEEDED',
+        badgeColor: approved ? '#2d7a10' : '#b42318',
+        body: '''
+<p style="margin:0 0 12px;font-size:16px;line-height:1.6;color:#3d4a3e">${_escape(greeting)},</p>
+<p style="margin:0 0 22px;font-size:16px;line-height:1.6;color:#3d4a3e">${_escape(body)}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:999px;background:#ffd166">
+  <a href="$_siteUrl" style="display:inline-block;padding:13px 26px;font-family:'Fredoka',Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#123d1c;text-decoration:none">Open AgriLink</a>
+</td></tr></table>''',
+      ),
       templateParams: {
         'to_email': email,
         'to_name': name,
@@ -148,6 +156,60 @@ class EmailService {
         'minutes': '',
       },
     );
+  }
+
+  static const _siteUrl = 'https://ftmshamel.github.io/AgriLink/';
+
+  /// Names come from sign-up forms, so they are escaped before going into HTML.
+  static String _escape(String value) => value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
+
+  /// The shared email frame: the same farm banner, colours and type as the
+  /// download page. Built from tables and inline styles because that is all
+  /// Gmail and Outlook reliably render; the banner is a hosted image since
+  /// mail clients do not draw SVG.
+  static String _layout({
+    required String preheader,
+    required String heading,
+    required String body,
+    String badge = '',
+    String badgeColor = '#2d7a10',
+  }) {
+    final badgeHtml = badge.isEmpty
+        ? ''
+        : '<div style="display:inline-block;margin:0 0 12px;padding:4px 12px;'
+            'border-radius:999px;background:$badgeColor;color:#ffffff;'
+            'font-size:12px;font-weight:700;letter-spacing:1px">$badge</div>';
+    return '''
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#fbf8ee">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${_escape(preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fbf8ee">
+<tr><td align="center" style="padding:24px 12px">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:24px;overflow:hidden;border:1px solid #e7e1c9">
+    <tr><td><img src="${_siteUrl}email-header.jpg" width="600" alt="AgriLink - Fresh from the farm, straight to your door." style="display:block;width:100%;height:auto;border:0"></td></tr>
+    <tr><td style="padding:30px 32px 8px;font-family:'Nunito',Arial,Helvetica,sans-serif">
+      $badgeHtml
+      <h1 style="margin:0 0 14px;font-family:'Fredoka',Arial,Helvetica,sans-serif;font-size:28px;line-height:1.2;font-weight:700;color:#123d1c">${_escape(heading)}</h1>
+      $body
+    </td></tr>
+    <tr><td style="padding:26px 32px 30px;font-family:'Nunito',Arial,Helvetica,sans-serif">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #ece6cf">
+        <tr><td style="padding-top:18px;font-size:13px;line-height:1.6;color:#8a8f7e">
+          <strong style="color:#2d7a10">AgriLink</strong> &middot; Farm-to-table marketplace, Nueva Ecija<br>
+          <a href="$_siteUrl" style="color:#2d7a10">ftmshamel.github.io/AgriLink</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</td></tr>
+</table>
+</body></html>''';
   }
 
   Future<EmailDelivery> _send({
@@ -159,7 +221,9 @@ class EmailService {
     required Map<String, String> templateParams,
   }) async {
     final provider = _provider.trim().toLowerCase();
-    if (!isConfigured) return const EmailDelivery(EmailDeliveryStatus.notConfigured);
+    if (!isConfigured) {
+      return const EmailDelivery(EmailDeliveryStatus.notConfigured);
+    }
 
     final http.Response response;
     switch (provider) {
