@@ -206,7 +206,14 @@ class EmailService {
             'template_id': _emailjsTemplateId,
             'user_id': _emailjsPublicKey,
             if (_apiKey.isNotEmpty) 'accessToken': _apiKey,
-            'template_params': {...templateParams, 'subject': subject},
+            // One EmailJS template serves every message: its subject is
+            // {{subject}} and its body {{{message_html}}}.
+            'template_params': {
+              ...templateParams,
+              'subject': subject,
+              'message': text,
+              'message_html': html,
+            },
           }),
         );
       default:
@@ -215,7 +222,7 @@ class EmailService {
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
-        'The reset email could not be sent (${response.statusCode}). '
+        'The email could not be sent (${response.statusCode}). '
         'Please try again in a moment.',
       );
     }

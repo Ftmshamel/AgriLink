@@ -166,6 +166,13 @@ flutter run `
 needs `AGRILINK_EMAILJS_SERVICE_ID`, `AGRILINK_EMAILJS_TEMPLATE_ID`, and
 `AGRILINK_EMAILJS_PUBLIC_KEY`.
 
+With EmailJS, one template serves every message. Set its **Subject** to
+`{{subject}}`, its **To Email** to `{{to_email}}`, and its body to
+`{{{message_html}}}` (three braces, so the HTML is not escaped). Under
+**Account → Security**, turn on *Allow EmailJS API for non-browser
+applications*; the app calls EmailJS directly, not from a web page. If you also
+turn on *Use Private Key*, put the private key in `AGRILINK_EMAIL_API_KEY`.
+
 ## Firestore security rules
 
 `firestore.rules` is what keeps reset codes unguessable — tickets can be fetched
