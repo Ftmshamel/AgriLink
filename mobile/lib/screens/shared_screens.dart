@@ -293,7 +293,7 @@ Future<void> showFarmSheet(
           const SizedBox(height: 12),
           Text(
             '${farm?['name'] ?? crop.farmerName}',
-            style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w900),
+            style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
           ),
           const SizedBox(height: 5),
           Text(

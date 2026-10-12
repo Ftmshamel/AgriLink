@@ -529,7 +529,8 @@ class AgriOrder {
   /// The day the farm has to have this out: its delivery date, or the day it
   /// was placed for orders older than scheduling.
   DateTime get dueDate =>
-      deliveryDate ?? dateOnly((createdAt ?? DateTime.now()).toLocal());
+      deliveryDate ??
+      dateOnly(DeliveryHours.inManila(createdAt ?? DateTime.now()));
 
   bool isDueBy(DateTime now) => !dueDate.isAfter(dateOnly(now));
 
@@ -545,7 +546,7 @@ class AgriOrder {
     final date = deliveryDate;
     final placed = createdAt;
     if (isScheduled || date == null || placed == null) return false;
-    return date.isAfter(dateOnly(placed.toLocal()));
+    return date.isAfter(dateOnly(DeliveryHours.inManila(placed)));
   }
 
   /// What goes back to the buyer's wallet if this order is cancelled.
@@ -659,6 +660,22 @@ class RatingSummary {
 class DeliveryHours {
   static const opensAt = 6;
   static const cutoff = 18;
+
+  /// Every farm, rider and buyer is in the Philippines, so the 6 AM opening
+  /// and 6 PM cutoff are Philippine time whatever zone the phone is set to.
+  /// The Philippines has no daylight saving, so a fixed offset is exact.
+  static const manilaOffset = Duration(hours: 8);
+
+  /// The Philippine wall-clock reading of [instant], as a plain local
+  /// [DateTime] so it compares directly with stored delivery dates.
+  static DateTime inManila(DateTime instant) {
+    final t = instant.toUtc().add(manilaOffset);
+    return DateTime(
+        t.year, t.month, t.day, t.hour, t.minute, t.second, t.millisecond);
+  }
+
+  /// The current time in the Philippines; what every delivery rule runs on.
+  static DateTime manilaNow() => inManila(DateTime.now());
 
   /// The day a same-day order placed at [now] is delivered. Before 6 AM it is
   /// still today (riders start at 6); from 6 PM it rolls over to tomorrow.

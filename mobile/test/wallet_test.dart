@@ -245,7 +245,7 @@ void main() {
         'id': 'o',
         'deliveryType': 'same_day',
         'deliveryDate': '2026-10-12',
-        'createdAt': DateTime(2026, 10, 11, 19).toUtc().toIso8601String(),
+        'createdAt': '2026-10-11T19:00:00+08:00',
       });
       expect(rolled.isNextDay, isTrue);
       expect(rolled.canBuyerCancel(now), isFalse,
@@ -255,7 +255,7 @@ void main() {
         'id': 'o',
         'deliveryType': 'same_day',
         'deliveryDate': '2026-10-11',
-        'createdAt': DateTime(2026, 10, 11, 9).toUtc().toIso8601String(),
+        'createdAt': '2026-10-11T09:00:00+08:00',
       });
       expect(sameDay.isNextDay, isFalse);
     });
@@ -284,6 +284,20 @@ void main() {
       expect(DeliveryHours.sameDayDate(at(0)), today);
       expect(DeliveryHours.sameDayDate(at(5, 59)), today);
       expect(DeliveryHours.opensOn(today), at(6));
+    });
+
+    test('the rules run on Philippine time whatever the phone zone is', () {
+      // 10:30 UTC is 6:30 PM in Manila: past the cutoff even on a phone set
+      // to UTC, where it would still read as morning.
+      final manila =
+          DeliveryHours.inManila(DateTime.utc(2026, 10, 11, 10, 30));
+      expect(manila, DateTime(2026, 10, 11, 18, 30));
+      expect(DeliveryHours.pastCutoff(manila), isTrue);
+      expect(DeliveryHours.sameDayDate(manila), tomorrow);
+
+      // 9 PM UTC is already 5 AM the next day in Manila.
+      expect(DeliveryHours.inManila(DateTime.utc(2026, 10, 10, 21)),
+          DateTime(2026, 10, 11, 5));
     });
 
     test('scheduling starts the day after same-day would deliver', () {

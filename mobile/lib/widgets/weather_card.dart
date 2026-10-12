@@ -124,8 +124,8 @@ class WeatherCard extends StatelessWidget {
                         '${weather.temperature.round()}°C',
                         style: const TextStyle(
                           fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          height: 1.05,
+                          fontWeight: FontWeight.w700,
+                          height: 1.05, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                         ),
                       ),
                       Text(

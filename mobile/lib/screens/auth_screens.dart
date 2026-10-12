@@ -66,7 +66,7 @@ class VerificationPendingPage extends StatelessWidget {
                 title,
                 textAlign: TextAlign.center,
                 style:
-                    const TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+                    const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
               ),
               const SizedBox(height: 10),
               Text(
@@ -254,7 +254,7 @@ class _ResubmitDocumentsPageState extends State<ResubmitDocumentsPage> {
           const SizedBox(height: 16),
           const Text(
             'Resubmit requirements',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
           ),
           const SizedBox(height: 5),
           const Text(
@@ -431,8 +431,8 @@ class AuthWelcomePage extends StatelessWidget {
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 24,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -.5,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -.5, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                                   ),
                                 ),
                                 Text(
@@ -477,8 +477,8 @@ class AuthWelcomePage extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 38,
                             height: 1.08,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1.3,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -1.3, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -675,7 +675,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 16),
             const Text(
               'Welcome back',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
             ),
             const SizedBox(height: 5),
             const Text(
@@ -922,7 +922,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           const SizedBox(height: 16),
           const Text(
             'Forgot password',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
           ),
           const SizedBox(height: 5),
           const Text(
@@ -980,7 +980,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           const SizedBox(height: 16),
           const Text(
             'Check your email',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
           ),
           const SizedBox(height: 5),
           Text(
@@ -1065,7 +1065,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           const SizedBox(height: 16),
           const Text(
             'Set a new password',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
           ),
           const SizedBox(height: 5),
           const Text(
@@ -1179,7 +1179,7 @@ class _SuperadminLoginPageState extends State<SuperadminLoginPage> {
             const SizedBox(height: 16),
             const Text(
               'Platform staff',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
             ),
             const SizedBox(height: 6),
             const Text(
@@ -1597,7 +1597,7 @@ class _SignupPageState extends State<SignupPage> {
           children: [
             const Text(
               'Create your account',
-              style: TextStyle(fontSize: 29, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 29, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
             ),
             const SizedBox(height: 5),
             const Text(
@@ -2286,7 +2286,7 @@ class _AuthScaffold extends StatelessWidget {
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                         ),
                       ),
                       Text(

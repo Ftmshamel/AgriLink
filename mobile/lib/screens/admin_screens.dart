@@ -1792,8 +1792,8 @@ class _PayoutCardState extends State<_PayoutCard> {
                     formatPeso(group.amount),
                     style: const TextStyle(
                       color: green,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                     ),
                   ),
                 ],

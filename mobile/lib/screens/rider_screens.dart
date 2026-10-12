@@ -177,7 +177,7 @@ class RiderSnapshot {
           .where((order) =>
               order.status == OrderStatus.readyForPickup &&
               !order.hasRider &&
-              order.isDueForPickup(DateTime.now()))
+              order.isDueForPickup(DeliveryHours.manilaNow()))
           .toList(),
       mine: all.where((order) => order.riderId == riderId).toList(),
       trips: results[1] as List<Map<String, dynamic>>,
@@ -410,7 +410,7 @@ class RiderDashboard extends StatelessWidget {
                           session.user.name,
                           style: const TextStyle(
                             fontSize: 21,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                           ),
                         ),
                       ],
@@ -457,7 +457,7 @@ class RiderDashboard extends StatelessWidget {
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 19,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                             ),
                           ),
                           Text(
@@ -640,7 +640,7 @@ class ActiveTripCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 20,
                       color: green,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                     ),
                   ),
                 ],
@@ -795,7 +795,7 @@ class _RiderPoolState extends State<RiderPool> {
                           'You’re offline',
                           style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -1001,7 +1001,7 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
           const SizedBox(height: 18),
           Text(
             widget.batch.route,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
           ),
           const SizedBox(height: 5),
           Text(
@@ -1567,7 +1567,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                           stop.title,
                           style: const TextStyle(
                             fontSize: 22,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -1667,7 +1667,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                 const SizedBox(height: 20),
                 const Text(
                   'Route stops',
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
                 ),
                 const SizedBox(height: 10),
                 for (var i = 0; i < stops.length; i++) ...[
@@ -1852,7 +1852,7 @@ class _DeliveryProofDialogState extends State<_DeliveryProofDialog> {
                 style: const TextStyle(
                   fontSize: 26,
                   letterSpacing: 12,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                 ),
                 decoration: const InputDecoration(
                   labelText: 'Delivery code',
