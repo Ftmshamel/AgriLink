@@ -8,6 +8,17 @@ import 'package:http/testing.dart';
 class FakeFirestore {
   final Map<String, Map<String, dynamic>> documents = {};
 
+  /// Per-document write counter, reported as Firestore's `updateTime` so the
+  /// compare-and-set writes in [CloudDatabase] can be exercised.
+  final Map<String, int> _versions = {};
+
+  /// Runs just before a PATCH is applied; tests use it to slip in a write
+  /// from "another phone" between a read and the write that follows it.
+  Future<void> Function(String key)? beforePatch;
+
+  String _updateTime(String key) =>
+      '2026-01-01T00:00:00.${'${_versions[key] ?? 0}'.padLeft(6, '0')}Z';
+
   http.Client get client => MockClient(_handle);
 
   Future<http.Response> _handle(http.Request request) async {
@@ -27,6 +38,7 @@ class FakeFirestore {
         }
         documents['$collection/$id'] =
             _decode(_fields(request.body)).cast<String, dynamic>();
+        _versions['$collection/$id'] = 1;
         return _ok({'name': '$collection/$id'});
       case 'GET':
         if (tail.length == 2) {
@@ -43,9 +55,19 @@ class FakeFirestore {
         });
       case 'PATCH':
         final key = '$collection/${tail[1]}';
+        await beforePatch?.call(key);
         final stored = documents[key];
         if (stored == null) return http.Response('{}', 404);
+        final expected =
+            request.url.queryParameters['currentDocument.updateTime'];
+        if (expected != null && expected != _updateTime(key)) {
+          return http.Response(
+            '{"error":{"code":400,"status":"FAILED_PRECONDITION"}}',
+            400,
+          );
+        }
         stored.addAll(_decode(_fields(request.body)).cast<String, dynamic>());
+        _versions[key] = (_versions[key] ?? 0) + 1;
         return _ok(_document(key, stored));
       case 'DELETE':
         documents.remove('$collection/${tail[1]}');
@@ -79,7 +101,7 @@ class FakeFirestore {
           as Map<String, dynamic>;
 
   Map<String, dynamic> _document(String name, Map<String, dynamic> data) =>
-      {'name': name, 'fields': _encode(data)};
+      {'name': name, 'fields': _encode(data), 'updateTime': _updateTime(name)};
 
   http.Response _ok(Map<String, dynamic> body) => http.Response(
         jsonEncode(body),

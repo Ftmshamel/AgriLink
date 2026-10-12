@@ -385,16 +385,84 @@ class CloudDatabase {
 
   Future<void> deleteCrop(String id) => deleteDocument('mobileCrops', id);
 
-  /// Removes [soldKg] from a listing so the marketplace never oversells stock.
+  /// Takes [soldKg] off a listing, refusing when there is not that much left.
+  ///
+  /// Two buyers can check out the last kilos at the same moment, so this is a
+  /// compare-and-set: the write only lands if the listing has not changed
+  /// since it was read, and is retried with fresh numbers otherwise. Without
+  /// that, both checkouts would read 20 kg, both subtract, and the farm would
+  /// owe kilos it does not have.
   Future<void> reduceCropStock(String cropId, int soldKg) async {
     if (cropId.isEmpty || soldKg <= 0) return;
-    final current = await getDocument('mobileCrops', cropId);
-    if (current == null) return;
-    final remaining = ((current['quantityKg'] as num?)?.round() ?? 0) - soldKg;
-    await updateCrop(cropId, {
-      'quantityKg': remaining < 0 ? 0 : remaining,
-      if (remaining <= 0) 'status': 'sold_out',
+    await _adjustCropStock(cropId, (current) {
+      final available = (current['quantityKg'] as num?)?.round() ?? 0;
+      if (available < soldKg) {
+        final name = '${current['name'] ?? 'This crop'}';
+        throw Exception(available <= 0
+            ? '$name just sold out.'
+            : 'Only $available kg of $name is left. Lower the quantity and '
+                'try again.');
+      }
+      final remaining = available - soldKg;
+      return {
+        'quantityKg': remaining,
+        if (remaining <= 0) 'status': 'sold_out',
+      };
     });
+  }
+
+  /// Reads a listing, computes new fields with [change], and writes them only
+  /// if nobody else wrote in between. Returns quietly when the listing is gone.
+  Future<void> _adjustCropStock(
+    String cropId,
+    Map<String, dynamic> Function(Map<String, dynamic> current) change,
+  ) async {
+    for (var attempt = 0; attempt < 5; attempt++) {
+      final response =
+          await _client.get(Uri.parse('$_base/mobileCrops/$cropId'));
+      if (response.statusCode == 404) return;
+      _ensureSuccess(response);
+      final raw = jsonDecode(response.body) as Map<String, dynamic>;
+      final fields = change(_decodeDocument(raw));
+      final written = await _updateIfUnchanged(
+        'mobileCrops',
+        cropId,
+        '${raw['updateTime'] ?? ''}',
+        {...fields, 'updatedAt': DateTime.now().toUtc().toIso8601String()},
+      );
+      if (written) return;
+    }
+    throw Exception(
+      'Many people are buying this right now. Please try again.',
+    );
+  }
+
+  /// Patches [id] only if it still has [updateTime]; false when it changed.
+  /// An empty [updateTime] (a server that does not report one) writes as-is.
+  Future<bool> _updateIfUnchanged(
+    String collection,
+    String id,
+    String updateTime,
+    Map<String, dynamic> fields,
+  ) async {
+    final query = [
+      for (final key in fields.keys)
+        'updateMask.fieldPaths=${Uri.encodeQueryComponent(key)}',
+      if (updateTime.isNotEmpty)
+        'currentDocument.updateTime=${Uri.encodeQueryComponent(updateTime)}',
+    ].join('&');
+    final response = await _client.patch(
+      Uri.parse('$_base/$collection/$id?$query'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'fields': _encodeMap(fields)}),
+    );
+    if (response.statusCode == 409 ||
+        (response.statusCode == 400 &&
+            response.body.contains('FAILED_PRECONDITION'))) {
+      return false;
+    }
+    _ensureSuccess(response);
+    return true;
   }
 
   // ------------------------------------------------------------------ orders
@@ -671,13 +739,13 @@ class CloudDatabase {
   /// Puts cancelled kilos back on the listing they came from.
   Future<void> restoreCropStock(String cropId, int kg) async {
     if (cropId.isEmpty || kg <= 0) return;
-    final current = await getDocument('mobileCrops', cropId);
-    if (current == null) return;
-    final quantity = ((current['quantityKg'] as num?)?.round() ?? 0) + kg;
-    await updateCrop(cropId, {
-      'quantityKg': quantity,
-      if (current['status'] == 'sold_out') 'status': 'active',
-    });
+    await _adjustCropStock(
+        cropId,
+        (current) => {
+              'quantityKg':
+                  ((current['quantityKg'] as num?)?.round() ?? 0) + kg,
+              if (current['status'] == 'sold_out') 'status': 'active',
+            });
   }
 
   // ------------------------------------------------------------------ wallet

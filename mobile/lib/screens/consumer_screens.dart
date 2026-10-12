@@ -668,7 +668,8 @@ class _ProductDetailsState extends State<ProductDetails> {
             onPressed: !_canOrder
                 ? null
                 : () {
-                    final inCart = widget.cart.lineFor(crop.id)?.quantityKg ?? 0;
+                    final inCart =
+                        widget.cart.lineFor(crop.id)?.quantityKg ?? 0;
                     if (inCart + quantity > crop.quantityKg) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -830,8 +831,8 @@ class _CartSheetState extends State<CartSheet> {
           'id': 'draft-${entry.key}',
           'buyerId': user.id,
           'farmerId': entry.key,
-          'quantityKg': entry.value
-              .fold<int>(0, (sum, line) => sum + line.quantityKg),
+          'quantityKg':
+              entry.value.fold<int>(0, (sum, line) => sum + line.quantityKg),
           'deliveryFee': fees[entry.key] ?? DeliveryPricing.fallbackFee,
           'deliveryLatitude': _dropPoint?.latitude,
           'deliveryLongitude': _dropPoint?.longitude,
@@ -1026,8 +1027,7 @@ class _CartSheetState extends State<CartSheet> {
           ? GeoService.distanceKm(buyer, farm)
           : 0.0;
       final kilos = lines.fold<int>(0, (sum, line) => sum + line.quantityKg);
-      fees[farmerId] =
-          _rates.fee(distanceKm: distance, quantityKg: kilos);
+      fees[farmerId] = _rates.fee(distanceKm: distance, quantityKg: kilos);
     });
     return fees;
   }
@@ -1126,45 +1126,55 @@ class _CartSheetState extends State<CartSheet> {
           final fee = index == lines.length - 1
               ? farmFee - share * (lines.length - 1)
               : share;
-          await authService.database.createOrder({
-            'buyerId': user.id,
-            'buyerName': user.name,
-            'buyerPhone': user.phone,
-            'farmerId': crop.farmerId,
-            'farmerName': crop.farmerName,
-            'farmerPhone': farmerPhone,
-            'cropId': crop.id,
-            'cropName': crop.name,
-            'quantityKg': line.quantityKg,
-            'pricePerKg': crop.pricePerKg,
-            'totalPrice': line.subtotal,
-            'deliveryFee': fee,
-            'deliveryAddress': _dropAddress,
-            'deliveryLatitude': _dropPoint!.latitude,
-            'deliveryLongitude': _dropPoint!.longitude,
-            'farmLocation': crop.farmLocation,
-            'farmLatitude': crop.latitude,
-            'farmLongitude': crop.longitude,
-            'paymentMethod':
-                walletReference != null ? 'AgriLink Wallet' : _method,
-            'paymentReference': walletReference ??
-                _paidInvoice?.reference ??
-                _reference.text.trim(),
-            'paymentStatus': paid ? 'paid' : 'submitted',
-            if (_paidInvoice != null) 'paymentInvoiceId': _paidInvoice!.id,
-            'deliveryType': _scheduled ? 'scheduled' : 'same_day',
-            'deliveryDate': deliveryDate.toIso8601String().substring(0, 10),
-            // Money already in means there is nothing left for the farm to
-            // accept or refuse, so a paid order arrives confirmed and the
-            // farmer's only job is to pack it and book a rider.
-            'status':
-                paid ? OrderStatus.preparing.wire : OrderStatus.placed.wire,
-          });
+          // Stock is taken first: if another buyer got the last kilos a
+          // moment ago this throws before any order exists, and the catch
+          // below returns the money to the wallet.
+          await authService.database.reduceCropStock(crop.id, line.quantityKg);
+          try {
+            await authService.database.createOrder({
+              'buyerId': user.id,
+              'buyerName': user.name,
+              'buyerPhone': user.phone,
+              'farmerId': crop.farmerId,
+              'farmerName': crop.farmerName,
+              'farmerPhone': farmerPhone,
+              'cropId': crop.id,
+              'cropName': crop.name,
+              'quantityKg': line.quantityKg,
+              'pricePerKg': crop.pricePerKg,
+              'totalPrice': line.subtotal,
+              'deliveryFee': fee,
+              'deliveryAddress': _dropAddress,
+              'deliveryLatitude': _dropPoint!.latitude,
+              'deliveryLongitude': _dropPoint!.longitude,
+              'farmLocation': crop.farmLocation,
+              'farmLatitude': crop.latitude,
+              'farmLongitude': crop.longitude,
+              'paymentMethod':
+                  walletReference != null ? 'AgriLink Wallet' : _method,
+              'paymentReference': walletReference ??
+                  _paidInvoice?.reference ??
+                  _reference.text.trim(),
+              'paymentStatus': paid ? 'paid' : 'submitted',
+              if (_paidInvoice != null) 'paymentInvoiceId': _paidInvoice!.id,
+              'deliveryType': _scheduled ? 'scheduled' : 'same_day',
+              'deliveryDate': deliveryDate.toIso8601String().substring(0, 10),
+              // Money already in means there is nothing left for the farm to
+              // accept or refuse, so a paid order arrives confirmed and the
+              // farmer's only job is to pack it and book a rider.
+              'status':
+                  paid ? OrderStatus.preparing.wire : OrderStatus.placed.wire,
+            });
+          } catch (_) {
+            await authService.database
+                .restoreCropStock(crop.id, line.quantityKg)
+                .catchError((_) {});
+            rethrow;
+          }
           written += line.subtotal + fee;
           // Off the cart the moment it exists, so a retry after a dropped
           // connection only places what is still missing.
           widget.cart.remove(crop.id);
-          await authService.database.reduceCropStock(crop.id, line.quantityKg);
         }
       }
       _paidInvoice = null;
@@ -1271,8 +1281,7 @@ class _CartSheetState extends State<CartSheet> {
         invoice = await _payments.createInvoice(
           amount: total,
           reference: reference,
-          description:
-              'AgriLink order \u2022 ${widget.cart.lines.length} item'
+          description: 'AgriLink order \u2022 ${widget.cart.lines.length} item'
               '${widget.cart.lines.length == 1 ? '' : 's'}',
         );
       } on PaymentException catch (error) {
@@ -1654,67 +1663,67 @@ class _CartSheetState extends State<CartSheet> {
                   if (_useWallet)
                     _walletNotice(subtotal + delivery)
                   else ...[
-                  if (!PaymentService.enabled)
-                    DropdownButtonFormField<String>(
-                      initialValue: _method,
-                      decoration: const InputDecoration(
-                        labelText: 'Payment method',
-                        prefixIcon: Icon(Icons.payments_outlined),
+                    if (!PaymentService.enabled)
+                      DropdownButtonFormField<String>(
+                        initialValue: _method,
+                        decoration: const InputDecoration(
+                          labelText: 'Payment method',
+                          prefixIcon: Icon(Icons.payments_outlined),
+                        ),
+                        items:
+                            const ['GCash', 'Maya', 'MariBank', 'Bank transfer']
+                                .map(
+                                  (item) => DropdownMenuItem(
+                                    value: item,
+                                    child: Text(item),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (value) =>
+                            setState(() => _method = value ?? 'GCash'),
                       ),
-                      items:
-                          const ['GCash', 'Maya', 'MariBank', 'Bank transfer']
-                              .map(
-                                (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(item),
-                                ),
-                              )
-                              .toList(),
-                      onChanged: (value) =>
-                          setState(() => _method = value ?? 'GCash'),
-                    ),
-                  if (_payingOnline) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: canvas,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.lock_outline,
-                              color: green, size: 19),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              _paidInvoice == null
-                                  ? 'Pay on the next screen. GCash, Maya, card, '
-                                      'or bank \u2014 you pick there, and there is '
-                                      'no reference number to type.'
-                                  : 'Paid \u2022 $_method \u2022 '
-                                      '${_paidInvoice!.reference}',
-                              style:
-                                  const TextStyle(fontSize: 11.5, height: 1.4),
+                    if (_payingOnline) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: canvas,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.lock_outline,
+                                color: green, size: 19),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _paidInvoice == null
+                                    ? 'Pay on the next screen. GCash, Maya, card, '
+                                        'or bank \u2014 you pick there, and there is '
+                                        'no reference number to type.'
+                                    : 'Paid \u2022 $_method \u2022 '
+                                        '${_paidInvoice!.reference}',
+                                style: const TextStyle(
+                                    fontSize: 11.5, height: 1.4),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ] else if (_method != 'Cash on delivery') ...[
-                    const SizedBox(height: 12),
-                    _ManualPayTo(
-                      method: _method,
-                      amount: subtotal + delivery,
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _reference,
-                      decoration: const InputDecoration(
-                        labelText: 'Payment reference number',
-                        prefixIcon: Icon(Icons.confirmation_number_outlined),
+                    ] else if (_method != 'Cash on delivery') ...[
+                      const SizedBox(height: 12),
+                      _ManualPayTo(
+                        method: _method,
+                        amount: subtotal + delivery,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _reference,
+                        decoration: const InputDecoration(
+                          labelText: 'Payment reference number',
+                          prefixIcon: Icon(Icons.confirmation_number_outlined),
+                        ),
+                      ),
+                    ],
                   ],
                   if (_error != null) ...[
                     const SizedBox(height: 12),
@@ -2168,7 +2177,8 @@ class _WalletPageState extends State<WalletPage> {
   }
 
   Future<bool> _cashInOnline(int amount) async {
-    final reference = 'AGRILINK-WALLET-${DateTime.now().millisecondsSinceEpoch}';
+    final reference =
+        'AGRILINK-WALLET-${DateTime.now().millisecondsSinceEpoch}';
     final invoice = await _payments.createInvoice(
       amount: amount,
       reference: reference,
