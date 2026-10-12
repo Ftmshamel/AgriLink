@@ -25,7 +25,7 @@ riders, and superadministrators in one agricultural marketplace.
 - Verified proof of delivery: geofence, buyer code, photo, and buyer receipt
 - AgriLink Wallet: cash in through Xendit, pay from the balance, get refunds
 - Same-day or scheduled delivery, with cancellation up to 5 days before
-- In-app notification inbox for every role
+- In-app notification inbox and phone notifications for every role
 - Cloud-backed account and marketplace data
 
 ## API integration
@@ -227,9 +227,15 @@ Each role has a bell on its home screen with an unread count: buyers hear
 about every step of their orders (including their delivery code and refunds),
 farms about new orders, ratings and payouts, riders about packed orders
 waiting and payouts, and superadmins about applications and disputes. The
-inbox is built from the orders' own timelines, so it needs no server; true
-push notifications to a closed app need Firebase Cloud Messaging and a sender
-such as a Cloud Function.
+inbox is built from the orders' own timelines, so it needs no server.
+
+The same updates also appear as **phone notifications**
+(`lib/services/phone_alerts.dart`): the app checks every 20 seconds while it
+is open, and a WorkManager task checks about every 15 minutes (Android's
+minimum) after it is closed. Only updates newer than the last one shown are
+notified, and the first check after signing in just records where the user
+is. Instant delivery to a closed app would need Firebase Cloud Messaging and a
+sender such as a Cloud Function.
 
 ## Release build
 

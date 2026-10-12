@@ -44,7 +44,8 @@ jobs:
 
       # Signed with the shared AgriLink key (android/app/agrilink-ci.jks), so
       # each build installs over the last; the run number is the version code
-      # so Android always sees it as newer. Payment and
+      # so Android always sees it as newer, and the version name (1.0.<run>,
+      # shown in Settings → Apps) says which build a phone has. Payment and
       # email settings come from the repository's Actions secrets; any that
       # are not set stay empty and the app falls back to its offline modes
       # (manual reference numbers, demo wallet funds, reset code on screen).
@@ -73,7 +74,7 @@ jobs:
           add AGRILINK_EMAILJS_SERVICE_ID "$EMAILJS_SERVICE_ID"
           add AGRILINK_EMAILJS_TEMPLATE_ID "$EMAILJS_TEMPLATE_ID"
           add AGRILINK_EMAILJS_PUBLIC_KEY "$EMAILJS_PUBLIC_KEY"
-          flutter build apk --release --build-number=${{ github.run_number }} "${args[@]}"
+          flutter build apk --release --build-name=1.0.${{ github.run_number }} --build-number=${{ github.run_number }} "${args[@]}"
 
       - name: Report which services this build includes
         run: |
