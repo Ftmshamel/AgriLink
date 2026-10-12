@@ -13,10 +13,10 @@ enum WeatherAudience { farmer, rider }
 final weatherService = WeatherService();
 
 /// Default pin used when an account never finished pinning its location:
-/// Cabanatuan, in the Nueva Ecija rice belt AgriLink serves.
-const _fallbackLatitude = 15.4865;
-const _fallbackLongitude = 120.9734;
-const _fallbackPlaceName = 'Cabanatuan, Nueva Ecija';
+/// San Ildefonso, Bulacan, where AgriLink is developed.
+const _fallbackLatitude = 15.0790;
+const _fallbackLongitude = 120.9418;
+const _fallbackPlaceName = 'San Ildefonso, Bulacan';
 
 /// Live weather for the signed-in account's pinned location.
 ///

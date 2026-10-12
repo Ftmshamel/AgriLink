@@ -24,7 +24,7 @@ class GeoPlace {
   final double latitude;
   final double longitude;
 
-  /// "Cabanatuan, Nueva Ecija" — the region is dropped when it repeats the name.
+  /// "San Ildefonso, Bulacan" — the region is dropped when it repeats the name.
   String get label => region.isEmpty || region == name
       ? name
       : '$name, $region';
