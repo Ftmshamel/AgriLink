@@ -9,6 +9,7 @@ import 'screens/consumer_screens.dart';
 import 'screens/farmer_screens.dart';
 import 'screens/rider_screens.dart';
 import 'services/local_auth_service.dart';
+import 'services/phone_alerts.dart';
 import 'services/session.dart';
 import 'utils/app_colors.dart';
 
@@ -143,10 +144,15 @@ class _RoleHomeState extends State<RoleHome> {
   /// while signed in is moved to the suspended screen within a poll, instead
   /// of carrying on until they next sign in.
   void _watchForApproval() {
+    // Records where this user's updates stand, so only later ones notify.
+    unawaited(PhoneAlerts.check(database: authService.database));
     _approvalPoll = Timer.periodic(const Duration(seconds: 20), _refreshApproval);
   }
 
   Future<void> _refreshApproval(Timer timer) async {
+    // The same tick turns new inbox updates into phone notifications while
+    // the app is open; a background task covers the app being closed.
+    unawaited(PhoneAlerts.check(database: authService.database));
     final Map<String, dynamic>? account;
     try {
       account = await authService.database.getAccount(_session.user.id);
