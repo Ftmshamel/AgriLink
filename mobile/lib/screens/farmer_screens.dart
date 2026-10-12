@@ -1483,7 +1483,7 @@ class FarmerOrderDetails extends StatelessWidget {
                 const SizedBox(height: 20),
                 const Text(
                   'Progress',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
                 ),
                 const SizedBox(height: 14),
                 ..._timeline(order),

@@ -19,7 +19,7 @@ class AppBrand extends StatelessWidget {
           style: TextStyle(
             color: darkGreen,
             fontSize: 22,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
           ),
         ),
       ],

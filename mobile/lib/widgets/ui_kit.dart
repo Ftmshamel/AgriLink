@@ -25,7 +25,7 @@ class EmptyState extends StatelessWidget {
             Text(title,
                 textAlign: TextAlign.center,
                 style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,)),
             const SizedBox(height: 6),
             Text(message,
                 textAlign: TextAlign.center,
@@ -54,7 +54,7 @@ class MetricCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(value,
               style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,)),
           Text(label, style: const TextStyle(color: muted, fontSize: 12)),
         ]),
       ),
@@ -117,7 +117,7 @@ class PageHeader extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           title,
-          style: const TextStyle(fontSize: 29, fontWeight: FontWeight.w900),
+          style: const TextStyle(fontSize: 29, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
         ),
         const SizedBox(height: 5),
         Text(subtitle, style: const TextStyle(color: muted, height: 1.4)),
@@ -144,7 +144,7 @@ class SectionTitle extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
           ),
         ),
         InkWell(
@@ -522,7 +522,7 @@ class StatCard extends StatelessWidget {
             Text(label, style: const TextStyle(color: muted, fontSize: 12)),
             Text(
               value,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
             ),
           ],
         ),
@@ -715,7 +715,7 @@ class PoolCard extends StatelessWidget {
                     style: const TextStyle(
                       color: green,
                       fontSize: 21,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                     ),
                   ),
                 ],
@@ -724,7 +724,7 @@ class PoolCard extends StatelessWidget {
               Text(
                 route,
                 style:
-                    const TextStyle(fontSize: 19, fontWeight: FontWeight.w900),
+                    const TextStyle(fontSize: 19, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
               ),
               const SizedBox(height: 6),
               Text(

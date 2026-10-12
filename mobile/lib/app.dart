@@ -31,7 +31,8 @@ class AgriLinkApp extends StatelessWidget {
           surface: Colors.white,
         ),
         scaffoldBackgroundColor: canvas,
-        fontFamily: 'Roboto',
+        fontFamily: 'Nunito',
+        textTheme: _headingsInFredoka(),
         appBarTheme: const AppBarTheme(
           backgroundColor: canvas,
           foregroundColor: ink,
@@ -55,6 +56,26 @@ class AgriLinkApp extends StatelessWidget {
       home: const SplashScreen(),
     );
   }
+}
+
+/// Headings use Fredoka, the rounded face of the download page and emails;
+/// body text stays in Nunito. Fredoka has no peso sign, so prices in a heading
+/// fall back to Nunito for that one glyph.
+TextTheme _headingsInFredoka() {
+  const heading = TextStyle(
+    fontFamily: 'Fredoka',
+    fontFamilyFallback: ['Nunito'],
+    fontWeight: FontWeight.w600,
+  );
+  return const TextTheme(
+    displayLarge: heading,
+    displayMedium: heading,
+    displaySmall: heading,
+    headlineLarge: heading,
+    headlineMedium: heading,
+    headlineSmall: heading,
+    titleLarge: heading,
+  );
 }
 
 /// Sends a signed-in account to its role shell, or to the review screen while

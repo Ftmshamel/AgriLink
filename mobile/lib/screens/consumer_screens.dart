@@ -165,7 +165,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                           user.name,
                           style: const TextStyle(
                             fontSize: 22,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                           ),
                         ),
                       ],
@@ -244,8 +244,8 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 23,
-                              fontWeight: FontWeight.w900,
-                              height: 1.15,
+                              fontWeight: FontWeight.w700,
+                              height: 1.15, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                             ),
                           ),
                           SizedBox(height: 10),
@@ -495,7 +495,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                   crop.name,
                   style: const TextStyle(
                     fontSize: 28,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                   ),
                 ),
               ),
@@ -512,7 +512,7 @@ class _ProductDetailsState extends State<ProductDetails> {
             style: const TextStyle(
               color: green,
               fontSize: 22,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
             ),
           ),
           const SizedBox(height: 18),
@@ -1448,7 +1448,7 @@ class _CartSheetState extends State<CartSheet> {
               children: [
                 const Text(
                   'Your bulk order',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
                 ),
                 const SizedBox(height: 18),
                 if (lines.isEmpty)
@@ -2302,7 +2302,7 @@ class _WalletPageState extends State<WalletPage> {
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 34,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -2863,7 +2863,7 @@ class DeliveryTracking extends StatelessWidget {
                 const SizedBox(height: 20),
                 const Text(
                   'Delivery progress',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, fontFamily: headingFont, fontFamilyFallback: headingFallback,),
                 ),
                 const SizedBox(height: 14),
                 ..._timeline(order),
@@ -3093,8 +3093,8 @@ class _DeliveryCodeCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 36,
                   letterSpacing: 14,
-                  fontWeight: FontWeight.w900,
-                  color: green,
+                  fontWeight: FontWeight.w700,
+                  color: green, fontFamily: headingFont, fontFamilyFallback: headingFallback,
                 ),
               ),
             ),
