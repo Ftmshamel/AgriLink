@@ -6,11 +6,14 @@
   <title>AgriLink for Android</title>
   <meta name="description" content="AgriLink connects Nueva Ecija farms directly with buyers, with verified riders delivering in between. Download the Android app and read the quick guide for your role.">
   <link rel="icon" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f7f2; --surface: #ffffff; --surface-2: #eef3e8; --ink: #152015;
+      --bg: #fbf8ee; --surface: #ffffff; --surface-2: #f2eedd; --sun: #ffd166; --sun-ink: #123d1c; --sun-deep: #c99526; --ink: #152015;
       --muted: #5a6a5b; --line: #dde5d6; --green: #2d7a10; --green-ink: #ffffff;
-      --green-soft: #e3f0d9; --green-deep: #1d5209; --amber: #9a5b00; --amber-soft: #fbefd9;
+      --green-soft: #e4f1d6; --green-deep: #1d5209; --amber: #9a5b00; --amber-soft: #fbefd9;
       --hero-a: #1d5209; --hero-b: #3c9a17; --hero-ink: #ffffff; --hero-muted: #d6ecc8;
       --shadow: 0 1px 2px rgba(20, 40, 10, .06), 0 8px 24px rgba(20, 40, 10, .06);
     }
@@ -34,10 +37,11 @@
     html { scroll-behavior: smooth; }
     body {
       margin: 0; background: var(--bg); color: var(--ink);
-      font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font: 16px/1.6 "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
     a { color: var(--green); }
+    h1, h2, h3, .logo, .btn, .tab, .kicker, .eyebrow { font-family: "Fredoka", "Nunito", system-ui, sans-serif; }
     svg { flex: none; }
     .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
 
@@ -56,44 +60,64 @@
     .top .get:hover { background: var(--green); color: var(--green-ink); opacity: .9; }
     @media (max-width: 720px) { .top nav a:not(.get) { display: none; } }
 
-    /* Hero */
+    /* Hero: the same farm scene as the printed poster */
     .hero {
-      background: linear-gradient(135deg, var(--hero-a), var(--hero-b)); color: var(--hero-ink);
-      padding: 56px 0 64px;
+      position: relative; overflow: hidden; color: #fff; padding: 64px 0 230px;
+      background: radial-gradient(ellipse 90% 70% at 50% 30%, #2f6a2a 0%, #1d4d1f 50%, #123a17 100%);
     }
-    .hero .wrap { display: grid; grid-template-columns: 1.25fr .75fr; gap: 40px; align-items: center; }
-    .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 700; color: var(--hero-muted); margin: 0 0 12px; }
-    .hero h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin: 0 0 16px; letter-spacing: -.01em; }
-    .hero p.lead { font-size: 18px; color: var(--hero-muted); margin: 0 0 28px; max-width: 34em; }
-    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hero .scene { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .hero .wrap { position: relative; display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: center; }
+    .hero-logo { width: 150px; height: 150px; filter: drop-shadow(0 8px 20px rgba(0,0,0,.35)); margin: 0 0 6px -10px; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: 14px; font-weight: 600; color: #cfe9bd; margin: 0 0 10px; }
+    .hero h1 {
+      font-size: clamp(38px, 6vw, 64px); line-height: 1.04; margin: 0 0 18px; font-weight: 700;
+      text-shadow: 0 4px 0 #0b2a10, 0 10px 30px rgba(0,0,0,.3);
+    }
+    .hero h1 span { color: var(--sun); }
+    .hero p.lead { font-size: 19px; color: #dcefd0; margin: 0 0 30px; max-width: 32em; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
     .btn {
-      display: inline-flex; align-items: center; gap: 10px; padding: 14px 20px; border-radius: 14px;
-      font-weight: 700; text-decoration: none; font-size: 16px;
+      display: inline-flex; align-items: center; gap: 10px; padding: 15px 24px; border-radius: 999px;
+      font-weight: 600; text-decoration: none; font-size: 18px; transition: transform .15s ease;
     }
-    .btn-light { background: #ffffff; color: #1d5209; }
-    .btn-ghost { color: var(--hero-ink); border: 1.5px solid rgba(255,255,255,.45); }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-sun { background: var(--sun); color: var(--sun-ink); box-shadow: 0 6px 0 var(--sun-deep), 0 14px 30px rgba(0,0,0,.25); }
+    .btn-ghost { color: #fff; border: 2px solid rgba(255,255,255,.55); }
     .btn-ghost:hover { background: rgba(255,255,255,.1); }
-    .facts { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 28px; padding: 0; list-style: none; color: var(--hero-muted); font-size: 14px; }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px; padding: 0; list-style: none; color: #dcefd0; font-size: 15px; font-weight: 600; }
     .facts li { display: flex; align-items: center; gap: 6px; }
+    .facts svg { color: var(--sun); }
     .qr-card {
-      background: #ffffff; color: #152015; border-radius: 22px; padding: 20px; text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,.25); justify-self: end; width: 100%; max-width: 300px;
+      background: #ffffff; color: #123d1c; border-radius: 32px; padding: 24px; text-align: center;
+      box-shadow: 0 0 0 10px rgba(255,255,255,.16), 0 30px 60px rgba(0,0,0,.35); justify-self: end; width: 100%; max-width: 320px;
+      transform: rotate(2deg);
     }
-    .qr-card img { width: 100%; max-width: 240px; aspect-ratio: 1; display: block; margin: 0 auto; }
-    .qr-card strong { display: block; margin-top: 10px; font-size: 16px; }
-    .qr-card span { display: block; color: #5a6a5b; font-size: 13px; }
+    .qr-card img { width: 100%; max-width: 250px; aspect-ratio: 1; display: block; margin: 0 auto; }
+    .qr-card strong { display: block; margin-top: 12px; font: 600 20px "Fredoka", sans-serif; }
+    .qr-card span { display: block; color: #5a6a5b; font-size: 14px; }
     @media (max-width: 760px) {
-      .hero { padding: 40px 0 44px; }
-      .hero .wrap { grid-template-columns: 1fr; gap: 28px; }
-      .qr-card { justify-self: center; }
+      .hero { padding: 36px 0 170px; }
+      .hero .wrap { grid-template-columns: 1fr; gap: 30px; text-align: center; }
+      .hero-logo { width: 120px; height: 120px; margin: 0 auto 4px; }
+      .hero p.lead { margin-left: auto; margin-right: auto; }
+      .hero-actions, .facts { justify-content: center; }
+      .qr-card { display: none; }
       .btn { flex: 1 1 auto; justify-content: center; }
     }
+
+    /* Highlights strip */
+    .strip { background: var(--surface); border-bottom: 1px solid var(--line); }
+    .strip ul { list-style: none; margin: 0; padding: 22px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .strip li { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+    .strip b { display: block; color: var(--ink); font: 600 18px "Fredoka", sans-serif; }
+    .strip .icon { width: 42px; height: 42px; }
+    @media (max-width: 760px) { .strip ul { grid-template-columns: 1fr; gap: 12px; } }
 
     /* Sections */
     section.block { padding: 64px 0 8px; scroll-margin-top: 60px; }
     .hero { scroll-margin-top: 60px; }
     .head { max-width: 640px; margin-bottom: 28px; }
-    .head h2 { font-size: clamp(24px, 3.4vw, 32px); line-height: 1.2; margin: 0 0 8px; letter-spacing: -.01em; }
+    .head h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; margin: 0 0 8px; font-weight: 600; }
     .head p { color: var(--muted); margin: 0; font-size: 17px; }
     .kicker { color: var(--green); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
 
@@ -106,10 +130,10 @@
     @media (max-width: 560px) { .g4, .g3, .g2 { grid-template-columns: 1fr; } }
 
     .card {
-      background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px;
+      background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 24px;
       box-shadow: var(--shadow);
     }
-    .card h3 { margin: 12px 0 6px; font-size: 18px; }
+    .card h3 { margin: 14px 0 6px; font-size: 21px; font-weight: 600; }
     .card p { margin: 0; color: var(--muted); font-size: 15px; }
     .icon {
       width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
@@ -227,20 +251,62 @@
   </header>
 
   <section class="hero" id="download">
+    <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <radialGradient id="h-sun" cx="1380" cy="40" r="800" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#ffe7a1" stop-opacity=".9"/>
+          <stop offset=".3" stop-color="#f4c35a" stop-opacity=".45"/>
+          <stop offset="1" stop-color="#d79a32" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="h-ray" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#fff2c4" stop-opacity=".16"/><stop offset="1" stop-color="#fff2c4" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="h-cloud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d3e6f4"/></linearGradient>
+        <filter id="h-soft"><feGaussianBlur stdDeviation="5"/></filter>
+      </defs>
+      <rect width="1600" height="900" fill="url(#h-sun)"/>
+      <g transform="translate(1380 40)">
+        <polygon points="0,0 -1200,420 -1160,520" fill="url(#h-ray)"/>
+        <polygon points="0,0 -900,700 -790,760" fill="url(#h-ray)"/>
+        <polygon points="0,0 -1300,170 -1290,240" fill="url(#h-ray)"/>
+      </g>
+      <g filter="url(#h-soft)" opacity=".95">
+        <g transform="translate(-120 10) scale(.55)">
+          <ellipse cx="260" cy="200" rx="260" ry="110" fill="url(#h-cloud)"/>
+          <circle cx="180" cy="140" r="110" fill="url(#h-cloud)"/><circle cx="340" cy="110" r="130" fill="url(#h-cloud)"/>
+        </g>
+        <g transform="translate(1320 120) scale(.5)">
+          <ellipse cx="260" cy="190" rx="300" ry="110" fill="url(#h-cloud)"/>
+          <circle cx="170" cy="140" r="110" fill="url(#h-cloud)"/><circle cx="330" cy="100" r="140" fill="url(#h-cloud)"/>
+        </g>
+      </g>
+      <path d="M0 760 C 260 700 520 715 800 735 C 1100 755 1350 690 1600 670 L1600 900 L0 900Z" fill="#5f9a33"/>
+      <g fill="#3b7d2c"><circle cx="470" cy="735" r="34"/><circle cx="515" cy="728" r="42"/><circle cx="560" cy="740" r="30"/></g>
+      <g transform="translate(1040 640) scale(.8)">
+        <rect x="20" y="60" width="130" height="90" fill="#d9c08a"/><polygon points="0,64 85,0 170,64" fill="#a8844d"/>
+        <rect x="40" y="90" width="26" height="60" fill="#8a6a3a"/><rect x="95" y="85" width="34" height="28" fill="#6b5130"/>
+      </g>
+      <path d="M0 810 C 300 740 600 790 900 820 C 1200 850 1400 780 1600 760 L1600 900 L0 900Z" fill="#8cc04a"/>
+      <g stroke="#5b9a2c" stroke-width="18" stroke-linecap="round" fill="none" opacity=".6">
+        <path d="M-40 850 C 200 800 430 815 650 865"/><path d="M1000 850 C 1220 805 1420 785 1640 775"/>
+      </g>
+      <path d="M0 860 C 400 830 800 850 1100 875 C 1300 890 1450 880 1600 860 L1600 900 L0 900Z" fill="var(--bg)"/>
+    </svg>
     <div class="wrap">
       <div>
+        <img class="hero-logo" src="logo.png" alt="AgriLink">
         <p class="eyebrow">Farm-to-table marketplace · Nueva Ecija</p>
-        <h1>Buy straight from the farm. Delivered by a rider you can trust.</h1>
+        <h1>Fresh from the farm, <span>straight to your door.</span></h1>
         <p class="lead">
           AgriLink connects local farmers with restaurants, stores, and households.
           Buyers get fresh crops at farm prices, farmers sell without a middleman,
-          and verified riders bring the order to the buyer's door.
+          and verified riders deliver every order.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-light" href="https://github.com/Ftmshamel/AgriLink/releases/download/apk-latest/AgriLink.apk">
+          <a class="btn btn-sun" href="https://github.com/Ftmshamel/AgriLink/releases/download/apk-latest/AgriLink.apk">
             <svg width="20" height="20"><use href="#i-download"/></svg> Download for Android
           </a>
-          <a class="btn btn-ghost" href="#guide">Read the quick guide</a>
+          <a class="btn btn-ghost" href="#guide">How it works</a>
         </div>
         <ul class="facts">
           <li><svg width="16" height="16"><use href="#i-check"/></svg>Free to download</li>
@@ -253,6 +319,17 @@
         <strong>Scan to download</strong>
         <span>Point your phone's camera at the code</span>
       </div>
+    </div>
+  </section>
+
+  <section class="strip" aria-label="Highlights">
+    <div class="wrap">
+      <ul>
+        <li><div class="icon"><svg><use href="#i-farm"/></svg></div><div><b>Direct from farms</b>No middleman pricing</div></li>
+        <li><div class="icon"><svg><use href="#i-shield"/></svg></div><div><b>Verified users</b>Farmers and riders checked</div></li>
+        <li><div class="icon"><svg><use href="#i-key"/></svg></div><div><b>Proof of delivery</b>GPS, code, and photo</div></li>
+        <li><div class="icon"><svg><use href="#i-wallet"/></svg></div><div><b>GCash or wallet</b>Refunds to your wallet</div></li>
+      </ul>
     </div>
   </section>
 
