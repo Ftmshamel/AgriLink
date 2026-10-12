@@ -193,18 +193,10 @@ class EmailService {
 <tr><td align="center" style="padding:24px 12px">
   <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:24px;overflow:hidden;border:1px solid #e7e1c9">
     <tr><td><img src="${_siteUrl}email-header.jpg" width="600" alt="AgriLink - Fresh from the farm, straight to your door." style="display:block;width:100%;height:auto;border:0"></td></tr>
-    <tr><td style="padding:30px 32px 8px;font-family:'Nunito',Arial,Helvetica,sans-serif">
+    <tr><td style="padding:30px 32px 32px;font-family:'Nunito',Arial,Helvetica,sans-serif">
       $badgeHtml
       <h1 style="margin:0 0 14px;font-family:'Fredoka',Arial,Helvetica,sans-serif;font-size:28px;line-height:1.2;font-weight:700;color:#123d1c">${_escape(heading)}</h1>
       $body
-    </td></tr>
-    <tr><td style="padding:26px 32px 30px;font-family:'Nunito',Arial,Helvetica,sans-serif">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #ece6cf">
-        <tr><td style="padding-top:18px;font-size:13px;line-height:1.6;color:#8a8f7e">
-          <strong style="color:#2d7a10">AgriLink</strong> &middot; Farm-to-table marketplace, Nueva Ecija<br>
-          <a href="$_siteUrl" style="color:#2d7a10">ftmshamel.github.io/AgriLink</a>
-        </td></tr>
-      </table>
     </td></tr>
   </table>
 </td></tr>
