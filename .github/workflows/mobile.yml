@@ -75,12 +75,14 @@ jobs:
 
       - name: Report which services this build includes
         run: |
-          for name in PAYMENTS_URL EMAIL_PROVIDER GCASH_NUMBER; do
+          for name in PAYMENTS_URL EMAIL_PROVIDER EMAIL_API_KEY EMAIL_SENDER GCASH_NUMBER; do
             if [ -n "${!name}" ]; then echo "$name: set"; else echo "$name: not set"; fi
           done
         env:
           PAYMENTS_URL: ${{ secrets.AGRILINK_PAYMENTS_URL }}
           EMAIL_PROVIDER: ${{ secrets.AGRILINK_EMAIL_PROVIDER }}
+          EMAIL_API_KEY: ${{ secrets.AGRILINK_EMAIL_API_KEY }}
+          EMAIL_SENDER: ${{ secrets.AGRILINK_EMAIL_SENDER }}
           GCASH_NUMBER: ${{ secrets.AGRILINK_GCASH_NUMBER }}
 
       - uses: actions/upload-artifact@v4

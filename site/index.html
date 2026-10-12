@@ -101,7 +101,8 @@
     .g4 { grid-template-columns: repeat(4, 1fr); }
     .g3 { grid-template-columns: repeat(3, 1fr); }
     .g2 { grid-template-columns: repeat(2, 1fr); }
-    @media (max-width: 900px) { .g4 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 900px) { .g4 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 720px) { .g3 { grid-template-columns: 1fr; } }
     @media (max-width: 560px) { .g4, .g3, .g2 { grid-template-columns: 1fr; } }
 
     .card {
@@ -259,10 +260,10 @@
     <section class="block" id="who">
       <div class="head">
         <p class="kicker">Who it's for</p>
-        <h2>One app, four roles</h2>
+        <h2>One app, three roles</h2>
         <p>Choose your role when you create an account. Each role sees its own screens.</p>
       </div>
-      <div class="grid g4">
+      <div class="grid g3">
         <div class="card">
           <div class="icon"><svg><use href="#i-cart"/></svg></div>
           <h3>Consumers</h3>
@@ -281,12 +282,6 @@
           <p>Verified drivers with a vehicle who pick up from farms and deliver to buyers on a planned route.</p>
           <span class="role-tag">Deliver</span>
         </div>
-        <div class="card">
-          <div class="icon"><svg><use href="#i-admin"/></svg></div>
-          <h3>Admin</h3>
-          <p>Platform staff who approve accounts, settle reports, release payouts, and set delivery rates.</p>
-          <span class="role-tag">Manage</span>
-        </div>
       </div>
     </section>
 
@@ -301,7 +296,6 @@
         <button class="tab" role="tab" aria-selected="true" aria-controls="p-consumer" id="t-consumer"><svg><use href="#i-cart"/></svg>Consumer</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="p-farmer" id="t-farmer"><svg><use href="#i-farm"/></svg>Farmer</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="p-rider" id="t-rider"><svg><use href="#i-truck"/></svg>Rider</button>
-        <button class="tab" role="tab" aria-selected="false" aria-controls="p-admin" id="t-admin"><svg><use href="#i-admin"/></svg>Admin</button>
       </div>
 
       <div class="panel on" id="p-consumer" role="tabpanel" aria-labelledby="t-consumer">
@@ -370,26 +364,6 @@
             <li><svg><use href="#i-star"/></svg>Buyers rate you after each delivery.</li>
           </ul>
           <div class="note"><svg><use href="#i-info"/></svg><span>Fake GPS (mock location) apps are detected and blocked.</span></div>
-        </div>
-      </div>
-
-      <div class="panel" id="p-admin" role="tabpanel" aria-labelledby="t-admin">
-        <div class="card">
-          <ol class="steps">
-            <li><b>Log in as staff</b><span>On the login screen, open <strong>Platform staff access</strong>.</span></li>
-            <li><b>Approve new accounts</b><span>Review farmer and rider documents in the <strong>Verify</strong> tab. Approve them, or refuse with a reason so they can resubmit.</span></li>
-            <li><b>Handle disputes</b><span>In the <strong>Disputes</strong> tab, open a report to see the delivery photo, GPS distance, and code check. Resolve it with a refund to the buyer's wallet when needed.</span></li>
-            <li><b>Release payouts</b><span>Under <strong>Money → Payouts</strong>, send farmers and riders their earnings by GCash and mark each payout as paid.</span></li>
-            <li><b>Set delivery pricing</b><span>Under <strong>Money → Delivery pricing</strong>, update the diesel price and rates. Fees adjust right away.</span></li>
-          </ol>
-        </div>
-        <div class="card side">
-          <h4>Good to know</h4>
-          <ul>
-            <li><svg><use href="#i-wallet"/></svg>Buyer wallets keep a full ledger of every cash-in, payment, and refund.</li>
-            <li><svg><use href="#i-box"/></svg>All orders can be viewed in one list.</li>
-            <li><svg><use href="#i-shield"/></svg>Accounts can be suspended, with a reason the user sees.</li>
-          </ul>
         </div>
       </div>
     </section>
