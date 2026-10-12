@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgriLink for Android</title>
+  <meta name="description" content="Download the latest AgriLink Android app.">
+  <style>
+    :root {
+      --bg: #f6f8f4; --card: #ffffff; --ink: #172018; --muted: #5b6b5c;
+      --green: #2d7a10; --green-ink: #ffffff; --line: #dfe6da;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f140f; --card: #182018; --ink: #eef3ea; --muted: #a9b7a6;
+        --green: #5fb23a; --green-ink: #0f140f; --line: #2a352a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 520px; margin: 0 auto; padding: 32px 16px 48px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { width: 56px; height: 56px; border-radius: 14px; background: #fff; }
+    h1 { font-size: 28px; margin: 0; }
+    .tag { color: var(--muted); margin: 2px 0 0; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+      padding: 24px; margin-top: 24px; text-align: center;
+    }
+    .qr { width: 220px; height: 220px; border-radius: 12px; background: #fff; padding: 8px; }
+    .hint { color: var(--muted); font-size: 14px; margin: 12px 0 20px; }
+    .button {
+      display: block; padding: 14px 18px; border-radius: 14px; background: var(--green);
+      color: var(--green-ink); font-weight: 700; text-decoration: none;
+    }
+    ol { text-align: left; padding-left: 20px; margin: 0; }
+    li { margin: 8px 0; }
+    h2 { font-size: 18px; margin: 0 0 8px; text-align: left; }
+    .small { color: var(--muted); font-size: 13px; margin-top: 20px; text-align: center; }
+    .small a { color: inherit; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">
+      <img src="logo.png" alt="">
+      <div>
+        <h1>AgriLink</h1>
+        <p class="tag">Farm-to-table marketplace for Android</p>
+      </div>
+    </div>
+
+    <section class="card">
+      <img class="qr" src="apk-qr.png" alt="QR code that downloads the AgriLink app">
+      <p class="hint">Scan with your phone's camera to download the app.</p>
+      <a class="button" href="https://github.com/Ftmshamel/AgriLink/releases/download/apk-latest/AgriLink.apk">
+        Download AgriLink.apk
+      </a>
+    </section>
+
+    <section class="card">
+      <h2>Install on your phone</h2>
+      <ol>
+        <li>Scan the code or tap <strong>Download</strong>, then open <strong>AgriLink.apk</strong>.</li>
+        <li>If Android says installs are blocked, tap <strong>Settings</strong> and allow this source.</li>
+        <li>Tap <strong>Install</strong>. If an older AgriLink is already on the phone and Android says it cannot install, uninstall the old one first.</li>
+        <li>Open AgriLink and log in. New here? Use <strong>Forgot password?</strong> to set one.</li>
+      </ol>
+    </section>
+
+    <p class="small">
+      Always the latest build from the main branch.
+      <a href="https://github.com/Ftmshamel/AgriLink/releases/tag/apk-latest">Release details</a>
+    </p>
+  </main>
+</body>
+</html>

@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'mobile/**'
+      - 'site/**'
       - '.github/workflows/mobile.yml'
   pull_request:
     paths:
@@ -87,3 +88,46 @@ jobs:
           name: agrilink-apk
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
+
+  # Every build of main replaces the APK on one fixed release, so the link
+  # and QR code on the download page always give the newest app.
+  publish:
+    name: Publish APK and download page
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: agrilink-apk
+
+      - name: Update the apk-latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mv app-release.apk AgriLink.apk
+          notes="Built from ${GITHUB_SHA::7} on $(date -u '+%Y-%m-%d %H:%M UTC'). Download AgriLink.apk below, or scan the QR code at https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+          if gh release view apk-latest >/dev/null 2>&1; then
+            gh release edit apk-latest --notes "$notes"
+          else
+            gh release create apk-latest --title "AgriLink for Android (latest)" --notes "$notes" --target "$GITHUB_SHA"
+          fi
+          gh release upload apk-latest AgriLink.apk --clobber
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: pages
+        uses: actions/deploy-pages@v4
