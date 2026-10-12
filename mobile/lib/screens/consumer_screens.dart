@@ -75,6 +75,7 @@ class _ConsumerShellState extends State<ConsumerShell> {
   }
 
   Future<void> _openCart() async {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     final placed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -690,6 +691,10 @@ class _ProductDetailsState extends State<ProductDetails> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${crop.name} added to your cart'),
+                        // An action makes a snack bar stay until tapped;
+                        // this one is only a shortcut, so let it time out.
+                        persist: false,
+                        duration: const Duration(seconds: 4),
                         action: SnackBarAction(
                           label: 'VIEW CART',
                           onPressed: () {
@@ -1037,6 +1042,68 @@ class _CartSheetState extends State<CartSheet> {
     return fees;
   }
 
+  /// The last look before money moves: what, how much, how it is paid, and
+  /// when it arrives.
+  Future<bool> _confirmCheckout({required DateTime deliveryDate}) async {
+    final lines = widget.cart.lines;
+    final total = _grandTotal();
+    final paidWith = _useWallet
+        ? 'AgriLink Wallet'
+        : _payingOnline
+            ? '$_method (pay online next)'
+            : '$_method \u2022 ref ${_reference.text.trim()}';
+    final when = _scheduled
+        ? 'Scheduled \u2022 ${formatDeliveryDate(deliveryDate)}'
+        : DeliveryHours.sameDayDate(DeliveryHours.manilaNow()) ==
+                dateOnly(DeliveryHours.manilaNow())
+            ? 'Today, ${formatDeliveryDate(deliveryDate)}'
+            : 'Tomorrow, ${formatDeliveryDate(deliveryDate)}';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Place this order?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in lines)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '${line.quantityKg} kg ${line.crop.name} '
+                  '\u2022 ${formatPeso(line.subtotal)}',
+                ),
+              ),
+            const Divider(height: 20),
+            _ConfirmRow(label: 'Total', value: formatPeso(total), strong: true),
+            _ConfirmRow(label: 'Payment', value: paidWith),
+            _ConfirmRow(label: 'Delivery', value: when),
+            _ConfirmRow(label: 'Deliver to', value: _dropAddress),
+            const SizedBox(height: 10),
+            Text(
+              _scheduled
+                  ? 'You can cancel up to ${AgriOrder.cancelNoticeDays} days '
+                      'before the delivery date.'
+                  : 'Same-day orders are final and cannot be cancelled.',
+              style: const TextStyle(color: muted, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Back'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Place order'),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
+  }
+
   Future<void> _placeOrder() async {
     final user = widget.session.user;
     if (_dropPoint == null || _dropAddress.isEmpty) {
@@ -1071,6 +1138,11 @@ class _CartSheetState extends State<CartSheet> {
       setState(() => _error = 'Enter your $_method reference number.');
       return;
     }
+    if (_paidInvoice == null &&
+        !await _confirmCheckout(deliveryDate: deliveryDate)) {
+      return;
+    }
+    if (!mounted) return;
     setState(() {
       _placing = true;
       _error = null;
@@ -3153,6 +3225,17 @@ class _ReceiptActionsState extends State<_ReceiptActions> {
   }
 
   Future<void> _confirm() async {
+    if (!await confirmAction(
+      context,
+      title: 'Did you receive everything?',
+      message: 'Confirm only if the items and quantity are correct. If '
+          'something is missing or wrong, go back and tap Report a problem '
+          'instead.',
+      confirmLabel: 'Yes, I received it',
+    )) {
+      return;
+    }
+    if (!mounted) return;
     await _run(
       () => authService.database.confirmReceived(widget.order.id),
       'Thanks! Receipt confirmed.',
@@ -3473,6 +3556,42 @@ class FarmMapPage extends StatelessWidget {
                 showControls: true,
               ),
             ),
+    );
+  }
+}
+
+class _ConfirmRow extends StatelessWidget {
+  const _ConfirmRow({
+    required this.label,
+    required this.value,
+    this.strong = false,
+  });
+
+  final String label;
+  final String value;
+  final bool strong;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 82,
+            child: Text(label, style: const TextStyle(color: muted)),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontWeight: strong ? FontWeight.w900 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

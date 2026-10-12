@@ -89,6 +89,25 @@ void openUserHome(BuildContext context, MobileUser user) {
 }
 
 Future<void> signOut(BuildContext context) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Log out?'),
+      content: const Text('You will need your email and password to sign in '
+          'again.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: const Text('Log out'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
   await authService.logout();
   if (!context.mounted) return;
   Navigator.pushAndRemoveUntil(

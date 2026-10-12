@@ -120,17 +120,7 @@ class VerificationPendingPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () async {
-                    await authService.logout();
-                    if (!context.mounted) return;
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AuthWelcomePage(),
-                      ),
-                      (_) => false,
-                    );
-                  },
+                  onPressed: () => signOut(context),
                   icon: const Icon(Icons.logout),
                   label: const Padding(
                     padding: EdgeInsets.all(14),
