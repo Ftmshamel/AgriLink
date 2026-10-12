@@ -1396,8 +1396,40 @@ class FarmerOrderDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AgriOrder? shown;
     return Scaffold(
-      appBar: AppBar(title: const Text('Order & rider')),
+      appBar: AppBar(
+        title: const Text('Order & rider'),
+        actions: [
+          IconButton(
+            tooltip: 'Report the buyer or rider',
+            onPressed: () {
+              final order = shown;
+              if (order == null) return;
+              showReportSheet(
+                context,
+                session: session,
+                targets: [
+                  ReportTarget(
+                    id: order.buyerId,
+                    name: order.buyerName,
+                    role: 'consumer',
+                  ),
+                  if (order.hasRider)
+                    ReportTarget(
+                      id: order.riderId,
+                      name: order.riderName,
+                      role: 'rider',
+                    ),
+                ],
+                cropId: order.cropId,
+                orderId: order.id,
+              );
+            },
+            icon: const Icon(Icons.flag_outlined),
+          ),
+        ],
+      ),
       body: LiveBuilder<AgriOrder?>(
         session: session,
         // The rider pin should keep moving without the farmer pulling to
@@ -1406,6 +1438,7 @@ class FarmerOrderDetails extends StatelessWidget {
         load: () => authService.database.getOrder(orderId),
         builder: (context, data) {
           final order = data.value;
+          shown = order;
           if (order == null) {
             return LiveErrorCard(
               message: data.errorMessage.isEmpty

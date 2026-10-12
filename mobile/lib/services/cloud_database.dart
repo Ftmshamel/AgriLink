@@ -138,6 +138,30 @@ class CloudDatabase {
         'updatedAt': DateTime.now().toUtc().toIso8601String(),
       });
 
+  /// Suspends or restores a consumer, farmer or rider. A suspended account is
+  /// held at the "Account suspended" screen the next time the app checks in,
+  /// and a suspended farm's listings leave the marketplace with it until it
+  /// is restored.
+  Future<void> setAccountSuspended(
+    Map<String, dynamic> account, {
+    required bool suspended,
+    String reason = '',
+  }) async {
+    final id = '${account['id'] ?? ''}';
+    await setVerificationStatus(
+      id,
+      suspended ? 'suspended' : 'active',
+      reason: suspended ? reason : '',
+    );
+    if (account['role'] == 'farmer') {
+      for (final crop in await listCrops(farmerId: id)) {
+        await updateDocument('mobileCrops', '${crop['id']}', {
+          'farmerSuspended': suspended,
+        });
+      }
+    }
+  }
+
   Future<Map<String, dynamic>> uploadVerificationFile({
     required String userId,
     required String type,
@@ -347,9 +371,14 @@ class CloudDatabase {
 
   // ------------------------------------------------------------------- crops
 
+  /// The marketplace (no [farmerId]) leaves out suspended farms' listings; a
+  /// farm still sees its own.
   Future<List<CropListing>> listCropListings({String? farmerId}) async {
     final values = await listCollection('mobileCrops');
-    final crops = values.map(CropListing.fromMap).toList();
+    final crops = values
+        .where((crop) => farmerId != null || crop['farmerSuspended'] != true)
+        .map(CropListing.fromMap)
+        .toList();
     final filtered = farmerId == null
         ? crops
         : crops.where((crop) => crop.farmerId == farmerId).toList();
@@ -395,6 +424,11 @@ class CloudDatabase {
   Future<void> reduceCropStock(String cropId, int soldKg) async {
     if (cropId.isEmpty || soldKg <= 0) return;
     await _adjustCropStock(cropId, (current) {
+      if (current['farmerSuspended'] == true) {
+        throw Exception(
+          '${current['name'] ?? 'This crop'} is not available right now.',
+        );
+      }
       final available = (current['quantityKg'] as num?)?.round() ?? 0;
       if (available < soldKg) {
         final name = '${current['name'] ?? 'This crop'}';

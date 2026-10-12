@@ -294,6 +294,36 @@ class _RiderShellState extends State<RiderShell> {
       );
       return;
     }
+    // Going offline only stops new trip offers. A rider part-way through a
+    // trip still has farms and buyers waiting on them, who can still see and
+    // call them, so the trip has to be finished first.
+    if (!value) {
+      final active = await _activeTripOrders();
+      if (!mounted) return;
+      if (active.isNotEmpty) {
+        final buyers = {for (final order in active) order.buyerId}.length;
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Finish your trip first'),
+            content: Text(
+              'You still have ${plural(active.length, 'order')} for '
+              '${plural(buyers, 'buyer')} on your current trip. The farm and '
+              'buyers can still see and call you until every stop is done. '
+              'Finish the trip, then go offline. If something is wrong, use '
+              'Report a problem on the trip screen.',
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
     setState(() => _online = value);
     try {
       final point = value ? await GeoService.tryCurrentPoint() : null;
@@ -307,6 +337,17 @@ class _RiderShellState extends State<RiderShell> {
     } catch (_) {
       // Availability is a convenience flag; a failed write should not block
       // the rider from using the app.
+    }
+  }
+
+  /// Orders this rider has accepted and not yet delivered.
+  Future<List<AgriOrder>> _activeTripOrders() async {
+    try {
+      final orders = await authService.database
+          .listAgriOrders(riderId: widget.session.user.id);
+      return orders.where((order) => order.status.isWithRider).toList();
+    } catch (_) {
+      return const [];
     }
   }
 
@@ -1161,6 +1202,28 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
 
   List<AgriOrder> _liveOrders = const [];
 
+  /// Everyone on this trip a rider might need to report: each farm and each
+  /// buyer, once.
+  List<ReportTarget> _reportTargets() {
+    final seen = <String>{};
+    return [
+      for (final order in _liveOrders)
+        if (seen.add(order.farmerId))
+          ReportTarget(
+            id: order.farmerId,
+            name: order.farmerName,
+            role: 'farmer',
+          ),
+      for (final order in _liveOrders)
+        if (seen.add(order.buyerId))
+          ReportTarget(
+            id: order.buyerId,
+            name: order.buyerName,
+            role: 'consumer',
+          ),
+    ];
+  }
+
   /// When each stop first refused this rider's position, for the GPS
   /// override.
   final Map<String, DateTime> _firstMiss = {};
@@ -1477,9 +1540,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
             onPressed: () => showReportSheet(
               context,
               session: widget.session,
-              farmerId: _liveOrders.isEmpty ? '' : _liveOrders.first.farmerId,
-              farmerName:
-                  _liveOrders.isEmpty ? '' : _liveOrders.first.farmerName,
+              targets: _reportTargets(),
               orderId: _liveOrders.isEmpty ? '' : _liveOrders.first.id,
             ),
             icon: const Icon(Icons.support_agent),

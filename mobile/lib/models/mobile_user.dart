@@ -57,6 +57,9 @@ class MobileUser {
 
   String get verificationStatus => verification['status'] ?? 'active';
 
+  /// Why the superadmin suspended or refused the account, if they said.
+  String get statusReason => verification['statusReason'] ?? '';
+
   /// Only fully approved accounts reach a role shell — pending, rejected, and
   /// suspended accounts are all held at the review screen.
   bool get isApproved => verificationStatus == 'active';
@@ -102,6 +105,8 @@ class MobileUser {
           ).map((key, value) => MapEntry(key, '$value')),
           if (json['verificationStatus'] != null)
             'status': '${json['verificationStatus']}',
+          if ('${json['statusReason'] ?? ''}'.isNotEmpty)
+            'statusReason': '${json['statusReason']}',
         },
       );
 }

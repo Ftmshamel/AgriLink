@@ -31,8 +31,8 @@ class VerificationPendingPage extends StatelessWidget {
         ),
       'suspended' => (
           'Account suspended',
-          'Your access is paused while AgriLink reviews recent activity. '
-              'Contact support to have your account restored.',
+          '${user.statusReason.isEmpty ? 'Your access is paused while AgriLink reviews recent activity.' : 'Reason: ${user.statusReason}'}\n\n'
+              'Contact AgriLink support to have your account restored.',
         ),
       _ => (
           'Application under review',

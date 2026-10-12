@@ -119,10 +119,11 @@ class _RoleHomeState extends State<RoleHome> {
     _watchForApproval();
   }
 
-  /// Drops an applicant into their role shell as soon as a superadmin approves
-  /// them, so nobody has to guess when to sign in again.
+  /// Keeps the account's status current: an applicant drops into their role
+  /// shell as soon as a superadmin approves them, and a user who is suspended
+  /// while signed in is moved to the suspended screen within a poll, instead
+  /// of carrying on until they next sign in.
   void _watchForApproval() {
-    if (_session.user.isApproved) return;
     _approvalPoll = Timer.periodic(const Duration(seconds: 20), _refreshApproval);
   }
 
@@ -137,8 +138,14 @@ class _RoleHomeState extends State<RoleHome> {
       timer.cancel();
       return;
     }
-    if (account != null) _session.updateUser(MobileUser.fromJson(account));
-    if (_session.user.isApproved) timer.cancel();
+    if (account == null) return;
+    final latest = MobileUser.fromJson(account);
+    // Only a change of status rebuilds the shell; other fields are refreshed
+    // by the screens that show them.
+    if (latest.verificationStatus != _session.user.verificationStatus ||
+        latest.statusReason != _session.user.statusReason) {
+      _session.updateUser(latest);
+    }
   }
 
   @override

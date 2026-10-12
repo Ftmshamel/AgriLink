@@ -107,10 +107,26 @@ awaiting amounts in their profiles. Riders must add a payout number before
 going online.
 
 After confirming receipt, buyers rate the farm and the rider 1–5. Averages
-show on the product page and on the farmer and rider profiles. Superadmins
-can resolve a dispute with a refund to the buyer's wallet (capped at what the
-order cost, once per report), suspend accounts with a recorded reason, search
-every order, and review all wallet activity.
+show on the product page and on the farmer and rider profiles.
+
+## Reports and suspensions
+
+Anyone can report the people they deal with: consumers report a farm or a
+rider, riders report a farm or a buyer from the trip screen, and farms report
+a buyer or rider from an order. Each report records who it is about.
+
+The superadmin does not browse orders. Their app has **Verify** (new farmer
+and rider applications), **Accounts** (every consumer, farmer, and rider, with
+how often each was reported), and **Reports**. From a report they can resolve
+it, with an optional refund to the buyer's wallet (capped at what the order
+cost, once per report), or suspend the account it is about with a reason the
+user sees. A suspended user is moved to the "Account suspended" screen within
+about 20 seconds, even mid-session, and a suspended farm's listings leave the
+marketplace until it is restored. Payouts and delivery pricing stay under
+**Money** on the overview.
+
+A rider cannot go offline with an accepted trip still open: the farm and
+buyers can see and call them until every stop is done.
 
 ## Proof of delivery
 
@@ -129,7 +145,7 @@ confirm delivery** requires all of:
 Once delivered, the buyer sees the photo and distance on the tracking screen
 and can tap **I received my order** or report a problem. A report flags the
 order as disputed, and the superadmin can open the same delivery proof from
-**Active Disputes**.
+**Reports**.
 
 ## Account verification
 
