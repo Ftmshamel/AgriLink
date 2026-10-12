@@ -781,6 +781,22 @@ class _ApplicantCardState extends State<ApplicantCard> {
   bool _busy = false;
 
   Future<void> _decide(String status) async {
+    final approve = status == 'active';
+    if (!await confirmAction(
+      context,
+      title: approve
+          ? 'Approve ${widget.account['name']}?'
+          : 'Reject ${widget.account['name']}?',
+      message: approve
+          ? 'They can start using AgriLink as a ${widget.account['role']} '
+              'right away, and will be told by email.'
+          : 'They will be told by email and can resubmit clearer documents.',
+      confirmLabel: approve ? 'Approve' : 'Reject',
+      destructive: !approve,
+    )) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
       await authService.database.setVerificationStatus(
@@ -2101,6 +2117,16 @@ class _DeliveryRatesPageState extends State<DeliveryRatesPage> {
   }
 
   Future<void> _save() async {
+    if (!await confirmAction(
+      context,
+      title: 'Save new delivery rates?',
+      message: 'Every new checkout uses these rates right away. Orders '
+          'already placed keep the fee they were charged.',
+      confirmLabel: 'Save rates',
+    )) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _saving = true);
     try {
       await authService.database.saveDeliveryRates(_draft);

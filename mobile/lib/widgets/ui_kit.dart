@@ -2,6 +2,40 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
 
+/// A yes/no check before an action that is hard to take back. Returns true
+/// only when the user taps [confirmLabel].
+Future<bool> confirmAction(
+  BuildContext context, {
+  required String title,
+  required String message,
+  required String confirmLabel,
+  bool destructive = false,
+}) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(title),
+      content: Text(message, style: const TextStyle(height: 1.45)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          style: destructive
+              ? FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFB42318),
+                )
+              : null,
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(confirmLabel),
+        ),
+      ],
+    ),
+  );
+  return confirmed == true;
+}
+
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,

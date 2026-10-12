@@ -286,6 +286,7 @@ class _RiderShellState extends State<RiderShell> {
           content: const Text(
             'Add your GCash or Maya payout number before going online.',
           ),
+          persist: false,
           action: SnackBarAction(
             label: 'ADD',
             onPressed: () => openProfileEditor(context, widget.session),
@@ -944,6 +945,18 @@ class _PoolDetailsPageState extends State<PoolDetailsPage> {
 
   Future<void> _accept() async {
     if (_chosen.isEmpty) return;
+    final stops = {for (final order in _chosen) order.buyerId}.length;
+    if (!await confirmAction(
+      context,
+      title: 'Accept this trip?',
+      message: '${plural(_chosen.length, 'order')} \u2022 $_kilos kg \u2022 '
+          '${plural(stops, 'drop-off')}.\nYou earn ${formatPeso(_payout)}. '
+          'You must finish this trip before going offline or taking another.',
+      confirmLabel: 'Accept trip',
+    )) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _accepting = true);
     try {
       final user = widget.session.user;

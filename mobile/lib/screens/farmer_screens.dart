@@ -806,6 +806,18 @@ class _FarmerFulfillmentState extends State<FarmerFulfillment> {
   }
 
   Future<void> _book(List<AgriOrder> chosen) async {
+    final kilos = chosen.fold<int>(0, (sum, order) => sum + order.quantityKg);
+    if (!await confirmAction(
+      context,
+      title: 'Book a rider?',
+      message: '${plural(chosen.length, 'order')} ($kilos kg) will go to the '
+          'rider pool as packed and ready for pickup. Make sure they are '
+          'packed before a rider arrives.',
+      confirmLabel: 'Book rider',
+    )) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
       for (final order in chosen) {
@@ -1039,6 +1051,29 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
   bool _busy = false;
 
   Future<void> _advance(OrderStatus next) async {
+    final order = widget.order;
+    final (title, message, label) = next == OrderStatus.readyForPickup
+        ? (
+            'Ready for pickup?',
+            '${order.quantityKg} kg ${order.cropName} for ${order.buyerName} '
+                'goes to the rider pool. Make sure it is packed.',
+            'Send to riders',
+          )
+        : (
+            'Accept this order?',
+            '${order.quantityKg} kg ${order.cropName} for ${order.buyerName}. '
+                'You will start preparing it.',
+            'Accept order',
+          );
+    if (!await confirmAction(
+      context,
+      title: title,
+      message: message,
+      confirmLabel: label,
+    )) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
       await authService.database.advanceOrder(
