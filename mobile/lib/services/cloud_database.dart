@@ -694,7 +694,7 @@ class CloudDatabase {
     final order = await getOrder(orderId);
     if (order == null) throw Exception('This order no longer exists.');
     if (order.status == OrderStatus.cancelled) return order.refundedAmount;
-    if (cancelledBy == 'buyer' && !order.canBuyerCancel(DateTime.now())) {
+    if (cancelledBy == 'buyer' && !order.canBuyerCancel(DeliveryHours.manilaNow())) {
       throw Exception(order.isScheduled
           ? 'Scheduled orders can only be cancelled up to '
               '${AgriOrder.cancelNoticeDays} days before delivery.'

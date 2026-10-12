@@ -244,7 +244,7 @@ class FarmerDashboard extends StatelessWidget {
                         '\n${deliveryScheduleLabel(order)}',
                     badge: order.status == OrderStatus.placed
                         ? 'NEW'
-                        : order.isDueBy(DateTime.now())
+                        : order.isDueBy(DeliveryHours.manilaNow())
                             ? 'DUE TODAY'
                             : 'PACKING',
                   ),
@@ -1202,7 +1202,7 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                   // Only while the farm still has to act on it.
                   if ((order.status == OrderStatus.placed ||
                           order.status == OrderStatus.preparing) &&
-                      order.isDueBy(DateTime.now())) ...[
+                      order.isDueBy(DeliveryHours.manilaNow())) ...[
                     const SizedBox(width: 8),
                     const Pill(
                       icon: Icons.priority_high,
@@ -1230,7 +1230,7 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          order.isDueForPickup(DateTime.now())
+                          order.isDueForPickup(DeliveryHours.manilaNow())
                               ? 'Waiting for a rider to accept this pickup'
                               : dateOnly(order.deliveryDate!) ==
                                       dateOnly(DateTime.now())

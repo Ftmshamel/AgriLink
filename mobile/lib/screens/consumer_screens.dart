@@ -746,7 +746,7 @@ class _CartSheetState extends State<CartSheet> {
 
   /// The same-day date the buyer was last shown, to catch the 6 PM cutoff
   /// passing while the sheet is open.
-  DateTime _sameDayShown = DeliveryHours.sameDayDate(DateTime.now());
+  DateTime _sameDayShown = DeliveryHours.sameDayDate(DeliveryHours.manilaNow());
 
   bool _useWallet = false;
   int? _walletBalance;
@@ -815,7 +815,7 @@ class _CartSheetState extends State<CartSheet> {
 
   /// The day this cart would be delivered.
   DateTime? get _targetDate =>
-      _scheduled ? _deliveryDate : DeliveryHours.sameDayDate(DateTime.now());
+      _scheduled ? _deliveryDate : DeliveryHours.sameDayDate(DeliveryHours.manilaNow());
 
   /// This cart as the orders it would become, so it can be priced alongside
   /// the orders it would share a trip with.
@@ -850,7 +850,7 @@ class _CartSheetState extends State<CartSheet> {
     }
     final mates = all.where((order) => order.dueDate == date).toList();
     final soloTotal = fees.values.fold<int>(0, (sum, fee) => sum + fee);
-    final firstSchedulable = DeliveryHours.firstScheduleDate(DateTime.now());
+    final firstSchedulable = DeliveryHours.firstScheduleDate(DeliveryHours.manilaNow());
 
     // Other days a trip to this town is already forming.
     final otherDays = <DateTime, int>{};
@@ -968,7 +968,7 @@ class _CartSheetState extends State<CartSheet> {
   }
 
   Future<void> _pickDate() async {
-    final now = DateTime.now();
+    final now = DeliveryHours.manilaNow();
     final first = DeliveryHours.firstScheduleDate(now);
     final last = dateOnly(now).add(const Duration(days: 60));
     final suggested =
@@ -1039,7 +1039,7 @@ class _CartSheetState extends State<CartSheet> {
           'Add a delivery address in your profile before checking out.');
       return;
     }
-    final now = DateTime.now();
+    final now = DeliveryHours.manilaNow();
     if (_scheduled && _deliveryDate == null) {
       setState(() => _error = 'Pick a delivery date.');
       return;
@@ -1350,7 +1350,7 @@ class _CartSheetState extends State<CartSheet> {
 
   String _cancelPolicy() {
     if (!_scheduled) {
-      final now = DateTime.now();
+      final now = DeliveryHours.manilaNow();
       final String when;
       if (DeliveryHours.pastCutoff(now)) {
         when = 'Orders after 6:00 PM are delivered tomorrow, '
@@ -1371,7 +1371,7 @@ class _CartSheetState extends State<CartSheet> {
     }
     final deadline =
         date.subtract(const Duration(days: AgriOrder.cancelNoticeDays));
-    if (deadline.isBefore(dateOnly(DateTime.now()))) {
+    if (deadline.isBefore(dateOnly(DeliveryHours.manilaNow()))) {
       return 'This date is less than ${AgriOrder.cancelNoticeDays} days away, '
           'so the order will be final once placed.';
     }
@@ -1597,7 +1597,7 @@ class _CartSheetState extends State<CartSheet> {
                         value: false,
                         icon: const Icon(Icons.bolt),
                         label: Text(
-                          DeliveryHours.pastCutoff(DateTime.now())
+                          DeliveryHours.pastCutoff(DeliveryHours.manilaNow())
                               ? 'Tomorrow'
                               : 'Same day',
                         ),
@@ -2997,7 +2997,7 @@ class _ScheduleCardState extends State<_ScheduleCard> {
   Widget build(BuildContext context) {
     final order = widget.order;
     final deadline = order.cancelDeadline;
-    final canCancel = order.canBuyerCancel(DateTime.now());
+    final canCancel = order.canBuyerCancel(DeliveryHours.manilaNow());
     final String policy;
     if (order.status == OrderStatus.cancelled) {
       final by = switch (order.cancelledBy) {
