@@ -8,8 +8,11 @@ plugins {
 }
 
 // Release signing is read from android/key.properties, which stays out of git
-// along with the keystore it points to. Without it, release builds fall back
-// to the debug key so `flutter run --release` still works.
+// along with the keystore it points to. Without it, release builds use the
+// shared AgriLink key committed next to this file (agrilink-ci.jks), so every
+// CI build of the download-page APK is signed the same way and installs over
+// the previous one. That key is public by design: it keeps test builds
+// updatable, and a Play Store release must use its own key.properties.
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
@@ -39,6 +42,12 @@ android {
     }
 
     signingConfigs {
+        create("shared") {
+            storeFile = file("agrilink-ci.jks")
+            storePassword = "agrilink-ci"
+            keyAlias = "agrilink"
+            keyPassword = "agrilink-ci"
+        }
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String?
             keyPassword = keystoreProperties["keyPassword"] as String?
@@ -52,7 +61,7 @@ android {
             signingConfig = if (keystorePropertiesFile.exists()) {
                 signingConfigs.getByName("release")
             } else {
-                signingConfigs.getByName("debug")
+                signingConfigs.getByName("shared")
             }
         }
     }
