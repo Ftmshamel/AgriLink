@@ -15,6 +15,7 @@ import '../services/notifications.dart';
 import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
 import '../widgets/notification_bell.dart';
+import '../widgets/payment_status.dart';
 import '../widgets/ui_kit.dart';
 import 'auth_screens.dart';
 import 'shared_screens.dart';
@@ -2651,6 +2652,12 @@ class ActiveOrderCard extends StatelessWidget {
                     text: order.status.label.toUpperCase(),
                     color: order.status.isWithRider ? green : orange,
                   ),
+                  const SizedBox(width: 6),
+                  Pill(
+                    icon: paymentIcon(order),
+                    text: paymentBadgeText(order),
+                    color: paymentColor(order),
+                  ),
                   const Spacer(),
                   Text(
                     order.reference,
@@ -2927,12 +2934,8 @@ class DeliveryTracking extends StatelessWidget {
                           value: formatPeso(order.grandTotal),
                           strong: true,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${order.paymentMethod}'
-                          '${order.paymentReference.isEmpty ? '' : ' • ${order.paymentReference}'}',
-                          style: const TextStyle(color: muted, fontSize: 12),
-                        ),
+                        const SizedBox(height: 10),
+                        PaymentStatusLine(order: order),
                       ],
                     ),
                   ),

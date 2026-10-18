@@ -15,6 +15,7 @@ import '../widgets/live_data.dart';
 import '../widgets/crop_photo.dart';
 import '../widgets/live_map.dart';
 import '../widgets/notification_bell.dart';
+import '../widgets/payment_status.dart';
 import '../widgets/ui_kit.dart';
 import '../widgets/weather_card.dart';
 import 'shared_screens.dart';
@@ -1212,6 +1213,12 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
                 style: const TextStyle(color: muted),
               ),
               const SizedBox(height: 6),
+              Pill(
+                icon: paymentIcon(order),
+                text: paymentBadgeText(order),
+                color: paymentColor(order),
+              ),
+              const SizedBox(height: 6),
               Text(
                 order.deliveryAddress.isEmpty
                     ? 'No delivery address on file'
@@ -1534,16 +1541,14 @@ class FarmerOrderDetails extends StatelessWidget {
                           value: formatPeso(order.deliveryFee),
                         ),
                         MoneyRow(
-                          label: 'Buyer pays',
+                          label: order.isPaymentSecured
+                              ? 'Buyer paid'
+                              : 'Buyer pays',
                           value: formatPeso(order.grandTotal),
                           strong: true,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${order.paymentMethod}'
-                          '${order.paymentReference.isEmpty ? '' : ' \u2022 ${order.paymentReference}'}',
-                          style: const TextStyle(color: muted, fontSize: 12),
-                        ),
+                        const SizedBox(height: 10),
+                        PaymentStatusLine(order: order),
                       ],
                     ),
                   ),
