@@ -686,10 +686,11 @@ class DeliveryHours {
 
   static bool pastCutoff(DateTime now) => now.hour >= cutoff;
 
-  /// The earliest date a scheduled order can be booked for: the day after
-  /// whatever same-day would give.
+  /// The earliest date a scheduled order can be booked for: tomorrow. After
+  /// the cutoff that is the same day the "Tomorrow" option delivers, so a
+  /// buyer who opens the calendar can still pick it.
   static DateTime firstScheduleDate(DateTime now) =>
-      sameDayDate(now).add(const Duration(days: 1));
+      dateOnly(now).add(const Duration(days: 1));
 
   static DateTime opensOn(DateTime date) =>
       DateTime(date.year, date.month, date.day, opensAt);

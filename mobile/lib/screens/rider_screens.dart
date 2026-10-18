@@ -1712,6 +1712,15 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                             ),
                           ],
                         ),
+                        if (!stop.isPickup &&
+                            stop.orders.every((o) => o.isPaymentSecured)) ...[
+                          const SizedBox(height: 10),
+                          const Pill(
+                            icon: Icons.verified,
+                            text: 'ALREADY PAID • DO NOT COLLECT CASH',
+                            color: green,
+                          ),
+                        ],
                         const SizedBox(height: 14),
                         LinearProgressIndicator(
                           value: completed / stops.length,

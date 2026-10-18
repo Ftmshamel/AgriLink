@@ -300,10 +300,9 @@ void main() {
           DateTime(2026, 10, 11, 5));
     });
 
-    test('scheduling starts the day after same-day would deliver', () {
+    test('scheduling can start tomorrow, before or after the cutoff', () {
       expect(DeliveryHours.firstScheduleDate(at(10)), tomorrow);
-      expect(DeliveryHours.firstScheduleDate(at(19)),
-          DateTime(2026, 10, 13));
+      expect(DeliveryHours.firstScheduleDate(at(19)), tomorrow);
     });
   });
 }
