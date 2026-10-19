@@ -1489,8 +1489,12 @@ class FarmerOrderDetails extends StatelessWidget {
               onRetry: data.reload,
             );
           }
+          // Once the rider has the goods the farm is behind them, so the
+          // line runs from the vehicle straight to the delivery pin.
+          final pickedUp = order.riderPoint != null &&
+              order.status.step >= OrderStatus.pickedUp.step;
           final stops = <MapStop>[
-            if (order.pickupPoint != null)
+            if (order.pickupPoint != null && !pickedUp)
               MapStop(
                 point: order.pickupPoint!,
                 label: 'Your farm',

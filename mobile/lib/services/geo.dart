@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -275,6 +276,86 @@ class RouteService {
       failure: failure,
     );
   }
+}
+
+/// What is left of a route once the rider has driven part of it.
+class RouteRemainder {
+  const RouteRemainder({
+    required this.points,
+    required this.segment,
+    required this.offRouteMeters,
+  });
+
+  /// Starts at the rider and follows the road to the last stop.
+  final List<LatLng> points;
+
+  /// Index of the route segment the rider is on, fed back into the next call
+  /// so progress only moves forward.
+  final int segment;
+
+  /// How far the rider is from the drawn road; large means re-route.
+  final double offRouteMeters;
+}
+
+/// Cuts the part of [path] the rider at [position] has already driven, the
+/// way delivery apps shrink the line behind the vehicle.
+///
+/// Only segments from [fromSegment] onward are searched (and only a short
+/// stretch ahead of it) so a route that comes back along the same road —
+/// farm and back — is not skipped ahead.
+RouteRemainder remainingRoute(
+  List<LatLng> path,
+  LatLng position, {
+  int fromSegment = 0,
+  int lookAhead = 60,
+}) {
+  if (path.length < 2) {
+    return RouteRemainder(
+      points: [position, ...path],
+      segment: 0,
+      offRouteMeters: 0,
+    );
+  }
+  final start = fromSegment.clamp(0, path.length - 2);
+  final end = math.min(path.length - 2, start + lookAhead);
+  // Flat projection around the rider; accurate to well under a metre over
+  // the few kilometres a segment search covers.
+  final cosLat = math.cos(position.latitude * math.pi / 180);
+  const metersPerDegree = 111320.0;
+  double x(LatLng p) =>
+      (p.longitude - position.longitude) * metersPerDegree * cosLat;
+  double y(LatLng p) => (p.latitude - position.latitude) * metersPerDegree;
+
+  var best = start;
+  var bestDistance = double.infinity;
+  var bestT = 0.0;
+  for (var index = start; index <= end; index++) {
+    final ax = x(path[index]), ay = y(path[index]);
+    final bx = x(path[index + 1]), by = y(path[index + 1]);
+    final dx = bx - ax, dy = by - ay;
+    final lengthSquared = dx * dx + dy * dy;
+    final t = lengthSquared == 0
+        ? 0.0
+        : ((-ax * dx - ay * dy) / lengthSquared).clamp(0.0, 1.0);
+    final px = ax + t * dx, py = ay + t * dy;
+    final distance = math.sqrt(px * px + py * py);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = index;
+      bestT = t;
+    }
+  }
+
+  final a = path[best], b = path[best + 1];
+  final snapped = LatLng(
+    a.latitude + (b.latitude - a.latitude) * bestT,
+    a.longitude + (b.longitude - a.longitude) * bestT,
+  );
+  return RouteRemainder(
+    points: [position, snapped, ...path.sublist(best + 1)],
+    segment: best,
+    offRouteMeters: bestDistance,
+  );
 }
 
 String formatKm(double km) {
