@@ -275,6 +275,7 @@ class _RiderNavigationPageState extends State<RiderNavigationPage> {
               builder: (context, constraints) => LiveRouteMap(
                 stops: widget.stops,
                 followMe: true,
+                headingUp: true,
                 rounded: false,
                 height: constraints.maxHeight,
                 onPosition: widget.onPosition,

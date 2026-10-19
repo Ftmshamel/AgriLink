@@ -108,6 +108,34 @@ void main() {
     expect(opened, isTrue);
   });
 
+  testWidgets('heading-up maps get a compass button to switch to north-up',
+      (tester) async {
+    Widget map({required bool headingUp}) => MaterialApp(
+          home: Scaffold(
+            body: LiveRouteMap(
+              stops: const [
+                MapStop(
+                    point: _buyer,
+                    label: 'Buyer',
+                    icon: Icons.store,
+                    color: Colors.green),
+              ],
+              riderPoint: _rider,
+              headingUp: headingUp,
+            ),
+          ),
+        );
+    await tester.pumpWidget(map(headingUp: false));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.navigation), findsNothing);
+
+    await tester.pumpWidget(map(headingUp: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.navigation));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.explore), findsOneWidget);
+  });
+
   test('path length adds up each leg', () {
     expect(pathKm(const [_rider, _farm, _buyer]), closeTo(2.2, 0.1));
     expect(pathKm(const [_rider]), 0);
