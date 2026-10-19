@@ -56,6 +56,7 @@ class LiveRouteMap extends StatefulWidget {
     this.onProgress,
     this.onExpand,
     this.rounded = true,
+    this.headingUp = false,
   });
 
   final List<MapStop> stops;
@@ -79,6 +80,11 @@ class LiveRouteMap extends StatefulWidget {
 
   /// Off when the map fills the whole screen.
   final bool rounded;
+
+  /// Starts with the map turned so the vehicle's direction points up, like a
+  /// car navigation screen, and shows a compass button to switch back to
+  /// north-up. Only takes effect while [followMe] is following the rider.
+  final bool headingUp;
 
   @override
   State<LiveRouteMap> createState() => _LiveRouteMapState();
@@ -109,6 +115,7 @@ class _LiveRouteMapState extends State<LiveRouteMap>
   double _heading = 0;
   double _accuracy = 0;
   bool _following = false;
+  bool _headingUp = false;
   bool _loadingRoute = false;
   bool _requestingLocation = false;
   bool _mapReady = false;
@@ -118,6 +125,8 @@ class _LiveRouteMapState extends State<LiveRouteMap>
   void initState() {
     super.initState();
     _following = widget.followMe;
+    _headingUp = widget.headingUp;
+    _glide.addListener(_followGlide);
     if (widget.riderPoint != null && !widget.followMe) {
       _glideToward(widget.riderPoint!);
     }
@@ -149,6 +158,9 @@ class _LiveRouteMapState extends State<LiveRouteMap>
       _moveWhenReady(widget.focusPoint!, 15);
     }
     if (widget.followMe && !oldWidget.followMe) _startTracking();
+    if (widget.headingUp != oldWidget.headingUp) {
+      _headingUp = widget.headingUp;
+    }
   }
 
   @override
@@ -272,6 +284,39 @@ class _LiveRouteMapState extends State<LiveRouteMap>
     );
   }
 
+  /// Keeps the camera on the gliding vehicle, easing the map's turn toward
+  /// the direction of travel a little each frame so it never snaps around.
+  void _followGlide() {
+    final shown = _shownRider;
+    if (!_following || !_mapReady || shown == null || !widget.followMe) {
+      return;
+    }
+    final camera = _mapController.camera;
+    if (!_headingUp) {
+      _mapController.move(shown, camera.zoom);
+      return;
+    }
+    final target = -_heading;
+    // Shortest way round, so 350° → 10° turns 20°, not 340°.
+    final turn = ((target - camera.rotation + 540) % 360) - 180;
+    _mapController.moveAndRotate(
+      shown,
+      camera.zoom,
+      camera.rotation + turn * 0.12,
+    );
+  }
+
+  void _setHeadingUp(bool on) {
+    setState(() => _headingUp = on);
+    if (!_mapReady) return;
+    final camera = _mapController.camera;
+    _mapController.moveAndRotate(
+      _deviceLocation ?? camera.center,
+      camera.zoom,
+      on ? -_heading : 0,
+    );
+  }
+
   void _glideToward(LatLng target) {
     if (target == _glideTo) return;
     _glideFrom = _shownRider;
@@ -316,6 +361,9 @@ class _LiveRouteMapState extends State<LiveRouteMap>
     }
     return null;
   }
+
+  double? _screenHeading(double? heading, double mapRotation) =>
+      heading == null ? null : heading + mapRotation;
 
   /// GPS reports heading 0 when standing still; keep the last real one so
   /// the marker does not snap north at every stop.
@@ -368,7 +416,7 @@ class _LiveRouteMapState extends State<LiveRouteMap>
         });
         _trackProgress();
         widget.onPosition?.call(position);
-        if (_following && _mapReady) _mapController.move(current, 16.5);
+        // The camera follows inside _followGlide, alongside the vehicle.
       }, onError: (_) {});
 
       final position = await Geolocator.getCurrentPosition(
@@ -472,6 +520,8 @@ class _LiveRouteMapState extends State<LiveRouteMap>
                 markers: [
                   for (final stop in widget.stops)
                     Marker(
+                      // Labels stay readable when the map turns.
+                      rotate: true,
                       point: stop.point,
                       width: 120,
                       height: 64,
@@ -492,8 +542,14 @@ class _LiveRouteMapState extends State<LiveRouteMap>
                         point: _shownRider!,
                         width: 40,
                         height: 40,
+                        // The van stays upright; only its pointer turns, by
+                        // the heading plus however far the map is turned.
+                        rotate: true,
                         child: RiderNavigationMarker(
-                          heading: widget.followMe ? _heading : _routeBearing(),
+                          heading: _screenHeading(
+                            widget.followMe ? _heading : _routeBearing(),
+                            MapCamera.of(context).rotation,
+                          ),
                         ),
                       ),
                     ],
@@ -536,6 +592,14 @@ class _LiveRouteMapState extends State<LiveRouteMap>
                     MapControlButton(
                       icon: Icons.fullscreen,
                       onTap: widget.onExpand!,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  if (widget.headingUp) ...[
+                    MapControlButton(
+                      icon: _headingUp ? Icons.navigation : Icons.explore,
+                      active: _headingUp,
+                      onTap: () => _setHeadingUp(!_headingUp),
                     ),
                     const SizedBox(height: 6),
                   ],
