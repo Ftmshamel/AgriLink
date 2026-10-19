@@ -31,12 +31,21 @@ void main() {
     });
 
     test('accepts a rider just inside the radius', () {
+      // ~0.0004° of latitude is roughly 44 m.
+      final result = DeliveryProof.checkGeofence(
+        rider: const LatLng(15.4869, 120.9734),
+        drop: drop,
+      );
+      expect(result.allowed, isTrue);
+    });
+
+    test('refuses a rider a block away', () {
       // ~0.0012° of latitude is roughly 133 m.
       final result = DeliveryProof.checkGeofence(
         rider: const LatLng(15.4877, 120.9734),
         drop: drop,
       );
-      expect(result.allowed, isTrue);
+      expect(result.allowed, isFalse);
     });
 
     test('refuses a rider a few hundred metres away', () {
@@ -46,7 +55,7 @@ void main() {
       );
       expect(result.allowed, isFalse);
       expect(result.distanceMetres, greaterThan(DeliveryProof.geofenceMetres));
-      expect(result.message, contains('Move within 150 m'));
+      expect(result.message, contains('Move within 50 m'));
     });
 
     test('refuses a rider in another town', () {
