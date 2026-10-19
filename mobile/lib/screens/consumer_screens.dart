@@ -2744,7 +2744,7 @@ String consumerStatusLine(AgriOrder order) => switch (order.status) {
       OrderStatus.cancelled => 'Order cancelled',
     };
 
-class DeliveryTracking extends StatelessWidget {
+class DeliveryTracking extends StatefulWidget {
   const DeliveryTracking({
     super.key,
     required this.session,
@@ -2755,15 +2755,23 @@ class DeliveryTracking extends StatelessWidget {
   final String orderId;
 
   @override
+  State<DeliveryTracking> createState() => _DeliveryTrackingState();
+}
+
+class _DeliveryTrackingState extends State<DeliveryTracking> {
+  /// Road distance and ETA the map last worked out for the rider.
+  RouteProgress? _progress;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Track delivery')),
       body: LiveBuilder<AgriOrder?>(
-        session: session,
+        session: widget.session,
         // Tracking is the one screen that benefits from a tight poll: the pin
         // should keep up with the rider without the buyer touching anything.
         interval: const Duration(seconds: 6),
-        load: () => authService.database.getOrder(orderId),
+        load: () => authService.database.getOrder(widget.orderId),
         builder: (context, data) {
           final order = data.value;
           if (order == null) {
@@ -2810,8 +2818,14 @@ class DeliveryTracking extends StatelessWidget {
                 else
                   LiveRouteMap(
                     stops: stops,
-                    riderPoint: order.riderPoint,
+                    // Only while the rider has the order; once it is
+                    // delivered or cancelled the vehicle leaves the map.
+                    riderPoint:
+                        order.status.isWithRider ? order.riderPoint : null,
                     showControls: false,
+                    onProgress: (progress) {
+                      if (mounted) setState(() => _progress = progress);
+                    },
                   ),
                 const SizedBox(height: 16),
                 Card(
@@ -2892,7 +2906,7 @@ class DeliveryTracking extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _ScheduleCard(session: session, order: order),
+                _ScheduleCard(session: widget.session, order: order),
                 if (order.status.isWithRider &&
                     order.deliveryCode.isNotEmpty) ...[
                   const SizedBox(height: 16),
@@ -2902,7 +2916,7 @@ class DeliveryTracking extends StatelessWidget {
                   const SizedBox(height: 16),
                   DeliveryProofCard(order: order),
                   const SizedBox(height: 12),
-                  _ReceiptActions(session: session, order: order),
+                  _ReceiptActions(session: widget.session, order: order),
                 ],
                 const SizedBox(height: 16),
                 Card(
@@ -2966,8 +2980,14 @@ class DeliveryTracking extends StatelessWidget {
     }
     final rider = order.riderPoint;
     final drop = order.dropPoint;
+    final left = _progress?.left;
+    // The map's road route runs through the farm before pickup, so this is
+    // the real trip to the door, not a straight line.
+    if (left != null && rider != null && order.status.isWithRider) {
+      return '${left.distanceLabel} away • ETA ${left.etaLabel}';
+    }
     if (rider != null && drop != null && order.status.isWithRider) {
-      final km = GeoService.distanceKm(rider, drop);
+      final km = GeoService.exactKm(rider, drop);
       final minutes = (km / 28 * 60).round().clamp(1, 600);
       return '${formatKm(km)} away • ETA $minutes min';
     }

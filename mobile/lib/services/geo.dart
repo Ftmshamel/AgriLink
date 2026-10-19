@@ -115,8 +115,15 @@ class GeoService {
         },
       );
 
+  /// Rounded to whole kilometres — latlong2 rounds in the unit asked for.
+  /// Delivery fees are priced on this, so it is left as is; use [exactKm]
+  /// for anything shown as "how far".
   static double distanceKm(LatLng from, LatLng to) =>
       const Distance().as(LengthUnit.Kilometer, from, to).toDouble();
+
+  /// To the metre, for distances under a kilometre and route geometry.
+  static double exactKm(LatLng from, LatLng to) =>
+      const Distance().as(LengthUnit.Meter, from, to) / 1000;
 }
 
 /// Why a route fell back to a straight line instead of real road data.
@@ -166,7 +173,10 @@ class RoutePath {
 
 /// Public OSRM routing, used for the rider's road route and delivery ETAs.
 class RouteService {
+  /// Insertion-ordered, so the oldest entry is evicted first once a long
+  /// trip's re-routes fill it.
   static final _cache = <String, RoutePath>{};
+  static const _cacheLimit = 40;
 
   /// Swappable so tests can drive the failure paths without a network.
   static http.Client client = http.Client();
@@ -255,6 +265,9 @@ class RouteService {
         isEstimate: false,
       );
       _cache[key] = path;
+      while (_cache.length > _cacheLimit) {
+        _cache.remove(_cache.keys.first);
+      }
       return path;
     } on Object {
       // Not JSON, or JSON in a shape this app cannot read.
@@ -276,6 +289,15 @@ class RouteService {
       failure: failure,
     );
   }
+}
+
+/// Length of a drawn path, in kilometres.
+double pathKm(List<LatLng> points) {
+  var km = 0.0;
+  for (var index = 0; index < points.length - 1; index++) {
+    km += GeoService.exactKm(points[index], points[index + 1]);
+  }
+  return km;
 }
 
 /// What is left of a route once the rider has driven part of it.

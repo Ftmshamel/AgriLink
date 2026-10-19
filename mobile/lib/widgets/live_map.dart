@@ -24,6 +24,18 @@ class MapStop {
   final Color color;
 }
 
+/// How far the rider still has to go, along the road.
+class RouteProgress {
+  const RouteProgress({required this.left, required this.toNextStop});
+
+  /// From the rider to the last stop.
+  final RoutePath left;
+
+  /// From the rider to the first stop still on the map — the farm before
+  /// pickup.
+  final RoutePath toNextStop;
+}
+
 /// The route map used by rider navigation and buyer tracking.
 ///
 /// Everything it draws comes from [stops] and [riderPoint]; it holds no
@@ -41,6 +53,7 @@ class LiveRouteMap extends StatefulWidget {
     this.height = 270,
     this.onPosition,
     this.onRouteResolved,
+    this.onProgress,
   });
 
   final List<MapStop> stops;
@@ -55,18 +68,33 @@ class LiveRouteMap extends StatefulWidget {
   final void Function(Position position)? onPosition;
   final void Function(RoutePath route)? onRouteResolved;
 
+  /// What is left of the trip — road distance and ETA from the rider to the
+  /// last stop — each time the rider moves.
+  final void Function(RouteProgress progress)? onProgress;
+
   @override
   State<LiveRouteMap> createState() => _LiveRouteMapState();
 }
 
-class _LiveRouteMapState extends State<LiveRouteMap> {
+class _LiveRouteMapState extends State<LiveRouteMap>
+    with SingleTickerProviderStateMixin {
   final _mapController = MapController();
+
+  /// Slides the vehicle between position updates instead of letting it jump
+  /// every few seconds.
+  late final _glide = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+  LatLng? _glideFrom;
+  LatLng? _glideTo;
   StreamSubscription<Position>? _positionSubscription;
 
   RoutePath? _route;
 
   /// The part of [_route] still ahead of the rider; what is actually drawn.
   List<LatLng> _remaining = const [];
+  RoutePath? _left;
   int _progressSegment = 0;
   DateTime? _lastReroute;
   LatLng? _deviceLocation;
@@ -82,6 +110,9 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
   void initState() {
     super.initState();
     _following = widget.followMe;
+    if (widget.riderPoint != null && !widget.followMe) {
+      _glideToward(widget.riderPoint!);
+    }
     _resolveRoute();
     if (widget.followMe) _startTracking();
   }
@@ -89,6 +120,15 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
   @override
   void didUpdateWidget(covariant LiveRouteMap oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!widget.followMe && widget.riderPoint != oldWidget.riderPoint) {
+      if (widget.riderPoint == null) {
+        // Trip over: take the vehicle off the map.
+        _glideFrom = null;
+        _glideTo = null;
+      } else {
+        _glideToward(widget.riderPoint!);
+      }
+    }
     if (!_sameStops(oldWidget.stops, widget.stops) ||
         (oldWidget.riderPoint == null) != (widget.riderPoint == null)) {
       _resolveRoute();
@@ -106,6 +146,7 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
   @override
   void dispose() {
     _positionSubscription?.cancel();
+    _glide.dispose();
     super.dispose();
   }
 
@@ -135,6 +176,7 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
       setState(() {
         _route = null;
         _remaining = const [];
+        _left = null;
       });
       return;
     }
@@ -146,12 +188,14 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
       _route = resolved;
       _progressSegment = 0;
       _remaining = _trimmed(resolved.points);
+      _left = _leftOf(resolved, _remaining);
       _loadingRoute = false;
       _notice = resolved.isEstimate
           ? 'Live routing unavailable — showing a direct line.'
           : null;
     });
     widget.onRouteResolved?.call(resolved);
+    _reportProgress();
     if (!_following) _fitRoute();
   }
 
@@ -164,21 +208,86 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
     return remainder.points;
   }
 
+  /// The distance and ETA still to go, scaled from the full route by how
+  /// much of the road is left.
+  RoutePath _leftOf(RoutePath route, List<LatLng> remaining) {
+    final km = pathKm(remaining);
+    final duration = route.distanceKm > 0
+        ? route.duration * (km / route.distanceKm).clamp(0.0, 1.0)
+        : Duration(minutes: (km / 28 * 60).round());
+    return RoutePath(
+      points: remaining,
+      distanceKm: km,
+      duration: duration,
+      isEstimate: route.isEstimate,
+      failure: route.failure,
+    );
+  }
+
+  /// Hands the remaining trip to the parent after this frame, since it may
+  /// arrive while the parent is still building.
+  void _reportProgress() {
+    final left = _left;
+    final route = _route;
+    if (left == null || route == null || widget.onProgress == null) return;
+    if (_riderLocation == null || widget.stops.isEmpty) return;
+    // The road runs through the next pin, so the leg to it ends at the drawn
+    // point closest to that pin.
+    final next = widget.stops.first.point;
+    var closest = 0;
+    var closestKm = double.infinity;
+    for (var index = 0; index < left.points.length; index++) {
+      final km = GeoService.exactKm(left.points[index], next);
+      if (km < closestKm) {
+        closestKm = km;
+        closest = index;
+      }
+    }
+    final progress = RouteProgress(
+      left: left,
+      toNextStop: _leftOf(route, left.points.sublist(0, closest + 1)),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onProgress?.call(progress);
+    });
+  }
+
+  /// Where the vehicle is drawn this frame, part way through a glide.
+  LatLng? get _shownRider {
+    final from = _glideFrom, to = _glideTo;
+    if (to == null) return null;
+    if (from == null) return to;
+    final t = Curves.easeInOut.transform(_glide.value);
+    return LatLng(
+      from.latitude + (to.latitude - from.latitude) * t,
+      from.longitude + (to.longitude - from.longitude) * t,
+    );
+  }
+
+  void _glideToward(LatLng target) {
+    if (target == _glideTo) return;
+    _glideFrom = _shownRider;
+    _glideTo = target;
+    _glide.forward(from: 0);
+  }
+
   /// Shrinks the line behind the moving vehicle, and asks for a new road
   /// route once the rider has clearly left the drawn one.
   void _trackProgress() {
     final route = _route;
     final rider = _riderLocation;
+    if (rider != null) _glideToward(rider);
     if (route == null || rider == null || route.points.length < 2) return;
     final remainder =
         remainingRoute(route.points, rider, fromSegment: _progressSegment);
     setState(() {
       _progressSegment = remainder.segment;
       _remaining = remainder.points;
+      _left = _leftOf(route, remainder.points);
     });
-    final sinceReroute = _lastReroute == null
-        ? null
-        : DateTime.now().difference(_lastReroute!);
+    _reportProgress();
+    final sinceReroute =
+        _lastReroute == null ? null : DateTime.now().difference(_lastReroute!);
     if (!route.isEstimate &&
         remainder.offRouteMeters > 60 &&
         !_loadingRoute &&
@@ -193,7 +302,7 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
     if (_remaining.length < 2) return null;
     final from = _remaining.first;
     for (final point in _remaining.skip(1)) {
-      if (GeoService.distanceKm(from, point) > 0.005) {
+      if (GeoService.exactKm(from, point) > 0.005) {
         return const Distance().bearing(from, point);
       }
     }
@@ -267,6 +376,7 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
         _heading = _headingOf(position);
         _accuracy = position.accuracy;
       });
+      _glideToward(current);
       widget.onPosition?.call(position);
       if (_mapReady) _mapController.move(current, _following ? 16.5 : 13);
       await _resolveRoute();
@@ -290,7 +400,6 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
 
   @override
   Widget build(BuildContext context) {
-    final riderMarker = _deviceLocation ?? widget.riderPoint;
     return Container(
       height: widget.height,
       decoration: BoxDecoration(
@@ -318,16 +427,24 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
                 maxZoom: 19,
               ),
               if (_remaining.length > 1)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: _remaining,
-                      strokeWidth: 6,
-                      color: green,
-                      borderStrokeWidth: 2,
-                      borderColor: Colors.white,
-                    ),
-                  ],
+                AnimatedBuilder(
+                  animation: _glide,
+                  builder: (context, _) => PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        // Begins under the gliding vehicle so the two never
+                        // come apart mid-slide.
+                        points: [
+                          _shownRider ?? _remaining.first,
+                          ..._remaining.skip(1),
+                        ],
+                        strokeWidth: 6,
+                        color: green,
+                        borderStrokeWidth: 2,
+                        borderColor: Colors.white,
+                      ),
+                    ],
+                  ),
                 ),
               if (_deviceLocation != null && _accuracy > 0)
                 CircleLayer(
@@ -354,17 +471,24 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
                         color: stop.color,
                       ),
                     ),
-                  if (riderMarker != null)
-                    Marker(
-                      point: riderMarker,
-                      width: 40,
-                      height: 40,
-                      child: RiderNavigationMarker(
-                        heading: widget.followMe ? _heading : _routeBearing(),
-                      ),
-                    ),
                 ],
               ),
+              if (_glideTo != null)
+                AnimatedBuilder(
+                  animation: _glide,
+                  builder: (context, _) => MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: _shownRider!,
+                        width: 40,
+                        height: 40,
+                        child: RiderNavigationMarker(
+                          heading: widget.followMe ? _heading : _routeBearing(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
           if (_loadingRoute)
@@ -467,8 +591,8 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                _route != null && !_route!.isEstimate
-                    ? '${_route!.distanceLabel} • ${_route!.etaLabel} • OSM'
+                _left != null && !_left!.isEstimate
+                    ? '${_left!.distanceLabel} • ${_left!.etaLabel} • OSM'
                     : '© OpenStreetMap contributors',
                 style: const TextStyle(fontSize: 10, color: muted),
               ),
