@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' hide Path;
 
 import '../services/geo.dart';
 import '../utils/app_colors.dart';
@@ -64,6 +64,11 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
   StreamSubscription<Position>? _positionSubscription;
 
   RoutePath? _route;
+
+  /// The part of [_route] still ahead of the rider; what is actually drawn.
+  List<LatLng> _remaining = const [];
+  int _progressSegment = 0;
+  DateTime? _lastReroute;
   LatLng? _deviceLocation;
   double _heading = 0;
   double _accuracy = 0;
@@ -84,7 +89,12 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
   @override
   void didUpdateWidget(covariant LiveRouteMap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_sameStops(oldWidget.stops, widget.stops)) _resolveRoute();
+    if (!_sameStops(oldWidget.stops, widget.stops) ||
+        (oldWidget.riderPoint == null) != (widget.riderPoint == null)) {
+      _resolveRoute();
+    } else if (widget.riderPoint != oldWidget.riderPoint) {
+      _trackProgress();
+    }
     if (widget.focusPoint != null &&
         widget.focusPoint != oldWidget.focusPoint &&
         !_following) {
@@ -107,22 +117,35 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
     return true;
   }
 
+  /// Where the vehicle is: this phone's GPS for the rider, otherwise the last
+  /// position the rider published.
+  LatLng? get _riderLocation =>
+      widget.followMe ? _deviceLocation : widget.riderPoint;
+
+  /// The route starts at the rider, so the line runs from the vehicle to the
+  /// next pin rather than from wherever the trip began.
   List<LatLng> get _waypoints => [
-        if (_deviceLocation != null && widget.followMe) _deviceLocation!,
+        if (_riderLocation != null) _riderLocation!,
         ...widget.stops.map((stop) => stop.point),
       ];
 
   Future<void> _resolveRoute() async {
     final waypoints = _waypoints;
     if (waypoints.length < 2) {
-      setState(() => _route = null);
+      setState(() {
+        _route = null;
+        _remaining = const [];
+      });
       return;
     }
     setState(() => _loadingRoute = true);
+    _lastReroute = DateTime.now();
     final resolved = await RouteService.route(waypoints);
     if (!mounted) return;
     setState(() {
       _route = resolved;
+      _progressSegment = 0;
+      _remaining = _trimmed(resolved.points);
       _loadingRoute = false;
       _notice = resolved.isEstimate
           ? 'Live routing unavailable — showing a direct line.'
@@ -131,6 +154,58 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
     widget.onRouteResolved?.call(resolved);
     if (!_following) _fitRoute();
   }
+
+  List<LatLng> _trimmed(List<LatLng> points) {
+    final rider = _riderLocation;
+    if (rider == null || points.length < 2) return points;
+    final remainder =
+        remainingRoute(points, rider, fromSegment: _progressSegment);
+    _progressSegment = remainder.segment;
+    return remainder.points;
+  }
+
+  /// Shrinks the line behind the moving vehicle, and asks for a new road
+  /// route once the rider has clearly left the drawn one.
+  void _trackProgress() {
+    final route = _route;
+    final rider = _riderLocation;
+    if (route == null || rider == null || route.points.length < 2) return;
+    final remainder =
+        remainingRoute(route.points, rider, fromSegment: _progressSegment);
+    setState(() {
+      _progressSegment = remainder.segment;
+      _remaining = remainder.points;
+    });
+    final sinceReroute = _lastReroute == null
+        ? null
+        : DateTime.now().difference(_lastReroute!);
+    if (!route.isEstimate &&
+        remainder.offRouteMeters > 60 &&
+        !_loadingRoute &&
+        (sinceReroute == null || sinceReroute > const Duration(seconds: 20))) {
+      _resolveRoute();
+    }
+  }
+
+  /// Direction of the road just ahead of the rider, for watchers who only get
+  /// the rider's published position and no compass heading.
+  double? _routeBearing() {
+    if (_remaining.length < 2) return null;
+    final from = _remaining.first;
+    for (final point in _remaining.skip(1)) {
+      if (GeoService.distanceKm(from, point) > 0.005) {
+        return const Distance().bearing(from, point);
+      }
+    }
+    return null;
+  }
+
+  /// GPS reports heading 0 when standing still; keep the last real one so
+  /// the marker does not snap north at every stop.
+  double _headingOf(Position position) =>
+      position.heading.isFinite && position.heading > 0 && position.speed > 1
+          ? position.heading
+          : _heading;
 
   void _moveWhenReady(LatLng point, double zoom) {
     if (!_mapReady) return;
@@ -170,10 +245,11 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
         final current = LatLng(position.latitude, position.longitude);
         setState(() {
           _deviceLocation = current;
-          _heading = position.heading.isFinite ? position.heading : 0;
+          _heading = _headingOf(position);
           _accuracy = position.accuracy;
           _notice = null;
         });
+        _trackProgress();
         widget.onPosition?.call(position);
         if (_following && _mapReady) _mapController.move(current, 16.5);
       }, onError: (_) {});
@@ -188,7 +264,7 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
       final current = LatLng(position.latitude, position.longitude);
       setState(() {
         _deviceLocation = current;
-        _heading = position.heading.isFinite ? position.heading : 0;
+        _heading = _headingOf(position);
         _accuracy = position.accuracy;
       });
       widget.onPosition?.call(position);
@@ -241,11 +317,11 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
                 userAgentPackageName: 'ph.agrilink.mobile',
                 maxZoom: 19,
               ),
-              if ((_route?.points.length ?? 0) > 1)
+              if (_remaining.length > 1)
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: _route!.points,
+                      points: _remaining,
                       strokeWidth: 6,
                       color: green,
                       borderStrokeWidth: 2,
@@ -281,11 +357,10 @@ class _LiveRouteMapState extends State<LiveRouteMap> {
                   if (riderMarker != null)
                     Marker(
                       point: riderMarker,
-                      width: 58,
-                      height: 58,
-                      child: Transform.rotate(
-                        angle: _heading * math.pi / 180,
-                        child: const RiderNavigationMarker(),
+                      width: 40,
+                      height: 40,
+                      child: RiderNavigationMarker(
+                        heading: widget.followMe ? _heading : _routeBearing(),
                       ),
                     ),
                 ],
@@ -454,32 +529,66 @@ class NamedMapPin extends StatelessWidget {
   }
 }
 
+/// The delivery vehicle on the map: a small L300 van badge with a pointer
+/// on its rim showing which way it is heading. The van itself stays upright
+/// so it never reads as upside down.
 class RiderNavigationMarker extends StatelessWidget {
-  const RiderNavigationMarker({super.key});
+  const RiderNavigationMarker({super.key, this.heading});
+
+  /// Degrees clockwise from north; null hides the pointer.
+  final double? heading;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: Color(0x44000000), blurRadius: 10)],
-      ),
-      padding: const EdgeInsets.all(5),
-      child: Container(
-        decoration: BoxDecoration(
-          color: darkGreen,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        if (heading != null)
+          Transform.rotate(
+            angle: heading! * math.pi / 180,
+            child: const CustomPaint(
+              size: Size.square(40),
+              painter: _HeadingPointer(),
+            ),
+          ),
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: darkGreen,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: const [
+              BoxShadow(color: Color(0x44000000), blurRadius: 6),
+            ],
+          ),
+          child: const Icon(
+            Icons.airport_shuttle,
+            color: Colors.white,
+            size: 16,
+          ),
         ),
-        child: const Icon(
-          Icons.navigation_rounded,
-          color: Colors.white,
-          size: 30,
-        ),
-      ),
+      ],
     );
   }
+}
+
+class _HeadingPointer extends CustomPainter {
+  const _HeadingPointer();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centre = size.width / 2;
+    final path = Path()
+      ..moveTo(centre, 0)
+      ..lineTo(centre + 5, 7)
+      ..lineTo(centre - 5, 7)
+      ..close();
+    canvas.drawPath(path, Paint()..color = darkGreen);
+  }
+
+  @override
+  bool shouldRepaint(_HeadingPointer oldDelegate) => false;
 }
 
 class MapControlButton extends StatelessWidget {
