@@ -1426,7 +1426,7 @@ class _FulfillmentCardState extends State<FulfillmentCard> {
 /// drive, their number in plain text, and how far away they still are. The
 /// buyer's own tracking screen answers a different question, so the two are
 /// worded differently even though they read the same order.
-class FarmerOrderDetails extends StatelessWidget {
+class FarmerOrderDetails extends StatefulWidget {
   const FarmerOrderDetails({
     super.key,
     required this.session,
@@ -1435,6 +1435,14 @@ class FarmerOrderDetails extends StatelessWidget {
 
   final AppSession session;
   final String orderId;
+
+  @override
+  State<FarmerOrderDetails> createState() => _FarmerOrderDetailsState();
+}
+
+class _FarmerOrderDetailsState extends State<FarmerOrderDetails> {
+  /// Road distance and ETA the map last worked out for the rider.
+  RouteProgress? _progress;
 
   @override
   Widget build(BuildContext context) {
@@ -1450,7 +1458,7 @@ class FarmerOrderDetails extends StatelessWidget {
               if (order == null) return;
               showReportSheet(
                 context,
-                session: session,
+                session: widget.session,
                 targets: [
                   ReportTarget(
                     id: order.buyerId,
@@ -1473,11 +1481,11 @@ class FarmerOrderDetails extends StatelessWidget {
         ],
       ),
       body: LiveBuilder<AgriOrder?>(
-        session: session,
+        session: widget.session,
         // The rider pin should keep moving without the farmer pulling to
         // refresh, so this polls faster than the list behind it.
         interval: const Duration(seconds: 6),
-        load: () => authService.database.getOrder(orderId),
+        load: () => authService.database.getOrder(widget.orderId),
         builder: (context, data) {
           final order = data.value;
           shown = order;
@@ -1518,8 +1526,14 @@ class FarmerOrderDetails extends StatelessWidget {
                 if (stops.isNotEmpty)
                   LiveRouteMap(
                     stops: stops,
-                    riderPoint: order.riderPoint,
+                    // Only while the rider has the order; once it is
+                    // delivered or cancelled the vehicle leaves the map.
+                    riderPoint:
+                        order.status.isWithRider ? order.riderPoint : null,
                     showControls: false,
+                    onProgress: (progress) {
+                      if (mounted) setState(() => _progress = progress);
+                    },
                   ),
                 const SizedBox(height: 16),
                 _riderCard(context, order),
@@ -1770,8 +1784,17 @@ class FarmerOrderDetails extends StatelessWidget {
     final rider = order.riderPoint;
     final pickedUp = order.status.step >= OrderStatus.pickedUp.step;
     final target = pickedUp ? order.dropPoint : order.pickupPoint;
+    // By road when the map has a route: to the buyer after pickup, and to
+    // the farm (the first pin on the map) before it.
+    final road = pickedUp ? _progress?.left : _progress?.toNextStop;
+    if (road != null && rider != null && order.status.isWithRider) {
+      return pickedUp
+          ? '${road.distanceLabel} from the buyer \u2022 ETA ${road.etaLabel}'
+          : '${road.distanceLabel} from your farm \u2022 '
+              'arriving in ~${road.etaLabel}';
+    }
     if (rider != null && target != null) {
-      final km = GeoService.distanceKm(rider, target);
+      final km = GeoService.exactKm(rider, target);
       final minutes = (km / 28 * 60).round().clamp(1, 600);
       return pickedUp
           ? '${formatKm(km)} from the buyer \u2022 ETA $minutes min'

@@ -693,7 +693,7 @@ class ActiveTripCard extends StatelessWidget {
                 title:
                     'Pickup ${(pickupsDone + 1).clamp(1, pickups.length)} of ${pickups.length}',
                 subtitle: next.isPickup
-                    ? '${next.title}${next.point != null && riderPoint != null ? ' • ${formatKm(GeoService.distanceKm(riderPoint!, next.point!))}' : ''}'
+                    ? '${next.title}${next.point != null && riderPoint != null ? ' • ${formatKm(GeoService.exactKm(riderPoint!, next.point!))}' : ''}'
                     : 'All pickups complete',
               ),
               const RouteLine(),
@@ -1654,7 +1654,7 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                         if (stop.point != null && _devicePoint != null) ...[
                           const SizedBox(height: 6),
                           Text(
-                            '${formatKm(GeoService.distanceKm(_devicePoint!, stop.point!))} away',
+                            '${formatKm(GeoService.exactKm(_devicePoint!, stop.point!))} away',
                             style: const TextStyle(
                               color: green,
                               fontWeight: FontWeight.w800,
