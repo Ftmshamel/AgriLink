@@ -9,9 +9,9 @@ import '../models/agri_models.dart';
 class DeliveryProof {
   /// How close to the buyer's pin the rider must be. Phone GPS is usually
   /// good to 5–30 m outdoors, and a pin dropped on a map is rarely on the exact
-  /// gate, so 150 m allows for both without accepting "same street, wrong
-  /// barangay".
-  static const geofenceMetres = 150.0;
+  /// gate, so 50 m leaves room for both while still meaning "at the door",
+  /// not "down the street".
+  static const geofenceMetres = 50.0;
 
   static const codeLength = 4;
 
