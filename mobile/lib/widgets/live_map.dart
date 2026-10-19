@@ -54,6 +54,8 @@ class LiveRouteMap extends StatefulWidget {
     this.onPosition,
     this.onRouteResolved,
     this.onProgress,
+    this.onExpand,
+    this.rounded = true,
   });
 
   final List<MapStop> stops;
@@ -71,6 +73,12 @@ class LiveRouteMap extends StatefulWidget {
   /// What is left of the trip — road distance and ETA from the rider to the
   /// last stop — each time the rider moves.
   final void Function(RouteProgress progress)? onProgress;
+
+  /// Shows a full-screen button on the map controls when set.
+  final VoidCallback? onExpand;
+
+  /// Off when the map fills the whole screen.
+  final bool rounded;
 
   @override
   State<LiveRouteMap> createState() => _LiveRouteMapState();
@@ -404,8 +412,10 @@ class _LiveRouteMapState extends State<LiveRouteMap>
       height: widget.height,
       decoration: BoxDecoration(
         color: const Color(0xFFEAF1E8),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFDCE6D9)),
+        borderRadius: BorderRadius.circular(widget.rounded ? 24 : 0),
+        border: widget.rounded
+            ? Border.all(color: const Color(0xFFDCE6D9))
+            : null,
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -522,6 +532,13 @@ class _LiveRouteMapState extends State<LiveRouteMap>
               bottom: 40,
               child: Column(
                 children: [
+                  if (widget.onExpand != null) ...[
+                    MapControlButton(
+                      icon: Icons.fullscreen,
+                      onTap: widget.onExpand!,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
                   MapControlButton(
                     icon: Icons.add,
                     onTap: () => _mapController.move(

@@ -81,6 +81,33 @@ void main() {
     expect(find.byType(RiderNavigationMarker), findsNothing);
   });
 
+  testWidgets('the full-screen button only shows when the page offers one',
+      (tester) async {
+    await tester.pumpWidget(_map(rider: _rider));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.fullscreen), findsNothing);
+
+    var opened = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: LiveRouteMap(
+          stops: const [
+            MapStop(
+                point: _buyer,
+                label: 'Buyer',
+                icon: Icons.store,
+                color: Colors.green),
+          ],
+          riderPoint: _rider,
+          onExpand: () => opened = true,
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.fullscreen));
+    expect(opened, isTrue);
+  });
+
   test('path length adds up each leg', () {
     expect(pathKm(const [_rider, _farm, _buyer]), closeTo(2.2, 0.1));
     expect(pathKm(const [_rider]), 0);

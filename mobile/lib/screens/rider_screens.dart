@@ -227,6 +227,124 @@ List<TripStop> buildTripStops(List<AgriOrder> orders, LatLng? riderPoint) {
   ];
 }
 
+/// Full-screen map for driving to [stop] without leaving the app.
+///
+/// It streams GPS and passes each fix to [onPosition], the same as the trip
+/// page, so buyers keep seeing the rider move while this is open.
+class RiderNavigationPage extends StatefulWidget {
+  const RiderNavigationPage({
+    super.key,
+    required this.stops,
+    required this.stop,
+    required this.onPosition,
+  });
+
+  final List<MapStop> stops;
+  final TripStop stop;
+  final void Function(Position position) onPosition;
+
+  @override
+  State<RiderNavigationPage> createState() => _RiderNavigationPageState();
+}
+
+class _RiderNavigationPageState extends State<RiderNavigationPage> {
+  RouteProgress? _progress;
+
+  Future<void> _call() async {
+    final phone = widget.stop.phone;
+    if (phone.isEmpty || !await launchUrl(Uri(scheme: 'tel', path: phone))) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No contact number on file.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stop = widget.stop;
+    final leg = _progress?.toNextStop;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(stop.isPickup ? 'To the farm' : 'To the buyer'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) => LiveRouteMap(
+                stops: widget.stops,
+                followMe: true,
+                rounded: false,
+                height: constraints.maxHeight,
+                onPosition: widget.onPosition,
+                onProgress: (progress) =>
+                    setState(() => _progress = progress),
+              ),
+            ),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 12, 12),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: stop.isPickup ? orange : green,
+                    foregroundColor: Colors.white,
+                    child: Icon(
+                      stop.isPickup ? Icons.agriculture : Icons.store,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          leg == null
+                              ? 'Finding the road…'
+                              : '${leg.distanceLabel} • ${leg.etaLabel}',
+                          style: const TextStyle(
+                            color: green,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          stop.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        Text(
+                          stop.address.isEmpty
+                              ? 'No address on file'
+                              : stop.address,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: muted, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton.filledTonal(
+                    tooltip: 'Call contact',
+                    onPressed: _call,
+                    icon: const Icon(Icons.call),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Opens the phone's navigation app, falling back to OpenStreetMap.
 Future<void> openNavigation(LatLng destination, {LatLng? from}) async {
   final google = Uri.parse(
@@ -1590,6 +1708,26 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
           final pickupsLeft = stops
               .where((s) => s.isPickup && !s.isComplete)
               .length;
+          final mapStops = [
+            for (final item in stops)
+              if (item.point != null && !item.isComplete)
+                MapStop(
+                  point: item.point!,
+                  label: item.title,
+                  icon: item.isPickup ? Icons.agriculture : Icons.store,
+                  color: item.isPickup ? orange : green,
+                ),
+          ];
+          void navigate() => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RiderNavigationPage(
+                    stops: mapStops,
+                    stop: stop,
+                    onPosition: _onPosition,
+                  ),
+                ),
+              );
 
           return LiveRefreshView(
             loading: data.loading,
@@ -1598,19 +1736,11 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
               children: [
                 LiveRouteMap(
-                  stops: [
-                    for (final item in stops)
-                      if (item.point != null && !item.isComplete)
-                        MapStop(
-                          point: item.point!,
-                          label: item.title,
-                          icon: item.isPickup ? Icons.agriculture : Icons.store,
-                          color: item.isPickup ? orange : green,
-                        ),
-                  ],
+                  stops: mapStops,
                   followMe: true,
                   focusPoint: stop.point,
                   onPosition: _onPosition,
+                  onExpand: mapStops.isEmpty ? null : navigate,
                   height: 300,
                 ),
                 const SizedBox(height: 16),
@@ -1737,16 +1867,22 @@ class _ActiveTripPageState extends State<ActiveTripPage> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                if (stop.point != null)
-                  OutlinedButton.icon(
-                    onPressed: () =>
-                        openNavigation(stop.point!, from: _devicePoint),
-                    icon: const Icon(Icons.navigation_outlined),
+                if (stop.point != null) ...[
+                  FilledButton.icon(
+                    onPressed: navigate,
+                    icon: const Icon(Icons.navigation),
                     label: const Padding(
                       padding: EdgeInsets.all(10),
-                      child: Text('Open turn-by-turn navigation'),
+                      child: Text('Navigate in AgriLink'),
                     ),
                   ),
+                  TextButton.icon(
+                    onPressed: () =>
+                        openNavigation(stop.point!, from: _devicePoint),
+                    icon: const Icon(Icons.open_in_new, size: 18),
+                    label: const Text('Open in Google Maps instead'),
+                  ),
+                ],
                 const SizedBox(height: 20),
                 const Text(
                   'Route stops',
